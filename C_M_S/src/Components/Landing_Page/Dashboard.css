@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
+:root{
+    --purple_color:#B21FDC;
+    --gray_color:#eaeaea;
+}
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: "Outfit", sans-serif;
+    font-optical-sizing: auto;
+}
+
+.mainContainer{
+    height:100vh;
+    background-color:var(--gray_color);
+    display: flex;
+    flex-direction: column;
+    padding-inline: 30px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    gap: 40px;
+}
+
+.imgDivLeft{
+    display: none;
+}
+
+.introContainer{
+    display: flex;
+    width: 100%;
+}
+
+.introLeftDiv{
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content:center;
+    align-items: center;
+    gap: 45px;
+    padding: 0 40px;
+}
+
+.introLeftDiv h1{
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--purple_color);
+    letter-spacing: 1px;
+    text-wrap: wrap;
+    text-align: center;
+}
+
+.introLeftDiv p{
+    text-align: center;
+    color: var(--purple_color);
+    font-size: 19px;
+}
+
+.quoteDiv{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    gap: 20px;
+}
+
+.quoteDiv p{
+    font-size: 1.7rem;
+    font-family: "Great Vibes", cursive;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #29085b;
+}
+
+.openQuote{
+    transform: rotateY(180deg);
+}
+
+.material-symbols-outlined{
+    color:#29085b;
+}
+
+.btns{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.loginBtn{
+    background-color: white;
+    width: 100%;
+    color: var(--purple_color);
+    padding: 15px;
+    font-size: 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.getStartedBtn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--purple_color);
+    width: 100%;
+    color: white;
+    padding: 15px;
+    font-size: 20px;
+    border-radius: 10px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    margin-top: 10px;
+}
+
+.getStartedBtn:hover{
+    background-color: #43089c
+}
+
+.getStartedBtn img{
+    width: 17px;
+}
+
+.introRightDiv{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-inline: 30px;
+    gap: 50px;
+}
+
+.imgDiv{
+    border-radius: 20px;
+    box-shadow: rgba(14, 63, 126, 0.04) 0px 0px 0px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px;
+}
+
+.imgDiv img{
+    height: 480px;
+    width: 100%;
+    border-radius: 20px;
+} 
+
+.avatarContainer{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.avtarDiv{
+    display: flex;
+}
+  
+.avatar{
+    position: relative;
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%; 
+    overflow: hidden; 
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    margin-right: -11px; 
+}
+  
+.avatar img{
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+}
+  
+.text {
+    margin-left: 20px; 
+    font-size: 20px;  
+    font-weight: 600; 
+    color: var(--purple_color);
+}  
+
+@media (max-width:1130px) {
+
+    .introLeftDiv p{
+        font-size: 17px;
+    }
+
+    .introLeftDiv h1{
+        font-size: 2.3rem;
+    }
+
+    .mainContainer{
+        height: 100vh;
+    }
+
+    .introContainer{
+        margin-top: 20px;
+    }
+
+}
+
+@media (max-width:1045px) {
+
+    .introLeftDiv{
+        gap: 20px;
+    }
+
+    .mainContainer{
+        height: 100vh;
+    }
+
+}
+
+@media (max-width:910px) {
+
+    .introLeftDiv h1{
+        font-size: 2rem;
+    }
+
+    .mainContainer{
+        height: 100vh;
+    }
+
+}
+
+@media (max-width:880px) {
+
+    .mainContainer{
+        height: max-content;
+    }
+
+    .introRightDiv{
+        display: none;
+    }
+
+    .imgDivLeft{
+        display: block;
+    }
+
+    .menuBtn{
+        display: block;
+        cursor: pointer;
+    }
+
+    .imgDivLeft img{
+        height: 450px;   
+        border-radius: 20px;
+    }
+
+    .introLeftDiv h1{
+        font-size: 2.4rem;
+    }
+
+    .introLeftDiv{
+        gap: 40px;
+    }
+
+}
+
+@media (max-width:500px) {
+
+    .introLeftDiv{
+        padding: 0 0;
+    }
+
+    .introLeftDiv h1{
+        font-size: 2rem;
+    }
+
+    .mainContainer{
+        height: max-content;
+    }
+
+}
+
+@media (max-width:425px) {
+
+    .mainContainer{
+        height:auto;
+    }
+
+    .introLeftDiv h1{
+        font-size: 1.8rem;
+    }
+
+    .introLeftDiv p{
+        font-size: 14px;
+    }
+
+    .introLeftDiv{
+        gap: 30px;
+    }
+
+    .avatar{
+        width: 40px;
+        height: 40px;
+    }
+
+    .text{
+        font-size: 18px;
+    }
+
+    .imgDivLeft img{
+        height: 350px;
+    }
+
+    .btns{
+        gap: 10px;
+    }
+
+    .loginBtn , .getStartedBtn{
+        font-size: 15px;
+    }
+
+    .mainContainer{
+        height: max-content;
+    }
+
+}

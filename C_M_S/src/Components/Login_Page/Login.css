@@ -1,0 +1,154 @@
+/* General Styling */
+.login-page-container {
+  height: 100vh;
+  width: 100vw;
+}
+
+.left-section {
+  background-color: #f3e8ff;
+  width: 40%;
+  padding: 3rem;
+}
+
+.right-section {
+  width: 60%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Typography */
+.heading {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #a430da;
+}
+
+.login-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #000;
+}
+
+.text-purple {
+  color: #a430da;
+  font-weight: bold;
+}
+
+.purple-line {
+  border: none;
+  height: 4px;
+  width: 130px;
+  background-color: #9426dd;
+  margin: 10px auto;
+}
+
+.logo-img {
+  height: 4.5rem;
+  margin-left: 35%;
+}
+
+.login-illustration {
+  max-width: 500px;
+}
+
+/* Form and Fields */
+.form-icon {
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+  color: #a0a0a0;
+}
+
+.form-control {
+  padding-left: 2.5rem;
+  padding-right: 1rem;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  height: 48px;
+}
+
+.btn-purple {
+  background-color: #a430da;
+  color: white;
+  font-weight: 600;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-purple:hover {
+  background-color: #942ba9;
+  color: white;
+}
+
+.forgot-password {
+  color: #a430da;
+  cursor: pointer;
+  font-weight: 400;
+}
+
+/* Text Styling */
+.problem-signin {
+  font-size: 0.875rem;
+}
+
+.problem-signin a {
+  font-weight: 500;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.modal-title {
+  color: #6f42c1; /* Purple title */
+}
+
+.text-danger {
+  color: red; /* Ensures the error text is visible */
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #9426dd;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 3s;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 992px) {
+  .left-section {
+    display: none;
+  }
+  .right-section {
+    width: 100%;
+  }
+}
+
