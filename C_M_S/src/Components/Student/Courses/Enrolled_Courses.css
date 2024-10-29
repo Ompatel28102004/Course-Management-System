@@ -1,0 +1,509 @@
+.enrolled-courses-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+.section {
+  width: 100%;
+  height: 300px;
+  max-width: 1200px;
+  margin-bottom: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px 40px;
+}
+
+.section-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-left: 25px;
+}
+
+.section-info-enrolled {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 15rem;
+  /* Left side fixed width */
+  margin: 36px 0 0 48px;
+}
+
+.section-info-enrolled h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.section-info-enrolled p {
+  font-size: 18px;
+  margin-bottom: 25px;
+  color: #666;
+}
+
+.not-completed {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  text-align: center;
+  height: 100%; /* Ensure it takes up the full height of the parent */
+  width: 100%; /* Ensure it takes up the full width of the parent */
+  font-size: 18px; /* Font size */
+  color: #333; /* Text color */
+  padding: 20px; /* Add padding */
+  margin-top: 6rem;
+  box-sizing: border-box;
+}
+
+.section-info-completed {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 16rem;
+  /* Left side fixed width */
+  margin: 40px 0 0 45px;
+}
+
+.section-info-completed h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.section-info-completed p {
+  font-size: 18px;
+  margin-bottom: 25px;
+  color: #666;
+}
+
+.arrows {
+  display: flex;
+  justify-content: flex-start;
+  gap: 30px;
+}
+
+.arrow-button {
+  background-color: #7e57c2e3;
+  border: none;
+  color: #ffffff;
+  font-size: 25px;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 20%;
+  transition: background-color 0.3s ease;
+}
+
+.arrow-button:hover {
+  background-color: #673ab7;
+}
+
+.Courses-cards {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  width: 70%;
+  /* Right side fixed width */
+  max-height: 18rem;
+}
+
+.course-card-container {
+  flex: 0 0 30%;
+  /* Flex basis for cards */
+  max-width: 30%;
+  /* Ensure cards take up to 30% of the container */
+  box-sizing: border-box;
+  padding: 0 10px;
+}
+
+.Courses-card-enrolled {
+  background-color: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 0 10px;
+  width: 100%;
+  height: 16rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around; /* Ensures equal spacing vertically */
+  align-items: center; /* Ensures items are centered horizontally */
+}
+
+.Courses-card-enrolled h3 {
+  font-size: 22px;
+  color: #1a73e8;
+  margin: 0; /* Remove margin to allow flexbox to handle spacing */
+}
+
+.Courses-card-enrolled p {
+  font-size: 16px;
+  color: #333;
+  margin: 0; /* Remove margin to allow flexbox to handle spacing */
+}
+
+.forum-button {
+  background-color: #1e88e5;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.3s ease;
+  margin: 0; /* Remove margin to allow flexbox to handle spacing */
+}
+
+.forum-button:hover {
+  background-color: #1565c0;
+}
+
+.Courses-card-completed {
+  background-color: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 0 10px;
+  width: 100%;
+  height: 16rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  /* Ensures equal spacing vertically */
+  align-items: center;
+  /* Ensures items are centered horizontally */
+}
+
+.Courses-card-completed h3 {
+  font-size: 22px;
+  color: #1a73e8;
+  margin: 0;
+  /* Remove margin to allow flexbox to handle spacing */
+}
+
+.Courses-card-completed p {
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+  /* Remove margin to allow flexbox to handle spacing */
+}
+
+.no-courses-card {
+  background-color: #ffffff;
+  border: 3px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 40px 10px 0 10px;
+  width: 89%;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.no-courses-card h3 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.no-courses-card p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.no-courses-card .button {
+  background-color: #1e88e5;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.no-courses-card .button:hover {
+  background-color: #1565c0;
+}
+
+/* Modal Styling */
+.modal {
+  display: flex; /* Show as flex */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5); /* Slightly darker backdrop */
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #ffffff; /* Pure white background */
+  margin: auto;
+  padding: 30px; /* Increased padding for better spacing */
+  border: none; /* Removed border for cleaner look */
+  width: 80%;
+  max-width: 600px;
+  border-radius: 12px; /* Smooth rounded corners */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Stronger shadow for depth */
+}
+
+.close-button {
+  color: #aaa;
+  font-size: 24px; /* Slightly smaller font size */
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd; /* Subtle bottom border */
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+  font-size: 24px; /* Larger font size for emphasis */
+  font-weight: 700; /* Bolder text */
+  color: #333; /* Darker color for better contrast */
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end; /* Right align buttons */
+  align-items: center;
+  border-top: 1px solid #ddd; /* Subtle top border */
+  padding-top: 15px;
+  margin-top: 20px;
+}
+
+.modal-footer .button {
+  margin-left: 10px; /* Spacing between buttons */
+}
+
+.modal h2 {
+  margin: 0 0 10px;
+}
+
+.modal p {
+  margin: 0 0 10px;
+  color: #666; /* Subtle text color */
+}
+
+.button {
+  background-color: #1e88e5;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #1565c0;
+}
+
+/* Course Item Styling */
+.course-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.course-item input[type="checkbox"] {
+  margin-right: 10px; /* Gap between checkbox and text */
+  transform: scale(1.2); /* Increase size to match text */
+}
+
+.course-name {
+  flex-grow: 1; /* Allow course name to take up remaining space */
+}
+
+.pdf-link {
+  color: #1e88e5;
+  text-decoration: none;
+  margin-left: 10px; /* Space between text and PDF link */
+}
+
+.pdf-link:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.modal-body .disclaimer {
+  color: rgb(253, 84, 84);
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #9426dd;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 5000;
+  animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 3s;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 1024px) {  
+  /* .enrolled-courses-container {  
+    padding: 30px 15px;  
+  } */
+
+  .section {  
+    padding: 20px 30px;  
+  }
+
+  .section-info-enrolled,  
+  .section-info-completed {  
+    margin: 20px 0;  
+  }
+
+  .arrows {  
+    gap: 4rem;  
+    justify-content:flex-start;  
+  }
+
+  .arrow-button {  
+    font-size: 18px;  
+    padding: 9px;  
+    position: relative;  
+    top: 0;  
+    width: auto;  
+    height: auto;  
+  }
+  
+  .no-courses-card {
+    padding: 18px;
+    width: 95%;
+    margin: 30px 5px 0 25px;
+    align-content: center;
+  }
+
+  .course-card-container {  
+    flex: 0 0 100%;  
+    max-width: 100%;  
+  }
+
+  .not-completed {  
+    font-size: 16px;  
+    margin: 4rem 0.75rem 9rem 0;  
+  }  
+}
+
+@media (max-width: 768px) {  
+  /* .enrolled-courses-container {  
+    padding: 20px 10px;  
+  } */
+
+  .section {  
+    padding: 15px 20px;  
+    height: auto;  
+  }  
+
+  .section-content {  
+    flex-direction: column;  
+    align-items: flex-start;  
+  }  
+
+  .section-info-enrolled,  
+  .section-info-completed {  
+    width: 100%;  
+  }
+
+  .Courses-cards {  
+    width: 93%;  
+    justify-content: flex-start;  
+  } 
+
+  .no-courses-card {
+    padding: 10px;
+    width: 100%;
+    margin: 50px 0 50px 0;
+  }
+
+  .course-card-container {  
+    flex: 0 0 100%;  
+    max-width: 100%;  
+    padding: 0;  
+    margin-bottom: 20px;  
+  }  
+
+  .Courses-card-enrolled,
+  .Courses-card-completed {  
+    padding: 10px;  
+    margin: 0 auto;  
+    width: 100%;  
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);  
+  }  
+
+  .arrows {  
+    gap: 4rem;  
+    justify-content: center; 
+    margin-right: 24px; 
+  } 
+
+  .arrow-button {  
+    font-size: 18px;  
+    padding: 8px;  
+    top: 0;  
+    width: auto;  
+    height: auto;  
+    position: relative;  
+  }  
+  
+  .not-completed {  
+    font-size: 16px;  
+    margin: 4rem 0.75rem 9rem 12px;  
+  }  
+}

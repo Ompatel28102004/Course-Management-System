@@ -1,0 +1,236 @@
+:root {
+  --primary-color: white;
+  --hover-color: #43089c;
+  --sidebar-secondary-color: rgba(196, 195, 195, 0.607);
+}
+
+.user_management {
+  box-sizing: border-box;
+  overflow: hidden auto;
+}
+/* view */
+
+.Home {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  flex-direction: column;
+  background-color: var(--primary-color);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+.heading{
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+}
+
+.search_add {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 10px;
+  padding: 20px;
+}
+
+.search_input {
+  padding: 10px;
+  width: 70%;
+  border: 1px solid #cac9c9;
+  border-radius: 80px;
+}
+
+.user_btn {
+  background-color: var(--hover-color);
+  /* Purple color */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user_btn:hover {
+  background-color: #4f199e;
+}
+
+.table-container {
+  padding: 10px;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table th,
+.user-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+  width: auto;
+  height: auto;
+}
+
+.user-table th {
+  background-color: #dad8d8;
+}
+
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-evenly;
+  /* width: 150px; */
+  /* height: auto; */
+}
+
+.edit-btn,
+.delete-btn {
+  /* width: 100%; */
+  padding: 1000px 100px;
+  /* height: auto; */
+  background-color: var(--hover-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.edit-btn:hover {
+  background-color: #4f199e;
+}
+
+.delete-btn {
+  background-color: red;
+}
+
+.delete-btn:hover {
+  background-color: darkred;
+}
+
+/* form */
+.student-form {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 15px;
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--primary-color);
+  border-radius: 8px;
+}
+
+.student-form label {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  padding-right: 10px;
+}
+
+.student-form input,.student-form select {
+  width: 90%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-sizing:border-box;
+}
+
+.student-form .full-width {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+}
+
+.student-form button {
+  margin-top: 10px;
+  /* width: 30%; */
+  width: 70%;
+  padding: 10px;
+  background-color: var(--hover-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.student-form button:hover {
+  background-color: #4f199e;
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--hover-color);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 3s;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+/* Media queries for responsiveness */
+
+/* Tablets (max-width: 768px) */
+@media screen and (max-width: 768px) {
+  
+  .student-form input,
+  .student-form select{
+    width: 90%; /* Full width for inputs, selects, and buttons */
+  }
+
+  .user_btn {
+    margin-top: 10px;
+    width: 50%
+  }
+}
+
+/* Mobile (max-width: 480px) */
+@media screen and (max-width: 480px) {
+  .student-form input,
+  .student-form select{
+    width: 90%; /* Full width for inputs, selects, and buttons */
+    font-size: 0.9rem; /* Slightly smaller font size */
+  }
+  .checked{
+    width:50%;
+    height:50%; 
+  }
+  .user_btn {
+    margin-top: 10px;
+    width: 50%
+  }
+}

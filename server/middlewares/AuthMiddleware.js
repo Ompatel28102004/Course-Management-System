@@ -18,7 +18,7 @@ export const verifyToken = (request, response, next) => {
 
     // Verify the token
     jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
-        if (err) return response.status(403).send("Token is not valid!");
+        if (err) {return response.status(403).send("Token is not valid!");}
 
         // Set the user ID from the payload to request object
         request.userId = payload.id; // Assuming 'id' is in the payload

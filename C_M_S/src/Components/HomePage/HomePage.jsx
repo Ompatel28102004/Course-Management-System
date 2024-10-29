@@ -17,14 +17,20 @@ const HomePage = () => {
 
     // Redirect based on user role
     switch (userRole) {
-      case 'admin':
-        navigate('/admin-dashboard');
+      case 'master-admin':
+        navigate('/master-admin');
+        break;
+      case 'finance-admin':
+        navigate('/finance-admin');
+        break;
+      case 'academic-admin':
+        navigate('/academic-admin');
         break;
       case 'faculty':
-        navigate('/faculty-dashboard');
+        navigate('/faculty');
         break;
       case 'student':
-        navigate('/student-dashboard');
+        navigate('/student/dashboard/overview');
         break;
       default:
         navigate('/landing-page'); // Handle cases where the role is invalid

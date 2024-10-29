@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from 'react-router-dom'; 
 import { IoIosMail } from "react-icons/io";
 import { FaLock } from "react-icons/fa";
+import { HOST } from "../../utils/constants"
 import axios from "axios";
 import { Modal, Form, Spinner } from 'react-bootstrap';
 import "./Login.css";
@@ -13,7 +14,7 @@ const Login = () => {
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [showSecurityCodeModal, setShowSecurityCodeModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState("");
   const navigate = useNavigate();
 
   let newPassword = ""; 
@@ -32,15 +33,14 @@ const Login = () => {
   // Handle Login Submission
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/login", {
+      const response = await axios.post(`${HOST}/api/auth/login`, {
         user_id: userId,
         password: password,
       });
   
       if (!response.data.securityCodeRequired) { 
         // Store token and role from response
-        localStorage.setItem('authToken', response.data.token); 
-        localStorage.setItem('userRole', response.data.role); // Store user role
+        setToken(response.data.token);
       }
   
       if (response.data.securityCodeRequired) {
@@ -50,28 +50,22 @@ const Login = () => {
     } else {
         localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('userRole', response.data.role);
+        localStorage.setItem('userId', userId);
+
+        setToastMessage("Login successful!");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 500);
+        console.log("Login successful!", response.data);
     
-        // Redirect based on user role
-        const role = response.data.role;
-        switch (role) {
-          case 'admin':
-            navigate('/admin-dashboard');
-            break;
-          case 'faculty':
-            navigate('/faculty-dashboard');
-            break;
-          case 'student':
-            navigate('/student-dashboard');
-            break;
-          default:
-            navigate('/landing-page'); // Fallback if role is invalid
-            break;
-        }
+        // Redirect to HomePage
+        setTimeout(() => {
+          navigate("/") 
+        }, 500);
     }
     
     } catch (error) {
       console.error("Login failed:", error.response.data);
-      setToastMessage("Login failed. Please try again.");
+      setToastMessage(`Login failed. Please try again. {${error.response.data.message}}`);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     }
@@ -85,29 +79,31 @@ const Login = () => {
     }
   
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/verify-security-code", {
+      const response = await axios.post(`${HOST}/api/auth/verify-security-code`, {
         user_id: userId,
         securityCode: securityCode,
       });
+
       setToken(response.data.token);
-      localStorage.setItem('authToken', response.data.token); // Store the JWT token in localStorage
-      localStorage.setItem('userRole', response.data.role); // Store user role
+
       setShowSecurityCodeModal(false);
-      const role = response.data.role; // Get user role
   
       if (response.data.mustChangePassword) {
         setShowChangePasswordModal(true);
       } else {
+        localStorage.setItem('authToken', response.data.token); // Store the JWT token in localStorage
+        localStorage.setItem('userRole', response.data.role); // Store user role
+        localStorage.setItem('userId', userId);
+
         setToastMessage("Login successful!");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 500);
         console.log("Login successful!", response.data);
         securityCodeErrorRef.current.innerText = "";
   
-        // Redirect based on user role
+        // Redirect to HomePage
         setTimeout(() => {
-          const role = response.data.role;
-          navigate("/")
+          navigate("/") 
         }, 500);
         
       }
@@ -130,9 +126,8 @@ const Login = () => {
     }
     
     try {
-      const token = localStorage.getItem('authToken');
       const response = await axios.post(
-        "http://localhost:3000/api/auth/change-password",
+        `${HOST}/api/auth/change-password`,
         { userId, newPassword },
         {
           headers: { Authorization: `Bearer ${token}` }, // Send JWT token
@@ -155,15 +150,13 @@ const Login = () => {
       forgotPasswordErrorRef.current.innerText = "Please Enter User ID";
       return; // Early exit if security code is empty
     }
-
-
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/forgot-password", {
+      const response = await axios.post(`${HOST}/api/auth/forgot-password`, {
         user_id: forgotPasswordUserId,
       });
   
       setShowForgotPasswordModal(false); 
-      setToastMessage("Password reset instructions sent to your email.");
+      setToastMessage("Password reset instructions sent to your email. Please check Spam/Junk folder if not received.");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000); 
       console.log("Forgot Password Request Successful", response.data);
@@ -176,7 +169,7 @@ const Login = () => {
 
   const SecurityCodeModal = React.memo(({ show, onSubmit, onClose }) => {
     return (
-      <Modal backdrop="static" show={show} hide={onClose} centered>
+      <Modal backdrop={false} show={show} centered>
         <Modal.Header>
           <Modal.Title>Enter Security Code</Modal.Title>
         </Modal.Header>
@@ -205,9 +198,9 @@ const Login = () => {
     );
   });
 
-  const ChangePasswordModal = ({ show, onSubmit }) => {
+  const ChangePasswordModal = React.memo(({ show, onSubmit }) => {
     return (
-      <Modal backdrop="static" show={show} centered>
+      <Modal backdrop={false} show={show} centered>
         <Modal.Header>
           <Modal.Title>Change Password</Modal.Title>
         </Modal.Header>
@@ -231,7 +224,7 @@ const Login = () => {
         </Modal.Footer>
       </Modal>
     );
-  };
+  });
 
   const ForgotPasswordModal = React.memo(({ show, onSubmit, onClose }) => {
     const [loading, setLoading] = useState(false); // Loading state for submit button
@@ -243,7 +236,7 @@ const Login = () => {
     };
   
     return (
-      <Modal show={show} hide={onClose} centered>
+      <Modal backdrop={false} show={show} centered>
         <Modal.Header>
           <Modal.Title>Forgot Password</Modal.Title>
         </Modal.Header>

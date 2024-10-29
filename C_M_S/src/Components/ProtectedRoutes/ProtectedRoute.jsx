@@ -11,12 +11,10 @@ const ProtectedRoute = ({ element, requiredRole }) => {
 
     // If user is authenticated but the role does not match the required role
     if (requiredRole && role !== requiredRole) {
-        return <Navigate to={`/${role}-dashboard`} replace />; // Redirect to their own dashboard
+        return <Navigate to={`/${role}`} replace />; // Redirect to their own dashboard
     }
 
-    
 
-    // User is authenticated and authorized to view the component
     return element; 
 };
 

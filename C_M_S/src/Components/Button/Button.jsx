@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import Login from '../Login_Page/Login';
 import { useNavigate } from 'react-router-dom';
 
 export default function Btn({ children, clsName }) {
@@ -10,7 +9,7 @@ export default function Btn({ children, clsName }) {
   function handleClick(){
 
     if( clsName === "getStartedBtn" ){
-      navigate("/Login");
+      navigate("/login");
     }
     else{
       console.log("Invalid Path");

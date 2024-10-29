@@ -1,9 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-
 :root{
     --purple_color:#B21FDC;
     --gray_color:#eaeaea;
+    --hover_purple_color:#8707a8;
 }
 
 *{
@@ -117,7 +115,7 @@
 }
 
 .getStartedBtn:hover{
-    background-color: #43089c
+    background-color: var(--hover_purple_color);
 }
 
 .getStartedBtn img{
@@ -140,7 +138,7 @@
 }
 
 .imgDiv img{
-    height: 480px;
+    height: 510px;
     width: 100%;
     border-radius: 20px;
 } 
