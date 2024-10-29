@@ -52,7 +52,7 @@ export default function AboutUs() {
                 <DeveloperCard path={assets.a_alpha} name="Ayaan Himani" info="MERN Stack Developer" iL="https://www.instagram.com/ayaanhimani/" gL="https://github.com/AyaanHimani" lL="https://www.linkedin.com/in/ayaan-himani-1a4923287/"/>
                 <DeveloperCard path={assets.y_alpha} name="Yash Prajapati" info="Frontend Developer" iL="https://www.instagram.com/_yashu_016/" gL="https://github.com/Coding1610" lL="https://www.linkedin.com/in/yash-prajapati-512451298/"/>
                 <DeveloperCard path={assets.j_alpha} name="Jayesh Belsare" info="MERN Satck Developer" iL="" gL="https://github.com/Curious-nova" lL="https://www.linkedin.com/in/jayeshbelsare/"/>
-                <DeveloperCard path={assets.o_alpha} name="Om Patel" info="Backend Developer" iL="https://www.instagram.com/ompatel0329/" gL="https://github.com/Ompatel28102004" lL="https://www.linkedin.com/in/om-patel-36aa25257/"/>
+                <DeveloperCard path={assets.o_alpha} name="Om Patel" info="MERN Satck Developer" iL="https://www.instagram.com/ompatel0329/" gL="https://github.com/Ompatel28102004" lL="https://www.linkedin.com/in/om-patel-36aa25257/"/>
                 <DeveloperCard path={assets.r_alpha} name="Rohit Pani" info="Web Designer" iL="https://www.instagram.com/rohit.pani.16/" gL="https://github.com/R1N1X" lL="https://www.linkedin.com/in/rohit-pani-036083283/"/>
                 <DeveloperCard path={assets.n_alpha} name="Namra Patel" info="Backend Developer" iL="https://www.instagram.com/victorkrait0103/" gL="https://github.com/Coding1610" lL="https://www.linkedin.com/in/namra-patel-19967922b/"/>
             </div>

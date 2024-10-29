@@ -130,10 +130,10 @@ const handleDownload = async (courseID, fileUrl) => {
                     <p><strong>Instructor Name:</strong> {course.courseInstructorName}</p>
                     <p><strong>Credit:</strong> {course.courseCredit}</p>
                     <p>
-                      <strong>Download File:</strong>
+                      <strong>Course Files:</strong>
                       {course.pdfUrl ? (
                         <button className="download-btn" onClick={() => handleDownload(course.courseID,course.pdfUrl)}>
-                          Download PDF
+                          View PDF
                         </button>
                       ) : (
                         <span>No File</span>
@@ -159,7 +159,7 @@ const handleDownload = async (courseID, fileUrl) => {
                     <th>Instructor ID</th>
                     <th>Instructor Name</th>
                     <th>Credit</th>
-                    <th>Download File</th>
+                    <th>Course Files</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -177,7 +177,7 @@ const handleDownload = async (courseID, fileUrl) => {
                       <td>
                         {course.pdfUrl ? (
                           <button className="download-btn" onClick={() => handleDownload(course.courseID,course.pdfUrl)}>
-                            Download PDF
+                            View PDF
                           </button>
                         ) : (
                           <span>No File</span>

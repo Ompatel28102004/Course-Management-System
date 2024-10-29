@@ -144,7 +144,7 @@ h2 {
 .back {
   box-sizing: border-box;
   padding: 0px;
-  margin-right: 20px;
+  margin-right: 50px;
   width: 7%;
   height: 70%;
   font-size: 1.5rem;
@@ -405,6 +405,7 @@ input[type=number]::-webkit-outer-spin-button {
     padding: 0px;
     width: 15%;
     height: 50%;
+    margin-right: 0px;
     font-size: 1rem;
   }
 }
