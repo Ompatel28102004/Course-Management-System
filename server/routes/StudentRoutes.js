@@ -3,7 +3,8 @@ import {
     getStudentData,
     updateStudentData, getAvailableCourses, submitSelectedCourses,
     addDeleteDeadline,
-    getAllFees, updateFeeStatus, genReport
+    getAllFees, updateFeeStatus, genReport,
+    getStudentResults
 } from '../controller/StudentController.js';
 import { verifyToken } from '../middlewares/AuthMiddleware.js';
 
@@ -28,5 +29,9 @@ StudentRoutes.get('/fees',getAllFees);
 StudentRoutes.put('/fees/update/:id',verifyToken,updateFeeStatus)
 
 StudentRoutes.get('/fees/reciept/fees/:id',verifyToken,genReport)
+
+
+//Result routes
+StudentRoutes.get('/results',verifyToken,getStudentResults)
 
 export default StudentRoutes;

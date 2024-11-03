@@ -43,7 +43,7 @@ const FeesSection = () => {
 
   const token = localStorage.getItem('authToken');
   const userId = localStorage.getItem('userId');
-
+  const studentName = localStorage.getItem('firstName');
   useEffect(() => {
     if (!userId || !token) {
       setError("User ID or token not found. Please log in again.");
@@ -53,18 +53,12 @@ const FeesSection = () => {
 
     const fetchData = async () => {
       try {
-        const [feesResponse, studentResponse] = await Promise.all([
-          axios.get(`${HOST}/api/student/fees?userId=${userId}`, {
+        const feesResponse = await axios.get(`${HOST}/api/student/fees?userId=${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${HOST}/api/student/get-data`, {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { userId: userId },
           })
-        ]);
+        
 
         setFeesData(feesResponse.data);
-        setStudentData(studentResponse.data);
         setError(null);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -89,7 +83,7 @@ const FeesSection = () => {
     setConfirmationModal({ isOpen: false, semesterInfo: null });
 
     try {
-      // Simulate a 5-second loading state
+      
       await new Promise(resolve => setTimeout(resolve, 5000));
 
       const response = await axios.put(
@@ -132,11 +126,8 @@ const FeesSection = () => {
   };
 
   const printReceipt = (semesterInfo) => {
-    if (!studentData) return;
-
     const receiptWindow = window.open("", "_blank");
     if (!receiptWindow) return;
-
     const receiptContent = `
       <html>
       <head>
@@ -158,15 +149,15 @@ const FeesSection = () => {
           <table>
             <tr>
               <th>Student Name</th>
-              <td>${studentData.FirstName.toUpperCase()} ${studentData.LastName.toUpperCase()}</td>
+              <td>${studentName.toUpperCase()}</td>
             </tr>
             <tr>
               <th>Enrollment Number</th>
-              <td>${studentData.enrollment}</td>
+              <td>${userId}</td>
             </tr>
             <tr>
               <th>Branch</th>
-              <td>${studentData.Academic_info.Branch}</td>
+              <td>${semesterInfo.branch}</td>
             </tr>
             <tr>
               <th>Semester</th>
@@ -182,7 +173,7 @@ const FeesSection = () => {
             </tr>
             <tr>
               <th>Payment Status</th>
-              <td>Paid</td>
+              <td>${semesterInfo.status}</td>
             </tr>
           </table>
         </div>
@@ -265,12 +256,12 @@ const FeesSection = () => {
 
   const renderFeeCard = (fee, isCurrentSemester = false) => (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 transition-all duration-300 hover:shadow-xl">
-      <div className="p-6">
+      <div className="p-8">
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">
           {isCurrentSemester ? "Current Semester Fee" : `Semester: ${fee.semester}`}
         </h2>
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4 p-4 rounded-lg bg-gray-50">
-          <div className="w-full lg:w-2/3 mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 p-4 rounded-lg bg-gray-50">
+          <div className="w-full lg:w-2/3 mb-6 lg:mb-0">
             <div className="flex items-center mb-2">
               <p className="text-xl font-semibold text-gray-800">Amount: ₹{fee.amount}</p>
             </div>
@@ -290,7 +281,7 @@ const FeesSection = () => {
             </div>
           </div>
           <div className="flex-shrink-0 w-full lg:w-auto">
-            {fee.status !== 'paid' && (
+            {(fee.status !== 'paid' && fee.status !== 'waived' )&& (
               <button
                 onClick={() => handlePayFees(fee)}
                 className={`w-full lg:w-auto px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 ${
@@ -308,7 +299,7 @@ const FeesSection = () => {
                 )}
               </button>
             )}
-            {fee.status === 'paid' && (
+            {(fee.status === 'paid'  || fee.status === 'waived') && (
               <button
                 onClick={() => printReceipt(fee)}
                 className="w-full lg:w-auto px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-400"

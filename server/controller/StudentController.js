@@ -2,6 +2,7 @@ import Student from "../model/StudentModel.js";
 import Course from "../model/CourseModel.js";
 import Approval from "../model/ApprovalModel.js";
 import Fee from "../model/FeesModel.js";
+import Result from "../model/ResultModel.js";
 
 // Get Student Data Controller
 export const getStudentData = async (req, res) => {
@@ -252,3 +253,23 @@ export const genReport = async(req,res) => {
 }
 
 
+export const getStudentResults = async (req, res) => {
+  try {
+    const { studentId } = req.query;
+
+    if (!studentId) {
+      return res.status(400).json({ message: 'Student ID is required' });
+    }
+
+    const result = await Result.findOne({ studentId }).lean().exec();
+
+    if (!result) {
+      return res.status(404).json({ message: 'No results found for this student' });
+    }
+
+    res.status(200).json(result.semesters);
+  } catch (error) {
+    console.error('Error fetching student results:', error);
+    res.status(500).json({ message: 'Error fetching results', error: error.message });
+  }
+};

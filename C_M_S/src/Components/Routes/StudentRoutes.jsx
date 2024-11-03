@@ -4,6 +4,7 @@ import Profile from '../Student/Profile.jsx';
 import Overview from '../Student/Dashboard/Overview';
 import EnrolledCourses from '../Student/Courses/Enrolled_Courses';
 import FeesSection from '../Student/Dashboard/Fees.jsx';
+import Result from '../Student/Result/Result.jsx';
 
 const Student = () => {
   return (
@@ -20,7 +21,7 @@ const Student = () => {
           <Route path="/courses/course-forum" element={<EnrolledCourses />} />
           <Route path="/courses/assignments" element={<EnrolledCourses />} />
           <Route path="/courses/quiz" element={<EnrolledCourses />} />
-          <Route path="/courses/results" element={<EnrolledCourses />} />
+          <Route path="/courses/results" element={<Result />} />
         </Routes>
       </div>
   );
