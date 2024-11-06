@@ -4,12 +4,19 @@ import {
     updateStudentData, getAvailableCourses, submitSelectedCourses,
     addDeleteDeadline,
     getAllFees, updateFeeStatus, genReport,
-    getStudentResults
+    getStudentResults,
+    getStudentAssignments,
+    submitAssignment,
+    downloadFile
 } from '../controller/StudentController.js';
 import { verifyToken } from '../middlewares/AuthMiddleware.js';
+import multer from 'multer';
 
 
 const StudentRoutes = Router();
+
+
+const upload = multer({ dest: 'uploads/' });
 
 StudentRoutes.get('/get-data', verifyToken, getStudentData);
 
@@ -34,4 +41,12 @@ StudentRoutes.get('/fees/reciept/fees/:id',verifyToken,genReport)
 //Result routes
 StudentRoutes.get('/results',verifyToken,getStudentResults)
 
-export default StudentRoutes;
+
+
+
+StudentRoutes.get('/assignment',verifyToken, getStudentAssignments);
+StudentRoutes.post('/assignment/submit/:assignmentId', upload.single('file'),submitAssignment);
+StudentRoutes.get('/api/student/download', downloadFile);
+
+
+export default StudentRoutes

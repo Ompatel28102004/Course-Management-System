@@ -3,7 +3,8 @@ import Course from "../model/CourseModel.js";
 import Approval from "../model/ApprovalModel.js";
 import Fee from "../model/FeesModel.js";
 import Result from "../model/ResultModel.js";
-
+import Assignment from "../model/AssignmentModel.js"
+import uploadFile from "../cloudinary_files.js";
 // Get Student Data Controller
 export const getStudentData = async (req, res) => {
     const { userId } = req.query;
@@ -271,5 +272,139 @@ export const getStudentResults = async (req, res) => {
   } catch (error) {
     console.error('Error fetching student results:', error);
     res.status(500).json({ message: 'Error fetching results', error: error.message });
+  }
+};
+// Assignments
+export const getStudentAssignments = async (req, res) => {
+  try {
+    const { enrollment } = req.query; // Get enrollment from query parameters
+    const IntEnrollment = parseFloat(enrollment); // Parse enrollment
+
+    const student = await Student.findOne({ enrollment: IntEnrollment });
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+
+    const courseIds = student.Courses.map(course => course.Course_Id);
+    const assignments = await Assignment.find({
+      courseId: { $in: courseIds }
+    }).sort({ dueDate: 1 });
+
+    const assignmentsWithSubmissions = assignments.map(assignment => {
+      const submission = assignment.submissions.find(sub => sub.studentId === student.enrollment);
+      return {
+        ...assignment.toObject(),
+        submissions: submission ? [submission] : []
+      };
+    });
+
+    res.json({
+      success: true,
+      data: assignmentsWithSubmissions
+    });
+  } catch (error) {
+    console.error("Error fetching assignments:", error.message);
+    res.status(500).json({ success: false, message: 'Error fetching assignments', error: error.message });
+  }
+};
+
+export const submitAssignment = async (req, res) => {
+  try {
+    const { assignmentId } = req.body;
+    
+
+    console.log("query",req.query)
+    console.log("body",req.body)
+    if (!req.file) {
+      console.log("This is not file found")
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    const upload = await uploadFile(req.file.path);
+
+    const assignment = await Assignment.findById(assignmentId);
+    console.log(assignment)
+    if (!assignment) {
+      console.log("This is not assignment found")
+      return res.status(404).json({ success: false, message: 'Assignment not found' });
+    }
+
+    const { enrollment } = req.body; // Get enrollment from query parameters
+    const student = await Student.findOne({ enrollment });
+    console.log("student",student)
+    if (!student) {
+      console.log("stu not found ")
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+
+    const isLate = new Date() > assignment.dueDate;
+
+    const submission = {
+      studentId: student.enrollment,
+      submissionDate: new Date(),
+      attachmentUrl: upload.secure_url,
+      isLate,
+    };
+
+    const existingSubmissionIndex = assignment.submissions.findIndex(
+      (sub) => sub.studentId === student.enrollment
+    );
+
+    if (existingSubmissionIndex !== -1) {
+      assignment.submissions[existingSubmissionIndex] = submission;
+    } else {
+      assignment.submissions.push(submission);
+    }
+
+    await assignment.save();
+
+    // Update student's UpcomingDeadlines
+    const deadlineIndex = student.UpcomingDeadlines.findIndex(
+      (deadline) => deadline.heading === assignment.title
+    );
+    if (deadlineIndex !== -1) {
+      student.UpcomingDeadlines.splice(deadlineIndex, 1);
+      await student.save();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Assignment submitted successfully',
+      data: {
+        submission: {
+          ...submission,
+          _id: assignment.submissions[assignment.submissions.length - 1]._id,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Assignment submission error:", error.message);
+    res.status(500).json({ success: false, message: 'Error submitting assignment', error: error.message });
+  }
+};
+export const downloadFile = async (req, res) => {
+  const { fileUrl } = req.query;
+  console.log(req.query)
+  if (!fileUrl) {
+    return res.status(400).json({ success: false, message: 'File URL is required' });
+  }
+
+  try {
+    const response = await fetch(fileUrl);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Get the content type and set it in the response header
+    const contentType = response.headers.get('content-type');
+    res.setHeader('Content-Type', contentType);
+
+    // Pipe the response to the client
+    response.body.pipe(res);
+
+  } catch (error) {
+    console.error('Download failed:', error);
+    res.status(500).json({ success: false, message: 'Failed to download the file', error: error.message });
   }
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HOST } from '../../../utils/constants'
 import axios from 'axios';
 import './Enrolled_Courses.css';
+import LoadingAnimation from '../../Loading/loadingAnimation';
 
 function EnrolledCourses() {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -228,7 +229,7 @@ function EnrolledCourses() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div><LoadingAnimation/></div>;
   }
 
   return (

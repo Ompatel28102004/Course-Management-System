@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HOST } from "../../utils/constants"
 import axios from 'axios';
 import { PencilIcon, CheckIcon } from 'lucide-react';
+import LoadingAnimation from '../Loading/loadingAnimation';
 
 export default function ProfilePage() {
   const [data, setData] = useState(null);
@@ -87,7 +88,7 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div><LoadingAnimation/></div>;
   }
 
   return (
@@ -104,7 +105,7 @@ export default function ProfilePage() {
           </div>
           <button
             onClick={handleEditClick}
-            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
           >
             {isEditing ? (
               <>
@@ -260,7 +261,7 @@ function ProfileField({ label, name, value, onChange, isEditing, type = "text", 
             id={name}
             value={value}
             onChange={onChange}
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+            className="shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md"
           />
         ) : (
           <p className="text-sm text-gray-900">{value}</p>
