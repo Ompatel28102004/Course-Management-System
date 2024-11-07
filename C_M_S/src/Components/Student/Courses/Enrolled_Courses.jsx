@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { HOST } from '../../../utils/constants'
 import axios from 'axios';
 import './Enrolled_Courses.css';
-import LoadingAnimation from '../../Loading/loadingAnimation';
 
 function EnrolledCourses() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [CourseCompleted, setCompletedCourses] = useState([]);
   const [availableCourses, setAvailableCourses] = useState([]);
@@ -24,10 +25,10 @@ function EnrolledCourses() {
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    const fetchStudentData = async () => {
+    const fetchStudentCourseData = async () => {
       try {
         const response = await axios.get(
-          `${HOST}/api/student/get-data`,
+          `${HOST}/api/student/get-course-data`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -37,11 +38,11 @@ function EnrolledCourses() {
             },
           }
         );
-        const Courses = response.data.Courses;
-        const CourseCompleted = response.data.CourseCompleted;
-        setEnrolledCourses(Courses);
-        setCompletedCourses(CourseCompleted);
-        SetSem(response.data.Academic_info.Semester);
+        setEnrolledCourses(response.data.Courses);
+        setCompletedCourses(response.data.CourseCompleted);
+        setFirstName(response.data.firstName);
+        setLastName(response.data.lastName);
+        SetSem(response.data.Semester);
       } catch (error) {
         console.error('Fetch failed:', error);
         setToastMessage(`Fetch failed ${error}`);
@@ -51,7 +52,7 @@ function EnrolledCourses() {
         setLoading(false);
       }
     };
-    fetchStudentData();
+    fetchStudentCourseData();
   }, [token, userId]);
 
   useEffect(() => {
@@ -165,6 +166,8 @@ function EnrolledCourses() {
     try {
       await axios.post(`${HOST}/api/student/enroll-selected-courses`, {
         userId,
+        firstName, 
+        lastName,
         courses: selectedCourses,
       }, {
         headers: {
@@ -229,7 +232,7 @@ function EnrolledCourses() {
   };
 
   if (loading) {
-    return <div><LoadingAnimation/></div>;
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   return (

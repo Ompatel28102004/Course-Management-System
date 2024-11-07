@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { HOST } from '../../../utils/constants'
 import axios from 'axios';
 import { X, Calendar, CheckCircle, Clock, Users } from 'lucide-react';
-import LoadingAnimation from '../../Loading/loadingAnimation';
 
 const Card = ({ children, className }) => (
   <div className={`p-6 rounded-lg shadow ${className}`}>
@@ -12,6 +11,7 @@ const Card = ({ children, className }) => (
 
 export default function Overview() {
   const [data, setData] = useState(null);
+  const [lectureData, setLectureData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [newDeadline, setNewDeadline] = useState({ heading: '', description: '', date: '' });
@@ -45,6 +45,33 @@ export default function Overview() {
 
     fetchStudentData();
   }, [token, userId]);
+
+  useEffect(() => {
+    const fetchLecturesData = async () => {
+      try {
+        const response = await axios.get(
+          `${HOST}/api/student/get-lectures-data`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            params: {
+              userId: userId,
+            },
+          }
+        );
+        setLectureData(response.data);
+
+      } catch (error) {
+        console.error('Lectures Data Fetch failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLecturesData();
+  }, [token, userId]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,7 +128,7 @@ export default function Overview() {
   
 
   if (loading) {
-    return <div><LoadingAnimation/></div>;
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   if (!data) {
@@ -130,7 +157,7 @@ export default function Overview() {
   }
 
   // Calculate semesterProgress
-  const semesterProgress = totalLectures > 0 ? (attendedLectures / totalLectures) * 100 : 0;
+  const semesterProgress = lectureData?.totalLectures > 0 ? (lectureData?.lecturesTaken / lectureData?.totalLectures) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-white">
@@ -166,7 +193,7 @@ export default function Overview() {
               <span className="text-sm font-medium text-gray-500">Classes Attended</span>
               <Users className="h-4 w-4 text-gray-400" />
             </div>
-            <div className="text-2xl font-bold">{attendedLectures}</div>
+            <div className="text-2xl font-bold">{lectureData?.lecturesAttended}</div>
             <p className="text-xs text-gray-500">This semester</p>
           </Card>
         </div>
@@ -204,7 +231,7 @@ export default function Overview() {
               </div>
             </div>
             <div className="text-center mt-4">
-              <p className="text-lg font-semibold">{attendedLectures}/{totalLectures}</p>
+              <p className="text-lg font-semibold">{lectureData?.lecturesTaken}/{lectureData?.totalLectures}</p>
               <p className="text-sm text-gray-500">Lectures</p>
             </div>
           </Card>

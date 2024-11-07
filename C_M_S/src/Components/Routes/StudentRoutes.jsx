@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Profile from '../Student/Profile.jsx';
 import Overview from '../Student/Dashboard/Overview';
 import EnrolledCourses from '../Student/Courses/Enrolled_Courses';
+import Attendance from '../Student/Courses/Attendance.jsx';
 import FeesSection from '../Student/Dashboard/Fees.jsx';
 import Result from '../Student/Courses/Results.jsx';
 import Notification from '../AcademicAdmin/Notification';
@@ -21,7 +22,7 @@ const Student = () => {
           <Route path="/dashboard/inbox" element={<Overview />} />
           <Route path="/dashboard/fees" element={<FeesSection />} />
           <Route path="/courses/enrolled-courses" element={<EnrolledCourses />} />
-          <Route path="/courses/attendance" element={<EnrolledCourses />} />
+          <Route path="/courses/attendance" element={<Attendance />} />
           <Route path="/courses/course-forum" element={<EnrolledCourses />} />
           <Route path="/courses/assignments" element={<Assignments />} />
           <Route path="/courses/quiz" element={<EnrolledCourses />} />
