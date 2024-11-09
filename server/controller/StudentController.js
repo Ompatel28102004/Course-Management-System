@@ -441,7 +441,7 @@ export const getStudentAttendance = async (req, res) => {
     const numericUserId = Number(userId);
 
     // 1. Find the course in the Attendance table
-    const attendanceRecord = await Attendance.findOne({ courseID: courseRefID });
+    const attendanceRecord = await Attendance.findOne({ courseRefID: courseRefID });
 
     if (!attendanceRecord) {
       return res.status(404).json({ message: "Course not found." });
@@ -461,10 +461,20 @@ export const getStudentAttendance = async (req, res) => {
     // 4. Fetch attendance details for the given studentID
     const attendance = dates.map(dateRecord => {
       const attendanceRecord = dateRecord.attendanceRecords.find(record => record.studentID === numericUserId);
-      return {
-        date: dateRecord.date,
-        status: attendanceRecord ? attendanceRecord.status : "not recorded"
-      };
+      if (attendanceRecord && attendanceRecord.studentID === numericUserId) {
+        return {
+          date: dateRecord.date,
+          attendanceType: dateRecord.attendanceType, 
+          status: attendanceRecord.status
+        };
+      }
+      else {
+        return {
+          date: "",
+          attendanceType: "", 
+          status: ""
+        };
+      }
     });
 
     // 5. Respond with lecturesTaken and attendance array
@@ -484,18 +494,34 @@ export const getStudentAssignments = async (req, res) => {
     const { enrollment } = req.query; // Get enrollment from query parameters
     const IntEnrollment = parseFloat(enrollment); // Parse enrollment
 
-    const student = await Student.findOne({ enrollment: IntEnrollment });
-    if (!student) {
-      return res.status(404).json({ success: false, message: 'Student not found' });
+    // 1. Find the courses where the student is enrolled
+    const attendanceRecords = await Attendance.find({
+      "enrolledStudents.studentID": IntEnrollment,
+    });
+
+    // 2. Extract and format the required information from the attendance records
+    const courses = [];
+    for (const record of attendanceRecords) {
+      // Lookup the course information from the Courses collection
+      const courseInfo = await Course.findById(record.courseRefID).select(
+        "courseID courseName"
+      );
+      if (courseInfo) {
+        courses.push({
+          RefID: record.courseRefID.toString(),
+          Course_Id: courseInfo.courseID,
+          Course_Name: courseInfo.courseName,
+        });
+      }
     }
 
-    const courseIds = student.Courses.map(course => course.Course_Id);
+    const courseIds = courses.map(course => course.Course_Id);
     const assignments = await Assignment.find({
       courseId: { $in: courseIds }
     }).sort({ dueDate: 1 });
 
     const assignmentsWithSubmissions = assignments.map(assignment => {
-      const submission = assignment.submissions.find(sub => sub.studentId === student.enrollment);
+      const submission = assignment.submissions.find(sub => sub.studentId === IntEnrollment);
       return {
         ...assignment.toObject(),
         submissions: submission ? [submission] : []

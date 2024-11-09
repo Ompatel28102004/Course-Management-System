@@ -33,7 +33,7 @@ export default function Overview() {
           }
         );
         setData(response.data);
-        localStorage.setItem("firstName", response.data.FirstName);
+        localStorage.setItem("firstName", response.data.FirstName + " " + response.data.LastName);
         localStorage.setItem("imageUrl", response.data.image_url);
         localStorage.setItem("isTA", response.data.Academic_info.isTA);
       } catch (error) {
@@ -206,7 +206,7 @@ export default function Overview() {
               <div className="relative w-40 h-40">
                 <svg className="w-full h-full" viewBox="0 0 100 100">
                   <circle
-                    className="text-gray-200 stroke-current"
+                    className="text-[#cbd5e1] stroke-current"
                     strokeWidth="10"
                     cx="50"
                     cy="50"

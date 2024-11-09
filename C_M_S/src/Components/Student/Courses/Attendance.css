@@ -1,231 +1,573 @@
 .attendance-container {
-    padding: 2rem;
-    font-family: Arial, sans-serif;
-    color: #333;
-    background-color: #ffffff;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  color: #333;
+  background-color: #ffffff;
+}
+
+.attendance-heading {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #5b4b8a;
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.controls .course-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.controls .month-year-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.controls label {
+  font-weight: bold;
+  color: #4a3b76;
+}
+
+.controls select {
+  margin: 0 5px;
+  padding: 0.5rem;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+
+.month-year-selector button {
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.month-year-selector button {
+  background-color: #5b4b8a;
+  color: white;
+  border: none;
+}
+
+.month-year-selector button:hover {
+  background-color: #4a3b76;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  padding: 1rem;
+  background-color: #e8e4f1;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  width: 100%;
+}
+
+.summary h3 {
+  font-size: 1.2rem;
+  color: #4a3b76;
+  text-align: center;
+  width: 100%;
+}
+
+.summary-cards {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.summary-card {
+  position: relative; /* Required for positioning the pseudo-element */
+  background-color: #def5f9;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 8px;
+  min-width: 100px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.summary-card:hover {
+  transform: scale(1.05);
+}
+
+.summary-card:hover::after {
+  content: "This data is for overall semester"; /* The text to display */
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #dbc7dde6; /* Background with some opacity */
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.summary-card p {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #4a3b76;
+}
+
+.calendar-strip-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fbf2fd;
+  padding: 2rem;
+}
+
+.calendar-strip {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.arrow-btn-left,
+.arrow-btn-right {
+  background-color: #46484950;
+  /* Purple theme */
+  color: white;
+  border: none;
+  padding: 0.2rem 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.3rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.arrow-btn-left {
+  margin-left: -1rem;
+  margin-right: 1rem;
+}
+
+.arrow-btn-right {
+  margin-right: -1rem;
+  margin-left: 1rem;
+}
+
+.arrow-btn-left:hover,
+.arrow-btn-right:hover {
+  background-color: #4a3b76;
+  transform: scale(1.05);
+}
+
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 15%;
+  font-weight: bold;
+  font-size: 1rem;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.day.present {
+  background-color: #66bb6af0;
+  color: #eefcee;
+}
+
+.day.absent {
+  background-color: #fb5d5a7e;
+  color: #d74040;
+}
+
+.day.leave {
+  background-color: #757575b5;
+  color: rgb(225, 223, 223);
+}
+
+.day.no-record {
+  background-color: #e0e0e0;
+  color: #9e9e9e;
+}
+
+.attendance-details {
+  background-color: #f5f2fc;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 1.5rem;
+  height: 60vh;
+}
+
+.attendance-details-heading {
+  font-size: 1.5rem;
+  color: #4a3b76;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.attendance-details table {
+  position: relative;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.attendance-details.loading th {
+  padding: 1rem;
+  border-bottom: 2px solid #eee;
+  text-align: left;
+  background-color: #f8f9fa;
+  color: #5b4b8a;
+  font-weight: 600;
+}
+
+.attendance-details th {
+  padding: 1rem;
+  border-bottom: 2px solid #eee;
+  text-align: center;
+  background-color: #f8f9fa;
+  color: #5b4b8a;
+  font-weight: 600;
+}
+
+.attendance-details td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+/* Shimmer container styles */
+.shimmer-container td {
+  height: 50px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Different widths for shimmer elements */
+.shimmer-container td:nth-child(1) .shimmer {
+  width: 120px;
+}
+
+.shimmer-container td:nth-child(2) .shimmer {
+  width: 90px;
+}
+
+.shimmer-container td:nth-child(3) .shimmer {
+  width: 80px;
+}
+
+.shimmer-container td:nth-child(4) .shimmer {
+  width: 70px;
+}
+
+/* Enhanced shimmer effect */
+.shimmer {
+  position: relative;
+  height: 24px;
+  margin: 4px 0;
+  background: #f6f7f8;
+  background-image: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #e5e7eb 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  display: block;
+  border-radius: 4px;
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
   }
-  
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+td.Present {
+  color: #2ecc71;
+}
+
+td.Absent {
+  color: #e74c3c;
+}
+
+td.Leave {
+  color: #f1c40f;
+}
+
+/* Tablet Devices (768px to 1024px) */
+@media screen and (max-width: 1024px) {
+  .attendance-container {
+    padding: 1.5rem;
+  }
+
   .attendance-heading {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #5b4b8a;
-    text-align: left;
-    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
   }
-  
+
   .controls {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
+    flex-direction: column;
+    gap: 1.25rem;
   }
-  
-  .controls .course-selector {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
+
+  .controls .course-selector,
   .controls .month-year-selector {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    width: 100%;
+    justify-content: space-between;
   }
-  
-  .controls label {
-    font-weight: bold;
-    color: #4a3b76;
-  }
-  
+
   .controls select {
-    margin: 0 5px;
-    padding: 0.5rem;
-    border-radius: 3px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    font-size: 1rem;
+    flex: 1;
+    margin: 0 0.5rem;
   }
-  
-  
-  .month-year-selector button {
-    padding: 0.5rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  
-  .month-year-selector button {
-    background-color: #5b4b8a;
-    color: white;
-    border: none;
-  }
-  
-  .month-year-selector button:hover {
-    background-color: #4a3b76;
-  }
-  
+
   .summary {
-    display: flex;
+    padding: 0.75rem;
+  }
+
+  .summary-cards {
     flex-wrap: wrap;
     gap: 1rem;
-    justify-content: center;
-    padding: 1rem;
-    background-color: #e8e4f1;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
-  
-  .summary h3 {
-    font-size: 1.2rem;
-    color: #4a3b76;
-    text-align: center;
-    width: 100%;
-  }
-  
-  .summary-cards {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
+
   .summary-card {
-    background-color: #def5f9;
-    border-radius: 8px;
-    padding: 1rem;
-    margin: 8px;
-    min-width: 100px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out;
+    min-width: calc(50% - 1rem);
+    margin: 0;
   }
-  
-  .summary-card:hover {
-    transform: scale(1.05);
-  }
-  
-  .summary-card p {
-    font-weight: bold;
-    font-size: 1.1rem;
-    color: #4a3b76;
-  }
-  
-  /*  */
-  .calendar-container {
-    display: flex;
-    align-items: center;  
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  
-  /*  */
-  .previous-month-btn,
-  .next-month-btn {
-    font-size: 1.2rem;
-    padding: 0.5rem;
-    background-color: #5b4b8a;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-  
-  /*  */
-  .previous-month-btn:hover,
-  .next-month-btn:hover {
-    background-color: #4a3b76;
-  }
-  
-  .calendar-strip {
-    display: grid;
-    grid-template-columns: repeat(31, 1fr);
-    background-color: #fdf8fe;
+
+  .calendar-strip-container {
     padding: 1.5rem;
-    border-radius: 5px;
-    overflow-x: auto;
   }
-  
-  .day {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 2rem;
-    width: 2.1rem;
-    border-radius: 3px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    color: white;
-    transition: background-color 0.3s ease;
+
+  .calendar-strip {
+    flex-wrap: wrap;
+    gap: 8px;
   }
-  
-  .day.present {
-    background-color: #66bb6a; /* Green for present */
-  }
-  
-  .day.absent {
-    background-color: #ef5350; /* Red for absent */
-  }
-  
-  .day.leave {
-    background-color: #757575; /* Dark gray for leave */
-  }
-  
-  .day.no-record {
-    background-color: #e0e0e0;
-    color: #9e9e9e; /* Light gray for no data */
-  }
-  
+
   .attendance-details {
-    background-color: #f5f2fc;
-    border-radius: 10px;
+    height: 50vh;
+    padding: 0.75rem;
+  }
+}
+
+/* Large Mobile Devices (480px to 767px) */
+@media screen and (max-width: 767px) {
+  .attendance-container {
     padding: 1rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 1.5rem;
+  }
+
+  .attendance-heading {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .controls .course-selector,
+  .controls .month-year-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .month-year select{
+    margin-bottom: 5px;
+  }
+
+  .controls label {
+    margin-bottom: 0.25rem;
+  }
+
+  .controls select {
+    width: 100%;
+    margin: 0;
+  }
+
+  .summary h3 {
+    font-size: 1.1rem;
+  }
+
+  .summary-cards {
+    overflow: hidden;
+  }
+
+  .summary-card {
+    min-width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .summary-card:hover::after {
+    font-size: 0.7rem;
+    white-space: normal;
+    width: 80%;
     text-align: center;
   }
-  
-  .attendance-details table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
+
+  .calendar-strip {
+    justify-content: center;
   }
-  
+
+  .day {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.9rem;
+  }
+
+  .attendance-details {
+    height: 45vh;
+  }
+
+  .attendance-details-heading {
+    font-size: 1.25rem;
+  }
+
+  .attendance-details table {
+    font-size: 0.9rem;
+  }
+
   .attendance-details th,
   .attendance-details td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+/* Small Mobile Devices (up to 479px) */
+@media screen and (max-width: 479px) {
+  .attendance-container {
+    padding: 0.75rem;
+  }
+
+  .attendance-heading {
+    font-size: 1.25rem;
+  }
+
+  .controls select,
+  .controls button {
+    font-size: 0.9rem;
+    padding: 0.4rem;
+    margin-bottom: 5px;
+  }
+
+  .summary {
     padding: 0.5rem;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
   }
-  
-  .attendance-details th {
-    font-weight: bold;
-    color: #5b4b8a;
+
+  .summary-cards {
+    gap: 0.5rem;
   }
-  
-  .attendance-details td.present {
-    color: #66bb6a;
-    font-weight: bold;
+
+  .summary-card {
+    padding: 0.75rem;
   }
-  
-  .attendance-details td.absent {
-    color: #ef5350;
-    font-weight: bold;
-  }
-  
-  .attendance-details td.leave {
-    color: #757575;
-    font-weight: bold;
-  }
-  
-  .no-data-message {
-    color: #757575;
+
+  .summary-card p {
     font-size: 1rem;
-    text-align: center;
-    margin-top: 2rem;
+  }
+
+  .day {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+  }
+
+  .arrow-btn-left,
+  .arrow-btn-right {
+    font-size: 1rem;
+    padding: 0.3rem;
+  }
+
+  .attendance-details {
+    height: 40vh;
+    margin-top: 1rem;
+  }
+
+  .attendance-details table {
+    font-size: 0.8rem;
+  }
+
+  .attendance-details th,
+  .attendance-details td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  /* Adjust shimmer widths for smaller screens */
+  .shimmer-container td:nth-child(1) .shimmer {
+    width: 70px;
   }
   
+  .shimmer-container td:nth-child(2) .shimmer {
+    width: 50px;
+  }
+  
+  .shimmer-container td:nth-child(3) .shimmer {
+    width: 40px;
+  }
+  
+  .shimmer-container td:nth-child(4) .shimmer {
+    width: 35px;
+  }
+}
+
+/* Handle very small devices */
+@media screen and (max-width: 360px) {
+  .attendance-container {
+    padding: 0.5rem;
+  }
+
+  .controls select,
+  .controls button {
+    font-size: 0.8rem;
+    padding: 0.3rem;
+  }
+
+  .day {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
+  }
+
+  .summary-card {
+    padding: 0.5rem;
+  }
+
+  .attendance-details {
+    height: 35vh;
+  }
+
+  .attendance-details table {
+    font-size: 0.75rem;
+  }
+}
+

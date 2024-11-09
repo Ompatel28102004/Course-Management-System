@@ -50,7 +50,7 @@ const AttendanceSchema = new mongoose.Schema({
       },
       attendanceType: { 
         type: String, 
-        enum: ['lecture', 'lab', 'tutorial'], 
+        enum: ['Lecture', 'Lab', 'Tutorial'], 
         required: true, 
       },
       attendanceRecords: [
@@ -61,7 +61,7 @@ const AttendanceSchema = new mongoose.Schema({
           },
           status: {
             type: String,
-            enum: ['present', 'absent', 'leave'],
+            enum: ['Present', 'Absent', 'Leave'],
             required: true,
           },
         },
