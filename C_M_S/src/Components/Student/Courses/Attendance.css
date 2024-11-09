@@ -239,6 +239,21 @@
   overflow: hidden;
 }
 
+.attendance-details tbody {
+  display: block;
+  overflow-y: auto;
+  max-height: calc(60vh - 8.7rem);
+  scrollbar-width: auto;
+  scrollbar-color: #e6cce9 #f8f9fA;
+}
+
+.attendance-details thead,
+.attendance-details tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed; 
+}
+
 .attendance-details.loading th {
   padding: 1rem;
   border-bottom: 2px solid #eee;
@@ -325,7 +340,7 @@ td.Absent {
 }
 
 td.Leave {
-  color: #f1c40f;
+  color: #898882;
 }
 
 /* Tablet Devices (768px to 1024px) */
@@ -381,6 +396,10 @@ td.Leave {
   .attendance-details {
     height: 50vh;
     padding: 0.75rem;
+  }
+
+  .attendance-details tbody {
+    max-height: calc(50vh - 8.7rem);
   }
 }
 
@@ -461,6 +480,10 @@ td.Leave {
   .attendance-details td {
     padding: 0.75rem 0.5rem;
   }
+
+  .attendance-details tbody {
+    max-height: calc(45vh - 8.7rem);
+  }
 }
 
 /* Small Mobile Devices (up to 479px) */
@@ -538,6 +561,10 @@ td.Leave {
   .shimmer-container td:nth-child(4) .shimmer {
     width: 35px;
   }
+
+  .attendance-details tbody {
+    max-height: calc(40vh - 6rem); 
+  }
 }
 
 /* Handle very small devices */
@@ -568,6 +595,10 @@ td.Leave {
 
   .attendance-details table {
     font-size: 0.75rem;
+  }
+
+  .attendance-details tbody {
+    max-height: calc(35vh - 6rem); 
   }
 }
 
