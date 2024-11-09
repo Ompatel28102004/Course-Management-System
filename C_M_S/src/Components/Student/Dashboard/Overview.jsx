@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HOST } from '../../../utils/constants'
 import axios from 'axios';
 import { X, Calendar, CheckCircle, Clock, Users } from 'lucide-react';
+import LoadingAnimation from '../../Loading/LoadingAnimation';
 
 const Card = ({ children, className }) => (
   <div className={`p-6 rounded-lg shadow ${className}`}>
@@ -128,7 +129,7 @@ export default function Overview() {
   
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen"><LoadingAnimation/></div>;
   }
 
   if (!data) {

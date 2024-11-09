@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { HOST } from '../../../utils/constants'
 import axios from 'axios';
+import LoadingAnimation from "../../Loading/LoadingAnimation"
 import './Enrolled_Courses.css';
 
 function EnrolledCourses() {
@@ -232,7 +233,7 @@ function EnrolledCourses() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen"><LoadingAnimation/></div>;
   }
 
   return (
