@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef ,useLayoutEffect} from 'react';
 import { apiClient } from "../../../lib/api-client";
 import { GETACTIVEQUESTIONS_ROUTE, GETINACTIVEQUESTIONS_ROUTE, ADDQUESTION_ROUTE, EDITQUESTION_ROUTE, DELETEQUESTION_ROUTE } from "../../../utils/constants";
+import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
 
 const Question = () => {
   const [activeQuestions, setActiveQuestions] = useState([]);
@@ -23,7 +24,11 @@ const Question = () => {
   }, []);
   // Create a ref for the form
   const formRef = useRef(null);
-
+  useLayoutEffect(() => {
+    if (showForm && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [showForm]); // Trigger scroll when showForm changes to true
   useEffect(() => {
     fetchActiveQuestions();
     fetchInactiveQuestions();
@@ -112,7 +117,7 @@ const Question = () => {
 
   return (
     <div className="Home">
-      <h2 className='responsive'>Active Questions</h2>
+      <h2 className='responsive mb-3'>Active Questions</h2>
       {
         <div className="table-container">
           {activeQuestions.length > 0 ? (
@@ -124,9 +129,13 @@ const Question = () => {
                     <p><strong>Question ID:</strong> {question.questionID}</p>
                     <p><strong>Question Text:</strong> {question.questionText}</p>
                     <p><strong>Status:</strong> Active</p>
-                    <div className="actions">
-                      <button className="edit-btn" onClick={() => handleEditQuestion(question)}>Edit</button>
-                      <button className="delete-btn" onClick={() => handleDelete(question.questionID)}>Delete</button>
+                    <div className="action-buttons flex gap-10 justify-center align-middle">
+                      <button className="edit-btn" onClick={() => handleEditQuestion(question)}>
+                        <MdEdit />
+                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(question.questionID)}>
+                        <MdDelete />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -149,8 +158,14 @@ const Question = () => {
                       <td>{question.questionText}</td>
                       <td>Active</td>
                       <td className="actions">
-                        <button className="edit-btn" onClick={() => handleEditQuestion(question)}>Edit</button>
-                        <button className="delete-btn" onClick={() => handleDelete(question.questionID)}>Delete</button>
+                        <div className="action-buttons">
+                          <button className="edit-btn" onClick={() => handleEditQuestion(question)}>
+                            <MdEdit />
+                          </button>
+                          <button className="delete-btn" onClick={() => handleDelete(question.questionID)}>
+                            <MdDelete />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -164,7 +179,7 @@ const Question = () => {
       }
 
 
-      <h2 className='responsive'>Inactive Questions</h2>
+      <h2 className='responsive mb-3 mt-3'>Inactive Questions</h2>
       {
         <div className="table-container">
           {inactiveQuestions.length > 0 ? (
@@ -176,9 +191,13 @@ const Question = () => {
                     <p><strong>Question ID:</strong> {question.questionID}</p>
                     <p><strong>Question Text:</strong> {question.questionText}</p>
                     <p><strong>Status:</strong> Inactive</p>
-                    <div className="actions">
-                      <button className="edit-btn" onClick={() => handleEditQuestion(question)}>Edit</button>
-                      <button className="delete-btn" onClick={() => handleDelete(question.questionID)}>Delete</button>
+                    <div className="action-buttons flex gap-10 justify-center align-middle">
+                      <button className="edit-btn" onClick={() => handleEditQuestion(question)}>
+                        <MdEdit />
+                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(question.questionID)}>
+                        <MdDelete />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -201,8 +220,14 @@ const Question = () => {
                       <td>{question.questionText}</td>
                       <td>Inactive</td>
                       <td className="actions">
-                        <button className="edit-btn" onClick={() => handleEditQuestion(question)}>Edit</button>
-                        <button className="delete-btn" onClick={() => handleDelete(question.questionID)}>Delete</button>
+                        <div className="action-buttons">
+                          <button className="edit-btn" onClick={() => handleEditQuestion(question)}>
+                            <MdEdit />
+                          </button>
+                          <button className="delete-btn" onClick={() => handleDelete(question.questionID)}>
+                            <MdDelete />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -215,10 +240,36 @@ const Question = () => {
         </div>
       }
 
-
-      <button className="user_btn" onClick={() => setShowForm(!showForm)}>
-        {showForm ? 'Cancel' : 'Add Question'}
+      <button
+        className="user_btn add w-52 mt-3"
+        onClick={() => {
+          if (showForm) {
+            // When closing the form, reset both the form data and editing state
+            resetForm();
+          } else {
+            // If opening the form, clear editing and reset form data to empty
+            setEditingQuestion(null);
+            setNewQuestionText("");
+            setIsActive(true);
+            setResponseType('text');
+            setQuestionID("");
+          }
+          setShowForm(!showForm); // Toggle the form
+        }}
+      >
+        {showForm ? (
+          <>
+            <MdCancel className="icon" />
+            <span>Cancel</span>
+          </>
+        ) : (
+          <>
+            <MdAddCircle className="icon" />
+            <span>Add Question</span>
+          </>
+        )}
       </button>
+
 
       {/* Form ref added here */}
       {showForm && (
@@ -253,7 +304,7 @@ const Question = () => {
             <option value="rating">Rating</option>
             <option value="text">Text</option>
           </select>
-          <button type="submit" className="submit-btn" style={{width:"90%"}}>{editingQuestion ? 'Update' : 'Submit'}</button>
+          <button type="submit" className="submit-btn" style={{ width: "90%", gridColumn: -2 }}>{editingQuestion ? 'Update' : 'Submit'}</button>
         </form>
       )}
     </div>

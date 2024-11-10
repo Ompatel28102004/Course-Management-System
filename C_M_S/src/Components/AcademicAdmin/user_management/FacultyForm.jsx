@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { ADDFACULTY_ROUTE, EDITFACULTY_ROUTE, SEARCHFACULTYS_ROUTE, HOST} from "../../../utils/constants";
+import LoadingAnimation from "../../Loading/LoadingAnimation";
 
 const FacultyForm = () => {
   const { facultyId } = useParams(); // Get faculty facultyId from URL params
@@ -185,10 +186,10 @@ const FacultyForm = () => {
   
 
   if (uploading) {
-    return <p>Uploading Faculty Image...</p>;
+    return <LoadingAnimation />;
   }
   if (loading) {
-    return <p>Loading faculty data...</p>; // Show loading message
+    return <LoadingAnimation />; // Show loading message
   }
 
   return (

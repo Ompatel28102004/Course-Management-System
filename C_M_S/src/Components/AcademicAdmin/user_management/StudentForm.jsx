@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { ADDSTUDENT_ROUTE, EDITSTUDENT_ROUTE, SEARCHSTUDENTS_ROUTE, HOST } from "../../../utils/constants";
+import LoadingAnimation from "../../Loading/LoadingAnimation";
 
 const StudentForm = () => {
   const { enrollment } = useParams(); // Get enrollment from the URL
@@ -219,10 +220,10 @@ const StudentForm = () => {
   };
   
   if (uploading) {
-    return <p>Uploading Student Image...</p>;
+    return <LoadingAnimation />;
   }
   if (loading) {
-    return <p>Loading student data...</p>; // Display loading message when fetching data
+    return <LoadingAnimation />; // Display loading message when fetching data
   }
 
   return (

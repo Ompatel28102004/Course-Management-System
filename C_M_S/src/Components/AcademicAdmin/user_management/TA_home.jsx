@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { GETTAS_ROUTE, DELETETA_ROUTE, SEARCHTAS_ROUTE } from "../../../utils/constants";
+import LoadingAnimation from "../../Loading/LoadingAnimation";
+import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
 
 const TA_home = () => {
   const navigate = useNavigate();
@@ -38,9 +40,10 @@ const TA_home = () => {
           contactNumber: ta.contactNumber || '',
           semester: ta.semester || '' // Add semester field here
         }));
+        const sortedTa = taList.sort((a, b) => a.enrollment - b.enrollment);
 
-        setTAs(taList); // Set original TA list
-        setFilteredTAs(taList); // Initialize filtered list with the full TA list
+        setTAs(sortedTa); // Set original TA list
+        setFilteredTAs(sortedTa); // Initialize filtered list with the full TA list
       }
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while fetching TAs.");
@@ -97,58 +100,10 @@ const TA_home = () => {
           value={searchQuery}
           onChange={handleSearchInput} // Update search input and filter list
         />
-        <button className="user_btn" onClick={() => navigate('/academic-admin/user_management/ta_form')}>Add TA</button>
+        <button className="user_btn add" onClick={() => navigate('/academic-admin/user_management/ta_form')}><MdAddCircle className="icon" /> Add TA</button>
       </div>
-
-      {/* {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p>{error}</p>
-      ) : (
-        <div className="table-container">
-          <table className="user-table">
-            <thead>
-              <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Contact Number</th>
-                <th>Faculty ID</th>
-                <th>Teaching Semester</th>
-                <th>Teaching Courses</th>
-                <th>Semester</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTAs.length > 0 ? (
-                filteredTAs.map((ta, index) => (
-                  <tr key={index}>
-                    <td>{ta.enrollment}</td>
-                    <td>{ta.studentName}</td>
-                    <td>{ta.studentEmail}</td>
-                    <td>{ta.contactNumber}</td>
-                    <td>{ta.facultyId}</td>
-                    <td>{ta.teachingSemester}</td>
-                    <td>{ta.teachingCourses}</td>
-                    <td>{ta.semester}</td>
-                    <td className="actions">
-                      <button className="edit-btn" onClick={() => handleEditClick(ta.enrollment)}>Edit</button>
-                      <button className="delete-btn" onClick={() => handleDelete(ta.enrollment)}>Delete</button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="9">No TAs found.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )} */}
       {loading ? (
-        <p>Loading...</p>
+        <LoadingAnimation />
       ) : error ? (
         <p>{error}</p>
       ) : (
@@ -159,7 +114,7 @@ const TA_home = () => {
               <div className="user-table">
                 {filteredTAs.map((ta, index) => (
                   <div key={index} className="ta-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
-                    <p><strong>Student ID:</strong> {ta.enrollment}</p>
+                    <p><strong>Enrollment No:</strong> {ta.enrollment}</p>
                     <p><strong>Name:</strong> {ta.studentName}</p>
                     <p><strong>Email:</strong> {ta.studentEmail}</p>
                     <p><strong>Contact Number:</strong> {ta.contactNumber}</p>
@@ -167,9 +122,13 @@ const TA_home = () => {
                     <p><strong>Teaching Semester:</strong> {ta.teachingSemester}</p>
                     <p><strong>Teaching Courses:</strong> {ta.teachingCourses}</p>
                     <p><strong>Semester:</strong> {ta.semester}</p>
-                    <div className="actions">
-                      <button className="edit-btn" onClick={() => handleEditClick(ta.enrollment)}>Edit</button>
-                      <button className="delete-btn" onClick={() => handleDelete(ta.enrollment)}>Delete</button>
+                    <div className="action-buttons flex gap-10 justify-center align-middle">
+                      <button className="edit-btn" onClick={() => handleEditClick(ta.enrollment)}>
+                        <MdEdit />
+                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(ta.enrollment)}>
+                        <MdDelete />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -179,7 +138,7 @@ const TA_home = () => {
               <table className="user-table">
                 <thead>
                   <tr>
-                    <th>Student ID</th>
+                    <th>Enrollment No</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Contact Number</th>
@@ -202,8 +161,14 @@ const TA_home = () => {
                       <td>{ta.teachingCourses}</td>
                       <td>{ta.semester}</td>
                       <td className="actions">
-                        <button className="edit-btn" onClick={() => handleEditClick(ta.enrollment)}>Edit</button>
-                        <button className="delete-btn" onClick={() => handleDelete(ta.enrollment)}>Delete</button>
+                        <div className="action-buttons">
+                          <button className="edit-btn" onClick={() => handleEditClick(ta.enrollment)}>
+                            <MdEdit />
+                          </button>
+                          <button className="delete-btn" onClick={() => handleDelete(ta.enrollment)}>
+                            <MdDelete />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

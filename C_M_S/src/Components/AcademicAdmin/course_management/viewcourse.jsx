@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { GETCOURSES_ROUTE, DELETECOURSE_ROUTE } from "../../../utils/constants";
 import { color } from 'framer-motion';
-
+import LoadingAnimation from "../../Loading/LoadingAnimation";
+import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
+import { FaFileDownload } from "react-icons/fa";
 const ViewCourse = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]); // Original course list
@@ -31,15 +33,23 @@ const ViewCourse = () => {
     setLoading(true);
     try {
       const response = await apiClient.get(GETCOURSES_ROUTE, { withCredentials: true });
-      const courseData = response.data.courses;
-      setCourses(courseData); // Set original course list
-      setFilteredCourses(courseData); // Initialize filtered list with full course list
+  
+      // Sort courses by courseID lexicographically (alphanumeric sorting)
+      const sortedCourses = response.data.courses.sort((a, b) => {
+        if (a.courseID < b.courseID) return -1;
+        if (a.courseID > b.courseID) return 1;
+        return 0;
+      });
+  
+      setCourses(sortedCourses); // Set original course list
+      setFilteredCourses(sortedCourses); // Initialize filtered list with full course list
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while fetching courses.");
     } finally {
       setLoading(false);
     }
   };
+  
 
   // Delete course function
   const handleDelete = async (courseID) => {
@@ -75,25 +85,25 @@ const ViewCourse = () => {
   };
 
 
-// Function to download the file
-const handleDownload = async (courseID, fileUrl) => {
-  try {
-    const response = await fetch(fileUrl); // Fetch the file
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
+  // Function to download the file
+  const handleDownload = async (courseID, fileUrl) => {
+    try {
+      const response = await fetch(fileUrl); // Fetch the file
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const blob = await response.blob(); // Convert the response to a Blob
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob); // Create a URL for the Blob
+      link.download = `${courseID}.pdf`; // Use courseID for the filename and add .pdf extension
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href); // Free up memory
+    } catch (error) {
+      console.error("Download failed:", error);
     }
-    const blob = await response.blob(); // Convert the response to a Blob
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob); // Create a URL for the Blob
-    link.download = `${courseID}.pdf`; // Use courseID for the filename and add .pdf extension
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href); // Free up memory
-  } catch (error) {
-    console.error("Download failed:", error);
-  }
-};
+  };
 
 
   return (
@@ -110,7 +120,7 @@ const handleDownload = async (courseID, fileUrl) => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <LoadingAnimation />
       ) : error ? (
         <p>{error}</p>
       ) : (
@@ -129,19 +139,23 @@ const handleDownload = async (courseID, fileUrl) => {
                     <p><strong>Instructor ID:</strong> {course.courseInstructorID}</p>
                     <p><strong>Instructor Name:</strong> {course.courseInstructorName}</p>
                     <p><strong>Credit:</strong> {course.courseCredit}</p>
-                    <p>
+                    <p className='flex'>
                       <strong>Course Files:</strong>
                       {course.pdfUrl ? (
-                        <button className="download-btn" onClick={() => handleDownload(course.courseID,course.pdfUrl)}>
-                          View PDF
+                        <button className="download w-[35%]" onClick={() => handleDownload(course.courseID, course.pdfUrl)}>
+                          <FaFileDownload className='icon' />
                         </button>
                       ) : (
                         <span>No File</span>
                       )}
                     </p>
-                    <div className="actions">
-                      <button className="edit-btn" onClick={() => handleEditClick(course.courseID)}>Edit</button>
-                      <button className="delete-btn" onClick={() => handleDelete(course.courseID)}>Delete</button>
+                    <div className="action-buttons flex gap-10 justify-center align-middle">
+                      <button className="edit-btn" onClick={() => handleEditClick(course.courseID)}>
+                        <MdEdit />
+                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(course.courseID)}>
+                        <MdDelete />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -176,16 +190,22 @@ const handleDownload = async (courseID, fileUrl) => {
                       <td>{course.courseCredit}</td>
                       <td>
                         {course.pdfUrl ? (
-                          <button className="download-btn" onClick={() => handleDownload(course.courseID,course.pdfUrl)}>
-                            View PDF
+                          <button className="download" onClick={() => handleDownload(course.courseID, course.pdfUrl)}>
+                            <FaFileDownload className='icon' />
                           </button>
                         ) : (
                           <span>No File</span>
                         )}
                       </td>
                       <td className="actions">
-                        <button className="edit-btn" onClick={() => handleEditClick(course.courseID)}>Edit</button>
-                        <button className="delete-btn" onClick={() => handleDelete(course.courseID)}>Delete</button>
+                        <div className="action-buttons">
+                          <button className="edit-btn" onClick={() => handleEditClick(course.courseID)}>
+                            <MdEdit />
+                          </button>
+                          <button className="delete-btn" onClick={() => handleDelete(course.courseID)}>
+                            <MdDelete />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

@@ -8,7 +8,7 @@ import {
     createFeedback, getActiveFeedback, getInactiveFeedback, deleteFeedback, searchFeedback, editFeedback, getFeedbackResponses, 
     Overview, UserDetails, 
     createQuestion, getActiveQuestions, getInactiveQuestions, editQuestion, deleteQuestion,
-    addTA, getAllTAs, deleteTA, searchTAs, editTA
+    addTA, getAllTAs, deleteTA, searchTAs, editTA,createExam,getExam,editExam,deleteExam
 } from '../controller/AcademicAdminController.js';
 
 import { verifyToken } from '../middlewares/AuthMiddleware.js';
@@ -114,6 +114,9 @@ AcademicAdminRoutes.get('/searchtas',verifyToken, searchTAs);
 // Route to delete a TA
 AcademicAdminRoutes.delete('/deleteta/:enrollment',verifyToken, deleteTA);
 
-
+AcademicAdminRoutes.post('/addexam',verifyToken, createExam);
+AcademicAdminRoutes.get('/getexams',verifyToken, getExam);
+AcademicAdminRoutes.put('/editexam/:examID',verifyToken, editExam);
+AcademicAdminRoutes.delete('/deleteexam/:examID',verifyToken, deleteExam);
 
 export default AcademicAdminRoutes;

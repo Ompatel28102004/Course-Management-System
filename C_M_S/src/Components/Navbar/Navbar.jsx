@@ -82,7 +82,8 @@ const navItemsByRole = {
     {
       id: 3, label: 'Course Management', href: '/academic-admin/course_management/viewcourse', icon: BookOpen, children: [
         { label: 'View Course', href: '/academic-admin/course_management/viewcourse', icon: FaEye },
-        { label: 'Add Course', href: '/academic-admin/course_management/addcourse', icon: FaPlusCircle }
+        { label: 'Add Course', href: '/academic-admin/course_management/addcourse', icon: FaPlusCircle },
+        { label: 'Exam Schedule', href: '/academic-admin/course_management/exam', icon: CalendarCheck }
       ]
     },
     {

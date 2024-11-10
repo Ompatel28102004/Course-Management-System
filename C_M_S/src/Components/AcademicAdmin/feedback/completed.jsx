@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { GETINACTIVEFEEDBACK_ROUTE, DELETEFEEDBACK_ROUTE, SEARCHFEEDBACK_ROUTE } from "../../../utils/constants"; // Ensure these routes exist
+import LoadingAnimation from "../../Loading/LoadingAnimation";
+import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
 
 const Completed = () => {
   const navigate = useNavigate();
@@ -26,9 +28,13 @@ const Completed = () => {
     setLoading(true);
     try {
       const response = await apiClient.get(GETINACTIVEFEEDBACK_ROUTE, { withCredentials: true });
-      const feedbackData = response.data.feedbacks;
-      setFeedbacks(feedbackData); // Set original feedback list
-      setFilteredFeedbacks(feedbackData); // Initialize filtered list with full feedback list
+      const sortedFeedback = response.data.feedbacks.sort((a, b) => {
+        if (a.feedbackID < b.feedbackID) return -1;
+        if (a.feedbackID > b.feedbackID) return 1;
+        return 0;
+      });
+      setFeedbacks(sortedFeedback); // Set original feedback list
+      setFilteredFeedbacks(sortedFeedback); // Initialize filtered list with full feedback list
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while fetching feedbacks.");
     } finally {
@@ -88,7 +94,7 @@ const Completed = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <LoadingAnimation />
       ) : error ? (
         <p>{error}</p>
       ) : (
@@ -113,9 +119,13 @@ const Completed = () => {
                       year: 'numeric', month: '2-digit', day: '2-digit',
                       hour: '2-digit', minute: '2-digit', hour12: true
                     })}</p>
-                    <div className="actions">
-                      <button className="edit-btn" onClick={() => handleEditClick(feedback.feedbackID)}>Edit</button>
-                      <button className="delete-btn" onClick={() => handleDelete(feedback.feedbackID)}>Delete</button>
+                    <div className="action-buttons flex gap-10 justify-center align-middle">
+                      <button className="edit-btn" onClick={() => handleEditClick(feedback.feedbackID)}>
+                        <MdEdit />
+                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(feedback.feedbackID)}>
+                        <MdDelete />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -154,13 +164,20 @@ const Completed = () => {
                         hour: '2-digit', minute: '2-digit', hour12: true
                       })}</td>
                       <td className="actions">
-                        <button className="edit-btn" onClick={() => handleEditClick(feedback.feedbackID)}>Edit</button>
-                        <button className="delete-btn" onClick={() => handleDelete(feedback.feedbackID)}>Delete</button>
+                        <div className="action-buttons">
+                          <button className="edit-btn" onClick={() => handleEditClick(feedback.feedbackID)}>
+                            <MdEdit />
+                          </button>
+                          <button className="delete-btn" onClick={() => handleDelete(feedback.feedbackID)}>
+                            <MdDelete />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+
             )
           ) : (
             <p>No feedbacks found.</p>

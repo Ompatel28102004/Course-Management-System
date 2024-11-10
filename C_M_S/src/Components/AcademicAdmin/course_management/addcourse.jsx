@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { ADDCOURSE_ROUTE, EDITCOURSE_ROUTE, SEARCHCOURSE_ROUTE, HOST } from "../../../utils/constants";
-
+import LoadingAnimation from "../../Loading/LoadingAnimation";
 const AddCourse = () => {
   const { courseID } = useParams(); // Get courseID from URL for editing
   const navigate = useNavigate(); // Initialize navigate
@@ -159,10 +159,10 @@ const AddCourse = () => {
   };
 
   if (uploading) {
-    return <p>Uploading course files...</p>;
+    return <LoadingAnimation />;
   }
   if (loading) {
-    return <p>Loading course data...</p>; // Display loading message when fetching data
+    return <LoadingAnimation />; // Display loading message when fetching data
   }
 
   return (

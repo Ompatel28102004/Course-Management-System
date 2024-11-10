@@ -5,7 +5,8 @@ import Course from '../model/CourseModel.js';
 import Feedback from '../model/feedbackModel.js';
 import Question from '../model/questionModel.js';
 import TAModel from '../model/TaModel.js';
-import Fees from '../model/FeesModel.js'
+import Fees from '../model/FeesModel.js';
+import Exam from '../model/ExamModel.js';
 import { hash } from 'bcrypt';
 import twilio from 'twilio'; // Import Twilio
 
@@ -86,8 +87,6 @@ export const UserDetails = async (req, res) => {
     return res.status(500).send({ message: 'Internal Server Error', error });
   }
 };
-
-
 
 // Helper function to generate enrollment number
 const generateUniqueEnrollmentNumber = async (branchCode, degreeCode) => {
@@ -1692,5 +1691,139 @@ export const deleteQuestion = async (req, res) => {
   } catch (error) {
     console.error('Error deleting question:', error); // Log the error for debugging
     res.status(500).json({ message: 'Error deleting question', error: error.message });
+  }
+};
+
+// Function to create a new Exam
+export const createExam = async (req, res) => {
+  const { ExamName, degree, branch, semester, ExamStartDate } = req.body;
+
+  try {
+    const startDate = new Date(ExamStartDate);
+    if (isNaN(startDate.getTime())) {
+      throw new Error("Invalid ExamStartDate");
+    }
+
+    let duration;
+    switch (ExamName) {
+      case 'Class Test 1':
+      case 'Class Test 2':
+        duration = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
+        break;
+      case 'Mid Semester':
+        duration = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+        break;
+      case 'End Semester':
+        duration = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+        break;
+      default:
+        throw new Error('Unknown exam type');
+    }
+
+    const endDate = new Date(startDate.getTime() + duration);
+
+    const newExam = new Exam({
+      ExamName,
+      degree,
+      branch,
+      semester,
+      ExamStartDate: startDate,
+      ExamEndDate: endDate,
+    });
+
+    const savedExam = await newExam.save();
+    res.status(201).json({ message: 'Exam created successfully', exam: savedExam });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating exam', error: error.message });
+  }
+};
+
+// Function to get all active questions
+export const getExam = async (req, res) => {
+  try {
+    const exam = await Exam.find();
+    res.status(200).json(exam);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching active questions', error: error.message });
+  }
+};
+
+// Function to edit an exam by ID
+export const editExam = async (req, res) => {
+  const { examID } = req.params; // Get the exam ID from the request parameters
+  const updateData = req.body; // Get the data to update from the request body
+
+  try {
+    // Fetch the current exam data to access ExamName if not provided in the update
+    const currentExam = await Exam.findById(examID);
+    if (!currentExam) {
+      return res.status(404).json({ message: 'Exam not found' });
+    }
+
+    // Determine the exam name to use for duration calculation
+    const examName = updateData.ExamName || currentExam.ExamName;
+
+    // Check if the start date is being changed and is valid
+    if (updateData.ExamStartDate) {
+      const startDate = new Date(updateData.ExamStartDate);
+      if (isNaN(startDate.getTime())) {
+        throw new Error("Invalid ExamStartDate");
+      }
+
+      // Determine duration based on ExamName
+      let duration;
+      switch (examName) {
+        case 'Class Test 1':
+        case 'Class Test 2':
+          duration = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
+          break;
+        case 'Mid Semester':
+          duration = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+          break;
+        case 'End Semester':
+          duration = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+          break;
+        default:
+          throw new Error('Unknown exam type');
+      }
+
+      // Calculate and set the new end date based on the updated start date
+      const endDate = new Date(startDate.getTime() + duration);
+      updateData.ExamEndDate = endDate.toISOString();
+    }
+
+    // Update the exam
+    const updatedExam = await Exam.findOneAndUpdate(
+      { _id: examID },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedExam) {
+      return res.status(404).json({ message: 'Exam not found' });
+    }
+
+    res.status(200).json({ message: 'Exam updated successfully', exam: updatedExam });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating exam', error: error.message });
+  }
+};
+
+// Function to delete an exam by ID
+export const deleteExam = async (req, res) => {
+  const { examID } = req.params;
+
+  try {
+    // Use findOneAndDelete to delete by examID
+    const deletedExam = await Exam.findOneAndDelete({ _id: examID }); // Match by _id field (assuming examID is the unique identifier for the exam document)
+
+    if (!deletedExam) {
+      return res.status(404).json({ message: 'Exam not found' });
+    }
+    res.status(200).json({ message: 'Exam deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting exam:', error); // Log the error for debugging
+    res.status(500).json({ message: 'Error deleting exam', error: error.message });
   }
 };

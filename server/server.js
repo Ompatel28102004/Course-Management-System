@@ -9,6 +9,10 @@ import StudentRoutes from "./routes/StudentRoutes.js";
 import AcademicAdminRoutes from "./routes/AcademicAdminRoutes.js";
 import cron from 'node-cron';
 import Feedback from './model/feedbackModel.js';
+import TAModel from './model/TaModel.js';
+import Student from './model/StudentModel.js';
+import Exam from './model/ExamModel.js';
+
 dotenv.config();
 
 const app = express();
@@ -62,3 +66,48 @@ cron.schedule('0 0 * * *', async () => {
 }, {
     timezone: "Asia/Kolkata"
 });
+// Scheduled cron task setup
+cron.schedule('0 0 * * *', async () => {
+    try {
+        // Set `now` to only include the date, ignoring the time
+        const now = new Date();
+        now.setHours(0, 0, 0, 0); // Reset time to 00:00:00
+
+        const studentsToUpdate = await TAModel.find({ endDate: { $lte: now } });
+
+        if (studentsToUpdate.length > 0) {
+            const studentIDs = studentsToUpdate.map(student => student.enrollment);
+            await Student.updateMany(
+                { enrollment: { $in: studentIDs } },
+                { 'Academic_info.isTA': false }
+            );
+            console.log(`Updated student records to inactive status: ${studentIDs.join(', ')}`);
+        } else {
+            console.log("No student records to update.");
+        }
+    } catch (error) {
+        console.error('Error updating student records:', error);
+    }
+}, {
+    timezone: "Asia/Kolkata"
+});
+// Scheduled cron task setup
+cron.schedule('0 0 * * *', async () => {
+    try {
+        const now = new Date();
+        const examsToDelete = await Exam.find({ examDateTime: { $lt: now } });
+
+        if (examsToDelete.length > 0) {
+            const examIDs = examsToDelete.map(exam => exam.examID);
+            await Exam.deleteMany({ examID: { $in: examIDs } });
+            console.log(`Deleted past exams from the database: ${examIDs.join(', ')}`);
+        } else {
+            console.log("No past exams to delete.");
+        }
+    } catch (error) {
+        console.error('Error deleting past exams:', error);
+    }
+}, {
+    timezone: "Asia/Kolkata"
+});
+

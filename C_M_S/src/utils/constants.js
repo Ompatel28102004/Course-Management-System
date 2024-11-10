@@ -1,7 +1,5 @@
 // export const HOST = import.meta.env.VITE_SERVER_URL;
 export const HOST = 'http://localhost:3000';
-// export const HOST = 'http://192.168.1.4:3000'; //use your ip address here
-
 
 // student
 export const student = "api/academic-admin";
@@ -91,10 +89,22 @@ export const GETACTIVEQUESTIONS_ROUTE = `${HOST}/${question}/getactivequestions`
 // Get all inactive questions
 export const GETINACTIVEQUESTIONS_ROUTE = `${HOST}/${question}/getinactivequestions`;
 
-
-
 // Edit a question by questionID (if needed)
 export const EDITQUESTION_ROUTE = (questionID) => `${HOST}/${question}/editquestion/${questionID}`;
 
 // Delete a question by questionID (if needed)
 export const DELETEQUESTION_ROUTE = (questionID) => `${HOST}/${question}/deletequestion/${questionID}`;
+
+export const exam = "api/academic-admin";
+
+// Add a new exam
+export const ADDEXAM_ROUTE = `${HOST}/${exam}/addexam`;
+
+// Get all active exams
+export const GETEXAMS_ROUTE = `${HOST}/${exam}/getexams`;
+
+// Edit an exam by examID
+export const EDITEXAM_ROUTE = (examID) => `${HOST}/${exam}/editexam/${examID}`;
+
+// Delete an exam by examID
+export const DELETEEXAM_ROUTE = (examID) => `${HOST}/${exam}/deleteexam/${examID}`;

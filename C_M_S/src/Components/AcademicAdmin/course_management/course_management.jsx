@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 // import "./course_management.css";
 import Viewcourse from './viewcourse.jsx';
 import AddCourse from './addcourse.jsx';
-// import Deletedcourse from './deletedcourse.jsx'
+import Exam from './Exam.jsx'
 
 const course_management = () => {
   return (
@@ -14,7 +14,7 @@ const course_management = () => {
         <Route path="/addcourse" element={<AddCourse />} /> 
         <Route path="/viewcourse" element={<Viewcourse />} />
         <Route path="/addcourse/:courseID" element={<AddCourse />} />
-        {/* <Route path="/deletedcourse" element={<Deletedcourse />} /> */}
+        <Route path="/Exam" element={<Exam />} />
       </Routes>
     </div>
   )

@@ -4,7 +4,7 @@ import { HOST } from "../../../utils/constants";
 import {
   PieChart, Pie, Tooltip, Legend, Cell, ResponsiveContainer
 } from 'recharts';
-
+import LoadingAnimation from "../../Loading/LoadingAnimation";
 const Home = () => {
   const [overviewData, setOverviewData] = useState({
     students: { total: 0, byDegree: [] },
@@ -29,7 +29,7 @@ const Home = () => {
     fetchOverviewData();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <LoadingAnimation />;
   if (error) return <p>Error: {error}</p>;
 
   // Prepare data for charts with percentage labels

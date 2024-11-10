@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { ADDTA_ROUTE, EDITTA_ROUTE, SEARCHTAS_ROUTE, GETNONTA_ROUTE, GETFACULTYS_ROUTE, GETCOURSES_ROUTE } from "../../../utils/constants";
+import LoadingAnimation from "../../Loading/LoadingAnimation";
 
 const TAForm = () => {
   const { enrollment } = useParams(); // Get TA ID from the URL
@@ -61,13 +62,6 @@ const TAForm = () => {
     }
   };
 
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setTA((prevTA) => ({
-  //     ...prevTA,
-  //     [name]: value,
-  //   }));
-  // };
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -129,7 +123,7 @@ const TAForm = () => {
   };
 
   if (loading) {
-    return <p>Loading TA data...</p>; // Display loading message when fetching data
+    return <LoadingAnimation />; // Display loading message when fetching data
   }
 
   return (

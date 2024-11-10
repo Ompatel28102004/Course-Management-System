@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { ADDFEEDBACK_ROUTE, EDITFEEDBACK_ROUTE, SEARCHFEEDBACK_ROUTE } from "../../../utils/constants";
+import LoadingAnimation from "../../Loading/LoadingAnimation";
 
 const FeedbackForm = () => {
   const { feedbackID } = useParams(); // Get feedbackID from the URL
@@ -121,7 +122,7 @@ const formatDateForInput = (date) => {
   };
 
   if (loading) {
-    return <p>Loading feedback data...</p>; // Display loading message when fetching data
+    return <LoadingAnimation />; // Display loading message when fetching data
   }
 
   return (

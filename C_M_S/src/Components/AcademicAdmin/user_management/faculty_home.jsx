@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { GETFACULTYS_ROUTE, DELETEFACULTY_ROUTE, SEARCHFACULTYS_ROUTE } from "../../../utils/constants";
+import LoadingAnimation from "../../Loading/LoadingAnimation";
+import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
 
 const FacultyHome = () => {
   const navigate = useNavigate();
@@ -30,15 +32,18 @@ const FacultyHome = () => {
     setLoading(true);
     try {
       const response = await apiClient.get(GETFACULTYS_ROUTE, { withCredentials: true });
-      setFaculty(response.data.faculty);
-      setFilteredFaculty(response.data.faculty); // Initialize filtered list with full data
+      // Sort faculty by facultyId in ascending order
+      const sortedFaculty = response.data.faculty.sort((a, b) => a.facultyId - b.facultyId);
+  
+      setFaculty(sortedFaculty);
+      setFilteredFaculty(sortedFaculty); // Initialize filtered list with sorted data
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while fetching faculty.");
     } finally {
       setLoading(false);
     }
   };
-
+  
   // Delete faculty function
   const handleDelete = async (facultyId) => {
     if (window.confirm('Are you sure you want to delete this faculty member?')) {
@@ -83,71 +88,81 @@ const FacultyHome = () => {
           onChange={handleSearchInput} // Update search input and filter list
         />
         {/* <button className="user_btn" onClick={handleSearchInput}>Search</button> */}
-        <button className="user_btn" onClick={() => navigate('/academic-admin/user_management/faculty_form')}>Add Faculty</button>
+        <button className="user_btn add" onClick={() => navigate('/academic-admin/user_management/faculty_form')}><MdAddCircle className='icon'/>Add Faculty</button>
       </div>
 
       {loading ? (
-  <p>Loading...</p>
-) : error ? (
-  <p>{error}</p>
-) : (
-  <div className="table-container">
-    {filteredFaculty.length > 0 ? (
-      screenSize < 768 ? (
-        // Mobile/Tablet view: Render a simple list or cards
-        <div className="user-table">
-          {filteredFaculty.map((member, index) => (
-            <div key={index} className="faculty-card" style={{border:"2px solid black", marginTop:"10px", padding:"10px"}}>
-              <p><strong>Faculty ID:</strong> {member.facultyId}</p>
-              <p><strong>First Name:</strong> {member.FirstName}</p>
-              <p><strong>Last Name:</strong> {member.LastName}</p>
-              <p><strong>Department:</strong> {member.department}</p>
-              <p><strong>Email:</strong> {member.CollegeEmail}</p>
-              <p><strong>Contact Number:</strong> {member.contactNumber}</p>
-              <div className="actions">
-                <button className="edit-btn" onClick={() => handleEditClick(member.facultyId)}>Edit</button>
-                <button className="delete-btn" onClick={() => handleDelete(member.facultyId)}>Delete</button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <LoadingAnimation />
+      ) : error ? (
+        <p>{error}</p>
       ) : (
-        // Desktop view: Render a table
-        <table className="user-table">
-          <thead>
-            <tr>
-              <th>Faculty ID</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Department</th>
-              <th>College Email</th>
-              <th>Contact Number</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredFaculty.map((member, index) => (
-              <tr key={index}>
-                <td>{member.facultyId}</td>
-                <td>{member.FirstName}</td>
-                <td>{member.LastName}</td>
-                <td>{member.department}</td>
-                <td>{member.CollegeEmail}</td>
-                <td>{member.contactNumber}</td>
-                <td className="actions">
-                  <button className="edit-btn" onClick={() => handleEditClick(member.facultyId)}>Edit</button>
-                  <button className="delete-btn" onClick={() => handleDelete(member.facultyId)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )
-    ) : (
-      <p>No faculty members found.</p>
-    )}
-  </div>
-)}
+        <div className="table-container">
+          {filteredFaculty.length > 0 ? (
+            screenSize < 768 ? (
+              // Mobile/Tablet view: Render a simple list or cards
+              <div className="user-table">
+                {filteredFaculty.map((member, index) => (
+                  <div key={index} className="faculty-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
+                    <p><strong>Faculty ID:</strong> {member.facultyId}</p>
+                    <p><strong>First Name:</strong> {member.FirstName}</p>
+                    <p><strong>Last Name:</strong> {member.LastName}</p>
+                    <p><strong>Department:</strong> {member.department}</p>
+                    <p><strong>Email:</strong> {member.CollegeEmail}</p>
+                    <p><strong>Contact Number:</strong> {member.contactNumber}</p>
+                    <div className="action-buttons flex gap-10 justify-center align-middle">
+                      <button className="edit-btn" onClick={() => handleEditClick(member.facultyId)}>
+                        <MdEdit />
+                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(member.facultyId)}>
+                        <MdDelete />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Desktop view: Render a table
+              <table className="user-table">
+                <thead>
+                  <tr>
+                    <th>Faculty ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Department</th>
+                    <th>College Email</th>
+                    <th>Contact Number</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredFaculty.map((member, index) => (
+                    <tr key={index}>
+                      <td>{member.facultyId}</td>
+                      <td>{member.FirstName}</td>
+                      <td>{member.LastName}</td>
+                      <td>{member.department}</td>
+                      <td>{member.CollegeEmail}</td>
+                      <td>{member.contactNumber}</td>
+                      <td className="actions">
+                        <div className="action-buttons">
+                          <button className="edit-btn" onClick={() => handleEditClick(member.facultyId)}>
+                            <MdEdit />
+                          </button>
+                          <button className="delete-btn" onClick={() => handleDelete(member.facultyId)}>
+                            <MdDelete />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )
+          ) : (
+            <p>No faculty members found.</p>
+          )}
+        </div>
+      )}
 
     </div>
   );

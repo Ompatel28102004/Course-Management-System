@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HOST } from '../../utils/constants';
 import { apiClient } from "../../lib/api-client";
 import avatar2 from "../../assets/avatar_2.png"; // Corrected image import
+import LoadingAnimation from "../Loading/LoadingAnimation";
 
 const Profile = () => {
   const [user, setUser] = useState({
@@ -36,7 +37,7 @@ const Profile = () => {
     <div>
       <h2 className='responsive'>Profile:</h2>
       {loading ? (
-        <p>Loading...</p>
+        <LoadingAnimation />
       ) : (
         <div className="profile-content">
           <div className="profile-image">

@@ -1,18 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
-import { GETINACTIVEFEEDBACK_ROUTE, GET_RESPONSES_ROUTE } from "../../../utils/constants"; // Ensure these routes exist
+import { GETINACTIVEFEEDBACK_ROUTE, GET_RESPONSES_ROUTE } from "../../../utils/constants";
+import LoadingAnimation from "../../Loading/LoadingAnimation";
 
 const Answer = () => {
   const navigate = useNavigate();
-  const [feedbacks, setFeedbacks] = useState([]); // Original feedback list
-  const [filteredFeedbacks, setFilteredFeedbacks] = useState([]); // Filtered list based on search
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [filteredFeedbacks, setFilteredFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFeedback, setSelectedFeedback] = useState(null); // Store selected feedback
-  const [responses, setResponses] = useState([]); // Store responses for selected feedback
-  const [screenSize, setScreenSize] = useState(window.innerWidth); // Track screen size
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const [responses, setResponses] = useState([]);
+  const [screenSize, setScreenSize] = useState(window.innerWidth);
+  
+  // Reference for the responses section
+  const responsesRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => setScreenSize(window.innerWidth);
@@ -21,15 +25,20 @@ const Answer = () => {
   }, []);
 
   useEffect(() => {
-    fetchFeedbacks(); // Fetch feedbacks on mount
+    fetchFeedbacks();
   }, []);
 
   const fetchFeedbacks = async () => {
     setLoading(true);
     try {
       const response = await apiClient.get(GETINACTIVEFEEDBACK_ROUTE, { withCredentials: true });
-      setFeedbacks(response.data.feedbacks);
-      setFilteredFeedbacks(response.data.feedbacks); // Initialize filtered list with full data
+      const sortedFeedback = response.data.feedbacks.sort((a, b) => {
+        if (a.feedbackID < b.feedbackID) return -1;
+        if (a.feedbackID > b.feedbackID) return 1;
+        return 0;
+      });
+      setFeedbacks(sortedFeedback);
+      setFilteredFeedbacks(sortedFeedback);
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while fetching feedbacks.");
     } finally {
@@ -47,15 +56,18 @@ const Answer = () => {
         return resp;
       });
       setResponses(parsedResponses);
+      setTimeout(() => {
+        responsesRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while fetching responses.");
-      setResponses([]); // Reset responses in case of error
+      setResponses([]);
     }
   };
 
   const showAnswer = (feedbackID) => {
     setSelectedFeedback(feedbackID);
-    fetchResponses(feedbackID); // Fetch responses for the selected feedback
+    fetchResponses(feedbackID);
   };
 
   const handleSearchInput = (e) => {
@@ -68,7 +80,7 @@ const Answer = () => {
       feedback.departmentID.toLowerCase().includes(query) ||
       feedback.branch.toLowerCase().includes(query)
     );
-    setFilteredFeedbacks(filtered); // Update filtered list
+    setFilteredFeedbacks(filtered);
   };
 
   return (
@@ -80,11 +92,11 @@ const Answer = () => {
           placeholder="Search Feedback"
           className="search_input"
           value={searchQuery}
-          onChange={handleSearchInput} // Update search input and filter list
+          onChange={handleSearchInput}
         />
       </div>
       {loading ? (
-        <p>Loading...</p>
+        <LoadingAnimation />
       ) : error ? (
         <p>{error}</p>
       ) : (
@@ -137,18 +149,18 @@ const Answer = () => {
       )}
 
       {selectedFeedback && (
-        <div className="responses">
+        <div  className="responses"> {/* Reference added here */}
           <h3 className='responsive'>Responses for Feedback ID: {selectedFeedback}</h3>
           {Array.isArray(responses) && responses.length === 0 ? (
             <p>No responses available.</p>
           ) : (
-            <div className="table-container">
+            <div className="table-container" ref={responsesRef}>
               {Array.isArray(responses) && responses.length > 0 ? (
                 screenSize < 768 ? (
                   <div className="response-cards">
                     {responses.map((response, index) => (
                       <div key={index} className="response-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
-                        <p><strong>Response #:</strong> {index + 1}</p> {/* Display index starting from 1 */}
+                        <p><strong>Response #:</strong> {index + 1}</p>
                         {Array.isArray(response.answers) && response.answers.map((answer, idx) => (
                           <div key={idx}>
                             <strong>QID: {answer.questionID}</strong> - {answer.response}
@@ -158,7 +170,7 @@ const Answer = () => {
                     ))}
                   </div>
                 ) : (
-                  <table className="user-table">
+                  <table className="user-table" ref={responsesRef}>
                     <thead>
                       <tr>
                         <th>Response #</th>
@@ -168,7 +180,7 @@ const Answer = () => {
                     <tbody>
                       {responses.map((response, index) => (
                         <tr key={index}>
-                          <td>{index + 1}</td> {/* Display index starting from 1 */}
+                          <td>{index + 1}</td>
                           <td>
                             {Array.isArray(response.answers) && response.answers.map((answer, idx) => (
                               <div key={idx}>
