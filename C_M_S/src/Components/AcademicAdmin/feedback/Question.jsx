@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef ,useLayoutEffect} from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { apiClient } from "../../../lib/api-client";
 import { GETACTIVEQUESTIONS_ROUTE, GETINACTIVEQUESTIONS_ROUTE, ADDQUESTION_ROUTE, EDITQUESTION_ROUTE, DELETEQUESTION_ROUTE } from "../../../utils/constants";
 import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
@@ -15,6 +15,9 @@ const Question = () => {
   const [questionID, setQuestionID] = useState('');
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [screenSize, setScreenSize] = useState(window.innerWidth); // Track screen size
+  const [activeCurrentPage, setActiveCurrentPage] = useState(1);
+  const [inactiveCurrentPage, setInactiveCurrentPage] = useState(1);
+  const feedbacksPerPage = 5; // Set number of questions per page
 
   // Track window resize to update screen size state
   useEffect(() => {
@@ -22,6 +25,7 @@ const Question = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   // Create a ref for the form
   const formRef = useRef(null);
   useLayoutEffect(() => {
@@ -29,6 +33,7 @@ const Question = () => {
       formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [showForm]); // Trigger scroll when showForm changes to true
+
   useEffect(() => {
     fetchActiveQuestions();
     fetchInactiveQuestions();
@@ -115,6 +120,26 @@ const Question = () => {
     }
   };
 
+  // Pagination for active questions
+  const activeIndexOfLastQuestion = activeCurrentPage * feedbacksPerPage;
+  const activeIndexOfFirstQuestion = activeIndexOfLastQuestion - feedbacksPerPage;
+  const activeCurrentQuestions = activeQuestions.slice(activeIndexOfFirstQuestion, activeIndexOfLastQuestion);
+  const activeTotalPages = Math.ceil(activeQuestions.length / feedbacksPerPage);
+
+  // Pagination for inactive questions
+  const inactiveIndexOfLastQuestion = inactiveCurrentPage * feedbacksPerPage;
+  const inactiveIndexOfFirstQuestion = inactiveIndexOfLastQuestion - feedbacksPerPage;
+  const inactiveCurrentQuestions = inactiveQuestions.slice(inactiveIndexOfFirstQuestion, inactiveIndexOfLastQuestion);
+  const inactiveTotalPages = Math.ceil(inactiveQuestions.length / feedbacksPerPage);
+
+  const handleActivePageChange = (pageNumber) => {
+    setActiveCurrentPage(pageNumber);
+  };
+
+  const handleInactivePageChange = (pageNumber) => {
+    setInactiveCurrentPage(pageNumber);
+  };
+
   return (
     <div className="Home">
       <h2 className='responsive mb-3'>Active Questions</h2>
@@ -122,9 +147,8 @@ const Question = () => {
         <div className="table-container">
           {activeQuestions.length > 0 ? (
             screenSize < 768 ? (
-              // Mobile/Tablet view: Render a simple list or cards
               <div className="user-table">
-                {activeQuestions.map((question, index) => (
+                {activeCurrentQuestions.map((question, index) => (
                   <div key={index} className="question-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
                     <p><strong>Question ID:</strong> {question.questionID}</p>
                     <p><strong>Question Text:</strong> {question.questionText}</p>
@@ -141,7 +165,6 @@ const Question = () => {
                 ))}
               </div>
             ) : (
-              // Desktop view: Render a table
               <table className="user-table">
                 <thead>
                   <tr>
@@ -152,7 +175,7 @@ const Question = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {activeQuestions.map((question, index) => (
+                  {activeCurrentQuestions.map((question, index) => (
                     <tr key={index}>
                       <td>{question.questionID}</td>
                       <td>{question.questionText}</td>
@@ -178,15 +201,41 @@ const Question = () => {
         </div>
       }
 
+      <div className="pagination-container">
+        <button
+          className={`pagination-button ${activeCurrentPage === 1 ? 'disabled-button' : ''}`}
+          onClick={() => handleActivePageChange(activeCurrentPage - 1)}
+          disabled={activeCurrentPage === 1}
+        >
+          Previous
+        </button>
+        <div className="page-numbers">
+          {[...Array(activeTotalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              className={`pagination-button ${index + 1 === activeCurrentPage ? 'active-page' : ''}`}
+              onClick={() => handleActivePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+        <button
+          className={`pagination-button ${activeCurrentPage === activeTotalPages ? 'disabled-button' : ''}`}
+          onClick={() => handleActivePageChange(activeCurrentPage + 1)}
+          disabled={activeCurrentPage === activeTotalPages}
+        >
+          Next
+        </button>
+      </div>
 
-      <h2 className='responsive mb-3 mt-3'>Inactive Questions</h2>
+      <h2 className="responsive mb-3">Inactive Questions</h2>
       {
         <div className="table-container">
           {inactiveQuestions.length > 0 ? (
             screenSize < 768 ? (
-              // Mobile/Tablet view: Render a simple list or cards
               <div className="user-table">
-                {inactiveQuestions.map((question, index) => (
+                {inactiveCurrentQuestions.map((question, index) => (
                   <div key={index} className="question-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
                     <p><strong>Question ID:</strong> {question.questionID}</p>
                     <p><strong>Question Text:</strong> {question.questionText}</p>
@@ -203,7 +252,6 @@ const Question = () => {
                 ))}
               </div>
             ) : (
-              // Desktop view: Render a table
               <table className="user-table">
                 <thead>
                   <tr>
@@ -214,7 +262,7 @@ const Question = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {inactiveQuestions.map((question, index) => (
+                  {inactiveCurrentQuestions.map((question, index) => (
                     <tr key={index}>
                       <td>{question.questionID}</td>
                       <td>{question.questionText}</td>
@@ -235,11 +283,38 @@ const Question = () => {
               </table>
             )
           ) : (
-            <p>No inactive questions found.</p>
+            <p>No questions found.</p>
           )}
         </div>
       }
 
+      <div className="pagination-container">
+        <button
+          className={`pagination-button ${inactiveCurrentPage === 1 ? 'disabled-button' : ''}`}
+          onClick={() => handleInactivePageChange(inactiveCurrentPage - 1)}
+          disabled={inactiveCurrentPage === 1}
+        >
+          Previous
+        </button>
+        <div className="page-numbers">
+          {[...Array(inactiveTotalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              className={`pagination-button ${index + 1 === inactiveCurrentPage ? 'active-page' : ''}`}
+              onClick={() => handleInactivePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+        <button
+          className={`pagination-button ${inactiveCurrentPage === inactiveTotalPages ? 'disabled-button' : ''}`}
+          onClick={() => handleInactivePageChange(inactiveCurrentPage + 1)}
+          disabled={inactiveCurrentPage === inactiveTotalPages}
+        >
+          Next
+        </button>
+      </div>
       <button
         className="user_btn add w-52 mt-3"
         onClick={() => {
@@ -269,9 +344,6 @@ const Question = () => {
           </>
         )}
       </button>
-
-
-      {/* Form ref added here */}
       {showForm && (
         <form ref={formRef} onSubmit={handleSubmitQuestion} className="student-form">
           <label>Enter Question ID: </label>

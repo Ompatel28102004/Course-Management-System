@@ -7,6 +7,7 @@ import {
   DELETEEXAM_ROUTE,
 } from "../../../utils/constants";
 import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
+
 const Exam = () => {
   const [activeExams, setActiveExams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,8 @@ const Exam = () => {
   });
   const [editingExam, setEditingExam] = useState(null);
   const [screenSize, setScreenSize] = useState(window.innerWidth);
+  const [activeCurrentPage, setActiveCurrentPage] = useState(1);
+  const feedbacksPerPage = 5; // Number of exams per page
 
   useEffect(() => {
     const handleResize = () => setScreenSize(window.innerWidth);
@@ -42,6 +45,7 @@ const Exam = () => {
       setError(err.response?.data?.message || "An error occurred while fetching active exams.");
     }
   };
+
   const formatDateForInput = (date) => {
     const d = new Date(date);
     const year = d.getFullYear();
@@ -52,6 +56,7 @@ const Exam = () => {
 
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
+
   const handleSubmitExam = async (e) => {
     e.preventDefault();
     try {
@@ -110,6 +115,16 @@ const Exam = () => {
     }
   };
 
+  // Pagination for active exams
+  const indexOfLastExam = activeCurrentPage * feedbacksPerPage;
+  const indexOfFirstExam = indexOfLastExam - feedbacksPerPage;
+  const currentActiveExams = activeExams.slice(indexOfFirstExam, indexOfLastExam);
+  const totalActivePages = Math.ceil(activeExams.length / feedbacksPerPage);
+
+  const handleActivePageChange = (pageNumber) => {
+    setActiveCurrentPage(pageNumber);
+  };
+
   return (
     <div className="Home">
       <h2 className='responsive mb-4'>Upcoming Exams</h2>
@@ -117,7 +132,7 @@ const Exam = () => {
         {activeExams.length > 0 ? (
           screenSize < 768 ? (
             <div className="user-table">
-              {activeExams.map((exam, index) => (
+              {currentActiveExams.map((exam, index) => (
                 <div key={index} className="exam-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
                   <p><strong>Exam Name:</strong> {exam.ExamName}</p>
                   <p><strong>Degree:</strong> {exam.degree}</p>
@@ -126,13 +141,13 @@ const Exam = () => {
                   <p><strong>Start Date:</strong> {new Date(exam.ExamStartDate).toLocaleString()}</p>
                   <p><strong>End Date:</strong> {new Date(exam.ExamEndDate).toLocaleString()}</p>
                   <div className="action-buttons flex gap-10 justify-center align-middle">
-                      <button className="edit-btn" onClick={() => handleEditExam(exam)}>
-                        <MdEdit />
-                      </button>
-                      <button className="delete-btn" onClick={() => handleDelete(exam._id)}>
-                        <MdDelete />
-                      </button>
-                    </div>
+                    <button className="edit-btn" onClick={() => handleEditExam(exam)}>
+                      <MdEdit />
+                    </button>
+                    <button className="delete-btn" onClick={() => handleDelete(exam._id)}>
+                      <MdDelete />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -150,7 +165,7 @@ const Exam = () => {
                 </tr>
               </thead>
               <tbody>
-                {activeExams.map((exam, index) => (
+                {currentActiveExams.map((exam, index) => (
                   <tr key={index}>
                     <td>{exam.ExamName}</td>
                     <td>{exam.degree}</td>
@@ -159,15 +174,15 @@ const Exam = () => {
                     <td>{new Date(exam.ExamStartDate).toLocaleString()}</td>
                     <td>{new Date(exam.ExamEndDate).toLocaleString()}</td>
                     <td className="actions">
-                        <div className="action-buttons">
-                          <button className="edit-btn" onClick={() => handleEditExam(exam)}>
-                            <MdEdit />
-                          </button>
-                          <button className="delete-btn" onClick={() => handleDelete(exam._id)}>
-                            <MdDelete />
-                          </button>
-                        </div>
-                      </td>
+                      <div className="action-buttons">
+                        <button className="edit-btn" onClick={() => handleEditExam(exam)}>
+                          <MdEdit />
+                        </button>
+                        <button className="delete-btn" onClick={() => handleDelete(exam._id)}>
+                          <MdDelete />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -176,36 +191,62 @@ const Exam = () => {
         ) : (
           <p>No exams found.</p>
         )}
+        <div className="pagination-container">
+          <button
+            className={`pagination-button ${activeCurrentPage === 1 ? 'disabled-button' : ''}`}
+            onClick={() => handleActivePageChange(activeCurrentPage - 1)}
+            disabled={activeCurrentPage === 1}
+          >
+            Previous
+          </button>
+          <div className="page-numbers">
+            {[...Array(totalActivePages)].map((_, index) => (
+              <button
+                key={index + 1}
+                className={`pagination-button ${index + 1 === activeCurrentPage ? 'active-page' : ''}`}
+                onClick={() => handleActivePageChange(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+          <button
+            className={`pagination-button ${activeCurrentPage === totalActivePages ? 'disabled-button' : ''}`}
+            onClick={() => handleActivePageChange(activeCurrentPage + 1)}
+            disabled={activeCurrentPage === totalActivePages}
+          >
+            Next
+          </button>
+        </div>
       </div>
       <button
-  className="user_btn add w-52 mt-4"
-  onClick={() => {
-    if (showForm) {
-      // If hiding the form, scroll to the top
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      resetForm();
-    } else {
-      // If showing the form, scroll to it
-      setShowForm(true);
-      setTimeout(() => {
-        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 0);
-    }
-  }}
->
-  {showForm ? (
-    <>
-      <MdCancel className="icon" />
-      <span>Cancel</span>
-    </>
-  ) : (
-    <>
-      <MdAddCircle className="icon" />
-      <span>Add Exam</span>
-    </>
-  )}
-</button>
-
+        className="user_btn add w-52 mt-4"
+        onClick={() => {
+          if (showForm) {
+            // If hiding the form, scroll to the top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            resetForm();
+          } else {
+            // If showing the form, scroll to it
+            setShowForm(true);
+            setTimeout(() => {
+              formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 0);
+          }
+        }}
+      >
+        {showForm ? (
+          <>
+            <MdCancel className="icon" />
+            <span>Cancel</span>
+          </>
+        ) : (
+          <>
+            <MdAddCircle className="icon" />
+            <span>Add Exam</span>
+          </>
+        )}
+      </button>
 
       {showForm && (
         <form ref={formRef} onSubmit={handleSubmitExam} className="student-form">

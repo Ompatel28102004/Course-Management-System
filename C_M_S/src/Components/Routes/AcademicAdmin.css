@@ -1,8 +1,62 @@
 :root {
   --primary-color: white;
   --hover-color: #B21FDC;
-  --sidebar-secondary-color: #fcfafa;
+  --chart-bg-color: #fcfafa;
+  --pagination-color: #f1eded;
 }
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px;
+  margin-top: 12px;
+}
+
+.pagination-button {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: var(--pagination-color);
+  color: black;
+  cursor: pointer;
+}
+
+/* .pagination-button:hover {
+  background-color: #f3f4f6;
+} */
+
+.disabled-button {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 8px;
+}
+
+.page-number {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: var(--pagination-color);
+  color: black;
+  cursor: pointer;
+}
+
+/* .page-number:hover {
+  background-color: #d1acda;
+} */
+
+.active-page {
+  background-color: var(--hover-color);
+  color: white;
+  border-color: var(--hover-color);
+}
+
 
 /* Styling for the notification message */
 .no-notification-message {
@@ -94,7 +148,7 @@
   align-items: center;
   border: 2px solid #eaeaea;
   border-radius: 20px;
-  background-color: var(--sidebar-secondary-color);
+  background-color: var(--chart-bg-color);
 }
 
 .responsive {

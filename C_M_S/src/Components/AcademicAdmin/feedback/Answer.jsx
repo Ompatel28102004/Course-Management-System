@@ -14,7 +14,9 @@ const Answer = () => {
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [responses, setResponses] = useState([]);
   const [screenSize, setScreenSize] = useState(window.innerWidth);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const feedbacksPerPage = 5; // Set number of feedbacks per page
+
   // Reference for the responses section
   const responsesRef = useRef(null);
 
@@ -32,11 +34,7 @@ const Answer = () => {
     setLoading(true);
     try {
       const response = await apiClient.get(GETINACTIVEFEEDBACK_ROUTE, { withCredentials: true });
-      const sortedFeedback = response.data.feedbacks.sort((a, b) => {
-        if (a.feedbackID < b.feedbackID) return -1;
-        if (a.feedbackID > b.feedbackID) return 1;
-        return 0;
-      });
+      const sortedFeedback = response.data.feedbacks.sort((a, b) => a.feedbackID.localeCompare(b.feedbackID));
       setFeedbacks(sortedFeedback);
       setFilteredFeedbacks(sortedFeedback);
     } catch (err) {
@@ -49,15 +47,10 @@ const Answer = () => {
   const fetchResponses = async (feedbackID) => {
     try {
       const response = await apiClient.get(GET_RESPONSES_ROUTE(feedbackID), { withCredentials: true });
-      const parsedResponses = (response.data.responses || []).map((resp) => {
-        if (typeof resp === "string") {
-          return JSON.parse(resp);
-        }
-        return resp;
-      });
+      const parsedResponses = (response.data.responses || []).map((resp) => (typeof resp === "string" ? JSON.parse(resp) : resp));
       setResponses(parsedResponses);
       setTimeout(() => {
-        responsesRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        responsesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 0);
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while fetching responses.");
@@ -81,11 +74,21 @@ const Answer = () => {
       feedback.branch.toLowerCase().includes(query)
     );
     setFilteredFeedbacks(filtered);
+    setCurrentPage(1); // Reset to first page after search
+  };
+
+  const indexOfLastFeedback = currentPage * feedbacksPerPage;
+  const indexOfFirstFeedback = indexOfLastFeedback - feedbacksPerPage;
+  const currentFeedbacks = filteredFeedbacks.slice(indexOfFirstFeedback, indexOfLastFeedback);
+  const totalPages = Math.ceil(filteredFeedbacks.length / feedbacksPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
     <div className="Home">
-      <h2 className='responsive'>Responsed Feedback</h2>
+      <h2 className="responsive">Responsed Feedback</h2>
       <div className="search_add">
         <input
           type="text"
@@ -104,7 +107,7 @@ const Answer = () => {
           {filteredFeedbacks.length > 0 ? (
             screenSize < 768 ? (
               <div className="user-table">
-                {filteredFeedbacks.map((feedback, index) => (
+                {currentFeedbacks.map((feedback, index) => (
                   <div key={index} className="feedback-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
                     <p><strong>Feedback ID:</strong> {feedback.feedbackID}</p>
                     <p><strong>Name:</strong> {feedback.feedbackName}</p>
@@ -128,7 +131,7 @@ const Answer = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredFeedbacks.map((feedback, index) => (
+                  {currentFeedbacks.map((feedback, index) => (
                     <tr key={index}>
                       <td>{feedback.feedbackID}</td>
                       <td>{feedback.feedbackName}</td>
@@ -149,57 +152,84 @@ const Answer = () => {
       )}
 
       {selectedFeedback && (
-        <div  className="responses"> {/* Reference added here */}
-          <h3 className='responsive'>Responses for Feedback ID: {selectedFeedback}</h3>
-          {Array.isArray(responses) && responses.length === 0 ? (
+        <div className="responses" ref={responsesRef}>
+          <h3 className="responsive">Responses for Feedback ID: {selectedFeedback}</h3>
+          {responses.length === 0 ? (
             <p>No responses available.</p>
           ) : (
-            <div className="table-container" ref={responsesRef}>
-              {Array.isArray(responses) && responses.length > 0 ? (
-                screenSize < 768 ? (
-                  <div className="response-cards">
-                    {responses.map((response, index) => (
-                      <div key={index} className="response-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
-                        <p><strong>Response #:</strong> {index + 1}</p>
-                        {Array.isArray(response.answers) && response.answers.map((answer, idx) => (
-                          <div key={idx}>
-                            <strong>QID: {answer.questionID}</strong> - {answer.response}
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <table className="user-table" ref={responsesRef}>
-                    <thead>
-                      <tr>
-                        <th>Response #</th>
-                        <th>Answers</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {responses.map((response, index) => (
-                        <tr key={index}>
-                          <td>{index + 1}</td>
-                          <td>
-                            {Array.isArray(response.answers) && response.answers.map((answer, idx) => (
-                              <div key={idx}>
-                                <strong>QID: {answer.questionID}</strong> - {answer.response}
-                              </div>
-                            ))}
-                          </td>
-                        </tr>
+            <div className="table-container">
+              {screenSize < 768 ? (
+                <div className="response-cards">
+                  {responses.map((response, index) => (
+                    <div key={index} className="response-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
+                      <p><strong>Response #:</strong> {index + 1}</p>
+                      {response.answers && response.answers.map((answer, idx) => (
+                        <div key={idx}>
+                          <strong>QID: {answer.questionID}</strong> - {answer.response}
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-                )
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <p>No responses found.</p>
+                <table className="user-table">
+                  <thead>
+                    <tr>
+                      <th>Response #</th>
+                      <th>Answers</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {responses.map((response, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {response.answers && response.answers.map((answer, idx) => (
+                            <div key={idx}>
+                              <strong>QID: {answer.questionID}</strong> - {answer.response}
+                            </div>
+                          ))}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           )}
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <div className="pagination-container">
+        <button
+          className={`pagination-button ${currentPage === 1 ? 'disabled-button' : ''}`}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+
+        <div className="page-numbers">
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              className={`pagination-button ${index + 1 === currentPage ? 'active-page' : ''}`}
+              onClick={() => handlePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+
+        <button
+          className={`pagination-button ${currentPage === totalPages ? 'disabled-button' : ''}`}
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

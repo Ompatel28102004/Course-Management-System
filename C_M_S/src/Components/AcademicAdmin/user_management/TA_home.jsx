@@ -7,19 +7,21 @@ import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
 
 const TA_home = () => {
   const navigate = useNavigate();
-  const [tas, setTAs] = useState([]); // Original TA list
-  const [filteredTAs, setFilteredTAs] = useState([]); // Filtered TA list
+  const [tas, setTAs] = useState([]);
+  const [filteredTAs, setFilteredTAs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [screenSize, setScreenSize] = useState(window.innerWidth); // Track screen size
+  const [screenSize, setScreenSize] = useState(window.innerWidth);
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 5;
 
-  // Track window resize to update screen size state
   useEffect(() => {
     const handleResize = () => setScreenSize(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   useEffect(() => {
     fetchTAs(); // Fetch TAs on mount
   }, []);
@@ -66,21 +68,19 @@ const TA_home = () => {
     }
   };
 
-  // Client-side search function
   const handleSearchInput = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    // Filter TAs based on the search query across multiple fields
     const filtered = tas.filter(ta =>
-      ta.enrollment.toString().toLowerCase().includes(query) ||
-      ta.facultyId.toString().toLowerCase().includes(query) ||
-      ta.teachingSemester.toString().toLowerCase().includes(query) ||
+      ta.enrollment.toLowerCase().includes(query) ||
+      ta.facultyId.toLowerCase().includes(query) ||
+      ta.teachingSemester.toLowerCase().includes(query) ||
       ta.teachingCourses.toLowerCase().includes(query) ||
       ta.studentName.toLowerCase().includes(query) ||
       ta.studentEmail.toLowerCase().includes(query) ||
-      ta.contactNumber.toString().includes(query) || // Ensure contact number is converted to string
-      ta.semester.toString().includes(query) // Convert semester to string for search
+      ta.contactNumber.toString().includes(query) ||
+      ta.semester.toString().includes(query)
     );
     setFilteredTAs(filtered);
   };
@@ -88,6 +88,16 @@ const TA_home = () => {
   const handleEditClick = (enrollment) => {
     navigate(`/academic-admin/user_management/ta_form/${enrollment}`);
   };
+
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = filteredTAs.slice(indexOfFirstStudent, indexOfLastStudent);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const totalPages = Math.ceil(filteredTAs.length / studentsPerPage);
 
   return (
     <div className="Home">
@@ -98,7 +108,7 @@ const TA_home = () => {
           placeholder="Search TAs"
           className="search_input"
           value={searchQuery}
-          onChange={handleSearchInput} // Update search input and filter list
+          onChange={handleSearchInput}
         />
         <button className="user_btn add" onClick={() => navigate('/academic-admin/user_management/ta_form')}><MdAddCircle className="icon" /> Add TA</button>
       </div>
@@ -110,9 +120,8 @@ const TA_home = () => {
         <div className="table-container">
           {filteredTAs.length > 0 ? (
             screenSize < 768 ? (
-              // Mobile/Tablet view: Render a simple list or cards
               <div className="user-table">
-                {filteredTAs.map((ta, index) => (
+                {currentStudents.map((ta, index) => (
                   <div key={index} className="ta-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
                     <p><strong>Enrollment No:</strong> {ta.enrollment}</p>
                     <p><strong>Name:</strong> {ta.studentName}</p>
@@ -134,7 +143,6 @@ const TA_home = () => {
                 ))}
               </div>
             ) : (
-              // Desktop view: Render a table
               <table className="user-table">
                 <thead>
                   <tr>
@@ -150,7 +158,7 @@ const TA_home = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTAs.map((ta, index) => (
+                  {currentStudents.map((ta, index) => (
                     <tr key={index}>
                       <td>{ta.enrollment}</td>
                       <td>{ta.studentName}</td>
@@ -180,7 +188,33 @@ const TA_home = () => {
           )}
         </div>
       )}
-
+      <div className="pagination-container">
+        <button
+          className={`pagination-button ${currentPage === 1 ? 'disabled-button' : ''}`}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <div className="page-numbers">
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index}
+              className={`page-number ${index + 1 === currentPage ? 'active-page' : ''}`}
+              onClick={() => handlePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+        <button
+          className={`pagination-button ${currentPage === totalPages ? 'disabled-button' : ''}`}
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

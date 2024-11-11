@@ -3,18 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { GETSTUDENTS_ROUTE, DELETESTUDENT_ROUTE, SEARCHSTUDENTS_ROUTE } from "../../../utils/constants";
 import LoadingAnimation from "../../Loading/LoadingAnimation";
-import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
+import { MdEdit, MdDelete, MdAddCircle } from "react-icons/md";
 
 const StudentHome = () => {
   const navigate = useNavigate();
-  const [students, setStudents] = useState([]); // Original student list
-  const [filteredStudents, setFilteredStudents] = useState([]); // Filtered list
+  const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [screenSize, setScreenSize] = useState(window.innerWidth); // Track screen size
+  const [screenSize, setScreenSize] = useState(window.innerWidth);
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 5;
 
-  // Track window resize to update screen size state
   useEffect(() => {
     const handleResize = () => setScreenSize(window.innerWidth);
     window.addEventListener("resize", handleResize);
@@ -22,20 +23,20 @@ const StudentHome = () => {
   }, []);
 
   useEffect(() => {
-    fetchStudents(); // Fetch students on mount
+    fetchStudents();
   }, []);
 
   const handleEditClick = (enrollment) => {
     navigate(`/academic-admin/user_management/student_form/${enrollment}`);
   };
+
   const fetchStudents = async () => {
     setLoading(true);
     try {
       const response = await apiClient.get(GETSTUDENTS_ROUTE, { withCredentials: true });
-  
       const sortedStudents = response.data.students.sort((a, b) => a.enrollmentNo - b.enrollmentNo);
       setStudents(sortedStudents);
-      setFilteredStudents(sortedStudents); // Set initial filtered list
+      setFilteredStudents(sortedStudents);
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while fetching students.");
     } finally {
@@ -43,40 +44,45 @@ const StudentHome = () => {
     }
   };
 
-  // Delete student function
   const handleDelete = async (enrollmentNo) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
       try {
         await apiClient.delete(DELETESTUDENT_ROUTE(enrollmentNo), { withCredentials: true });
         const updatedStudents = students.filter(student => student.enrollmentNo !== enrollmentNo);
-        setStudents(updatedStudents); // Update original state
-        setFilteredStudents(updatedStudents); // Update filtered state as well
+        setStudents(updatedStudents);
+        setFilteredStudents(updatedStudents);
       } catch (err) {
         setError(err.response?.data?.message || "An error occurred while deleting the student.");
       }
     }
   };
 
-  // Client-side search function
   const handleSearchInput = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-
-    // Filter students based on the search query across multiple fields
-    const filtered = students.filter(student => 
-      student.enrollmentNo.toString().toLowerCase().includes(query) || // Convert enrollmentNo to string
+    const filtered = students.filter(student =>
+      student.enrollmentNo.toString().toLowerCase().includes(query) ||
       student.name.toLowerCase().includes(query) ||
       student.CollegeEmail.toLowerCase().includes(query) ||
       student.degree.toLowerCase().includes(query) ||
       student.branch.toLowerCase().includes(query) ||
-      student.semester.toString().includes(query) || // Convert semester to string
-      student.contactNumber.toString().includes(query) // Convert contactNumber to string
+      student.semester.toString().includes(query) ||
+      student.contactNumber.toString().includes(query)
     );
-
     setFilteredStudents(filtered);
+    setCurrentPage(1);
   };
 
-  // Render a mobile/tablet view or desktop view based on screen size
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+
   return (
     <div className="Home">
       <h2 className='responsive'>Student Management</h2>
@@ -86,25 +92,24 @@ const StudentHome = () => {
           placeholder="Search students"
           className="search_input"
           value={searchQuery}
-          onChange={handleSearchInput} // Update search input and filter list
+          onChange={handleSearchInput}
         />
-        <button className="user_btn add" onClick={() => navigate('/academic-admin/user_management/student_form')}><MdAddCircle className='icon'/> Add Student</button>
+        <button className="user_btn add" onClick={() => navigate('/academic-admin/user_management/student_form')}>
+          <MdAddCircle className='icon' /> Add Student
+        </button>
       </div>
 
       {loading ? (
-        <>
         <LoadingAnimation />
-        </>
       ) : error ? (
         <p>{error}</p>
       ) : (
         <div className="table-container">
-          {filteredStudents.length > 0 ? (
+          {currentStudents.length > 0 ? (
             screenSize < 768 ? (
-              // Mobile/Tablet view: Render a simple list or cards
               <div className="user-table">
-                {filteredStudents.map((student, index) => (
-                  <div key={index} className="student-card" style={{border:"2px solid black", marginTop:"10px", padding:"10px"}}>
+                {currentStudents.map((student, index) => (
+                  <div key={index} className="student-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
                     <p><strong>Enrollment No:</strong> {student.enrollmentNo}</p>
                     <p><strong>Name:</strong> {student.name}</p>
                     <p><strong>Email:</strong> {student.CollegeEmail}</p>
@@ -124,7 +129,6 @@ const StudentHome = () => {
                 ))}
               </div>
             ) : (
-              // Desktop view: Render a table
               <table className="user-table">
                 <thead>
                   <tr>
@@ -139,7 +143,7 @@ const StudentHome = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredStudents.map((student, index) => (
+                  {currentStudents.map((student, index) => (
                     <tr key={index}>
                       <td>{student.enrollmentNo}</td>
                       <td>{student.name}</td>
@@ -166,6 +170,44 @@ const StudentHome = () => {
           ) : (
             <p>No students found.</p>
           )}
+
+          {/* Pagination Controls */}
+          <div className="pagination-container">
+            {/* Previous Button */}
+            <button
+              className={`pagination-button ${currentPage === 1 ? 'disabled-button' : ''}`}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers (Centered) */}
+            <div className="page-numbers">
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index}
+                  className={`page-number ${index + 1 === currentPage ? 'active-page' : ''}`}
+                  onClick={() => handlePageChange(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+
+            {/* Next Button */}
+            <button
+              className={`pagination-button ${currentPage === totalPages ? 'disabled-button' : ''}`}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+
+
+
+
         </div>
       )}
     </div>

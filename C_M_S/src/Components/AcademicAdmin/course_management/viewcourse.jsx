@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
 import { GETCOURSES_ROUTE, DELETECOURSE_ROUTE } from "../../../utils/constants";
-import { color } from 'framer-motion';
 import LoadingAnimation from "../../Loading/LoadingAnimation";
-import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
+import { MdEdit, MdDelete, MdAddCircle } from "react-icons/md";
 import { FaFileDownload } from "react-icons/fa";
+
 const ViewCourse = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]); // Original course list
@@ -14,6 +14,8 @@ const ViewCourse = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [screenSize, setScreenSize] = useState(window.innerWidth); // Track screen size
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 5;
 
   // Track window resize to update screen size state
   useEffect(() => {
@@ -21,6 +23,7 @@ const ViewCourse = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   useEffect(() => {
     fetchCourses(); // Fetch courses on mount
   }, []);
@@ -35,11 +38,7 @@ const ViewCourse = () => {
       const response = await apiClient.get(GETCOURSES_ROUTE, { withCredentials: true });
   
       // Sort courses by courseID lexicographically (alphanumeric sorting)
-      const sortedCourses = response.data.courses.sort((a, b) => {
-        if (a.courseID < b.courseID) return -1;
-        if (a.courseID > b.courseID) return 1;
-        return 0;
-      });
+      const sortedCourses = response.data.courses.sort((a, b) => a.courseID.localeCompare(b.courseID));
   
       setCourses(sortedCourses); // Set original course list
       setFilteredCourses(sortedCourses); // Initialize filtered list with full course list
@@ -50,7 +49,6 @@ const ViewCourse = () => {
     }
   };
   
-
   // Delete course function
   const handleDelete = async (courseID) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
@@ -84,7 +82,6 @@ const ViewCourse = () => {
     setFilteredCourses(filtered); // Update filtered course list
   };
 
-
   // Function to download the file
   const handleDownload = async (courseID, fileUrl) => {
     try {
@@ -105,6 +102,14 @@ const ViewCourse = () => {
     }
   };
 
+  const indexOfLastCourse = currentPage * coursesPerPage;
+  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+  const currentCourses = filteredCourses.slice(indexOfFirstCourse, indexOfLastCourse);
+  const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <div className="Home">
@@ -129,7 +134,7 @@ const ViewCourse = () => {
             screenSize < 768 ? (
               // Mobile/Tablet view: Render a simple list or cards
               <div className="user-table">
-                {filteredCourses.map((course, index) => (
+                {currentCourses.map((course, index) => (
                   <div key={index} className="course-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
                     <p><strong>Course ID:</strong> {course.courseID}</p>
                     <p><strong>Name:</strong> {course.courseName}</p>
@@ -178,7 +183,7 @@ const ViewCourse = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCourses.map((course, index) => (
+                  {currentCourses.map((course, index) => (
                     <tr key={index}>
                       <td>{course.courseID}</td>
                       <td>{course.courseName}</td>
@@ -218,6 +223,39 @@ const ViewCourse = () => {
         </div>
       )}
 
+          {/* Pagination Controls */}
+          <div className="pagination-container">
+            {/* Previous Button */}
+            <button
+              className={`pagination-button ${currentPage === 1 ? 'disabled-button' : ''}`}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers (Centered) */}
+            <div className="page-numbers">
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index}
+                  className={`page-number ${index + 1 === currentPage ? 'active-page' : ''}`}
+                  onClick={() => handlePageChange(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+
+            {/* Next Button */}
+            <button
+              className={`pagination-button ${currentPage === totalPages ? 'disabled-button' : ''}`}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
     </div>
   );
 };

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
-import { GETINACTIVEFEEDBACK_ROUTE, DELETEFEEDBACK_ROUTE, SEARCHFEEDBACK_ROUTE } from "../../../utils/constants"; // Ensure these routes exist
+import { GETINACTIVEFEEDBACK_ROUTE, DELETEFEEDBACK_ROUTE } from "../../../utils/constants"; // Ensure these routes exist
 import LoadingAnimation from "../../Loading/LoadingAnimation";
-import { MdEdit, MdDelete, MdAddCircle, MdCancel } from "react-icons/md";
+import { MdEdit, MdDelete } from "react-icons/md";
 
 const Completed = () => {
   const navigate = useNavigate();
@@ -13,6 +13,8 @@ const Completed = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [screenSize, setScreenSize] = useState(window.innerWidth); // Track screen size
+  const [currentPage, setCurrentPage] = useState(1);
+  const feedbacksPerPage = 5; // Set number of feedbacks per page
 
   // Track window resize to update screen size state
   useEffect(() => {
@@ -20,6 +22,7 @@ const Completed = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   useEffect(() => {
     fetchFeedbacks(); // Fetch feedbacks on mount
   }, []);
@@ -69,15 +72,25 @@ const Completed = () => {
       feedback.branch.toLowerCase().includes(query) ||
       feedback.facultyName.toLowerCase().includes(query) ||
       feedback.courseName.toLowerCase().includes(query) ||
-      new Date(feedback.startDateTime).toLocaleDateString('en-US').includes(query) || // Search in formatted date
-      new Date(feedback.endDateTime).toLocaleDateString('en-US').includes(query)     // Search in formatted date
+      new Date(feedback.startDateTime).toLocaleDateString('en-US').includes(query) ||
+      new Date(feedback.endDateTime).toLocaleDateString('en-US').includes(query)
     );
 
     setFilteredFeedbacks(filtered); // Update filtered feedback list
+    setCurrentPage(1); // Reset to first page after search
   };
 
   const handleEditClick = (feedbackID) => {
     navigate(`/academic-admin/feedback/add/${feedbackID}`); // Adjust the route accordingly
+  };
+
+  const indexOfLastFeedback = currentPage * feedbacksPerPage;
+  const indexOfFirstFeedback = indexOfLastFeedback - feedbacksPerPage;
+  const currentFeedbacks = filteredFeedbacks.slice(indexOfFirstFeedback, indexOfLastFeedback);
+  const totalPages = Math.ceil(filteredFeedbacks.length / feedbacksPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -89,7 +102,7 @@ const Completed = () => {
           placeholder="Search Feedback"
           className="search_input"
           value={searchQuery}
-          onChange={handleSearchInput} // Update search input and filter list
+          onChange={handleSearchInput}
         />
       </div>
 
@@ -101,9 +114,8 @@ const Completed = () => {
         <div className="table-container">
           {filteredFeedbacks.length > 0 ? (
             screenSize < 768 ? (
-              // Mobile/Tablet view: Render a simple list or cards
               <div className="user-table">
-                {filteredFeedbacks.map((feedback, index) => (
+                {currentFeedbacks.map((feedback, index) => (
                   <div key={index} className="feedback-card" style={{ border: "2px solid black", marginTop: "10px", padding: "10px" }}>
                     <p><strong>Feedback ID:</strong> {feedback.feedbackID}</p>
                     <p><strong>Name:</strong> {feedback.feedbackName}</p>
@@ -131,7 +143,6 @@ const Completed = () => {
                 ))}
               </div>
             ) : (
-              // Desktop view: Render a table
               <table className="user-table">
                 <thead>
                   <tr>
@@ -147,7 +158,7 @@ const Completed = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredFeedbacks.map((feedback, index) => (
+                  {currentFeedbacks.map((feedback, index) => (
                     <tr key={index}>
                       <td>{feedback.feedbackID}</td>
                       <td>{feedback.feedbackName}</td>
@@ -177,7 +188,6 @@ const Completed = () => {
                   ))}
                 </tbody>
               </table>
-
             )
           ) : (
             <p>No feedbacks found.</p>
@@ -185,6 +195,36 @@ const Completed = () => {
         </div>
       )}
 
+      {/* Pagination Controls */}
+      <div className="pagination-container">
+        <button
+          className={`pagination-button ${currentPage === 1 ? 'disabled-button' : ''}`}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+
+        <div className="page-numbers">
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              className={`pagination-button ${index + 1 === currentPage ? 'active-page' : ''}`}
+              onClick={() => handlePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+
+        <button
+          className={`pagination-button ${currentPage === totalPages ? 'disabled-button' : ''}`}
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
