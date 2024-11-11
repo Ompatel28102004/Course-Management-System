@@ -11,7 +11,7 @@ import cron from 'node-cron';
 import Feedback from './model/feedbackModel.js';
 import TAModel from './model/TaModel.js';
 import Student from './model/StudentModel.js';
-import Exam from './model/ExamModel.js';
+import Exam from './model/ExamDetailsModel.js';
 
 dotenv.config();
 

@@ -9,6 +9,6 @@ const questionSchema = new mongoose.Schema({
 });
 
 // Create and export the Mongoose model
-const Question = mongoose.model('Question', questionSchema);
+const Question = mongoose.model('FeedbackQuestion', questionSchema);
 
 export default Question;

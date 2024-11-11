@@ -3,10 +3,11 @@ import User from '../model/UserModel.js';
 import Faculty from '../model/facultyModel.js';
 import Course from '../model/CourseModel.js';
 import Feedback from '../model/feedbackModel.js';
-import Question from '../model/questionModel.js';
+import Question from '../model/FeedbackQuestionModel.js';
 import TAModel from '../model/TaModel.js';
 import Fees from '../model/FeesModel.js';
-import Exam from '../model/ExamModel.js';
+import Exam from '../model/ExamDetailsModel.js';
+import Attendance from '../model/AttendanceModel.js';
 import { hash } from 'bcrypt';
 import twilio from 'twilio'; // Import Twilio
 
@@ -1129,7 +1130,12 @@ export const addCourse = async (req, res) => {
       pdfUrl:courseFile, // Include PDF URL if provided
       courseInstructorName: `${faculty.FirstName} ${faculty.LastName}`, // Faculty name from Faculty model
     });
-
+    // Create new course record with additional details
+    const newAttendance = await Attendance.create({
+      courseRefID:newCourse._id,
+      enrolledStudents:[],
+      dates:[],
+    });
     // Return success response with complete course details
     return res.status(201).json({
       course: {
@@ -1184,8 +1190,9 @@ export const deleteCourse = async (req, res) => {
   try {
     const { courseID } = req.params;
     // Delete the course record
-    const course = await Course.findOneAndDelete({ courseID });
 
+    const course = await Course.findOneAndDelete({ courseID });
+    const attendance = await Attendance.findOneAndDelete({courseRefID:course._id})
     if (!course) {
       return res.status(404).json({ message: 'Course not found.' });
     }
