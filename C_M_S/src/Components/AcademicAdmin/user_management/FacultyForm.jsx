@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from "../../../lib/api-client";
-import { ADDFACULTY_ROUTE, EDITFACULTY_ROUTE, SEARCHFACULTYS_ROUTE, HOST} from "../../../utils/constants";
+import { ADDFACULTY_ROUTE, EDITFACULTY_ROUTE, SEARCHFACULTYS_ROUTE, HOST } from "../../../utils/constants";
 import LoadingAnimation from "../../Loading/LoadingAnimation";
 
 const FacultyForm = () => {
@@ -126,47 +126,47 @@ const FacultyForm = () => {
     e.preventDefault();
     setToastMessage('');
     setShowToast(false);
-  
+
     if (!e.target.checkValidity()) {
       setToastMessage('Please fill out all required fields.');
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
       return;
     }
-  
+
     try {
       let imageUrl = ''; // Initialize imageUrl for uploaded image
-  
+
       // Upload image file if it exists
       if (faculty.image_url) { // Assuming 'image_url' is the field for the image in faculty data
         setUploading(true);
-        
+
         const formData = new FormData();
         formData.append('file', faculty.image_url); // Append image file to form data
-  
+
         const uploadResponse = await apiClient.post(`${HOST}/api/file/upload-image`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
           withCredentials: true,
         });
         imageUrl = uploadResponse.data.data.file_url; // Get file URL from response
       }
-  
+
       // Create faculty data object with updated `imageUrl`
       const facultyData = {
         ...faculty,
         image_url: imageUrl, // Update `image_url` with `imageUrl` directly here
       };
-  
+
       const url = facultyId ? EDITFACULTY_ROUTE(facultyId) : ADDFACULTY_ROUTE;
       const method = facultyId ? 'put' : 'post';
-      
+
       const response = await apiClient[method](url, facultyData, { withCredentials: true });
-  
+
       if (response.status === 200 || response.status === 201) {
         setToastMessage(response.data.message || 'Success!');
         setShowToast(true);
         if (!facultyId) resetForm();
-  
+
         // Navigate back on success
         setTimeout(() => {
           setShowToast(false);
@@ -183,7 +183,7 @@ const FacultyForm = () => {
       setUploading(false); // Ensure uploading state is reset
     }
   };
-  
+
 
   if (uploading) {
     return <LoadingAnimation />;
@@ -257,9 +257,14 @@ const FacultyForm = () => {
           required
         >
           <option value="">Select department</option>
-          <option value="Electrical & Computer department">Electrical & Computer Engineering</option>
+          <option value="Computer department">Computer department</option>
           <option value="Mechanical department">Mechanical department</option>
+          <option value="Electrical department">Electrical department</option>
           <option value="Civil department">Civil department</option>
+          <option value="Physics department">Physics department</option>
+          <option value="Maths department">Maths department</option>
+          <option value="Chemistry department">Chemistry department</option>
+          <option value="Humanities and Social Sciences department">Humanities and Social Sciences department</option>
         </select>
         <label>Aadhar Number:</label>
         <input

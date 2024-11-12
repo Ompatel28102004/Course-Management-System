@@ -1,5 +1,5 @@
 :root {
-  --primary-color: white;
+  --primary-color: #f7f9fa;
   --hover-color: #B21FDC;
   --chart-bg-color: #fcfafa;
   --pagination-color: #f1eded;
@@ -76,7 +76,7 @@
   margin-top: 10vh;
   margin-left: 15px;
   display: flex;
-  width: 80vw;
+  width: 75vw;
   align-items: center;
   gap: 20px;
   border: 1px solid #ddd;
@@ -110,7 +110,7 @@
   border-radius: 10px;
   padding: 10px;
   margin: 10px auto;
-  max-width: 90%;
+  /* max-width: 90%; */
   background-color: #f9f9f9;
 }
 
@@ -137,7 +137,7 @@
 .graph {
   display: flex;
   gap: 20px;
-  margin-top: 15vh;
+  margin-top: 10vh;
 }
 
 .chart-card {

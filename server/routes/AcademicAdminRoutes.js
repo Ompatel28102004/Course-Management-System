@@ -6,7 +6,7 @@ import {
     addFaculty, getAllFaculty, 
     deleteFaculty, searchFaculty, editFaculty, 
     createFeedback, getActiveFeedback, getInactiveFeedback, deleteFeedback, searchFeedback, editFeedback, getFeedbackResponses, 
-    Overview, UserDetails, 
+    Overview, UserDetails, Report,
     createQuestion, getActiveQuestions, getInactiveQuestions, editQuestion, deleteQuestion,
     addTA, getAllTAs, deleteTA, searchTAs, editTA,createExam,getExam,editExam,deleteExam
 } from '../controller/AcademicAdminController.js';
@@ -14,11 +14,12 @@ import {
 import { verifyToken } from '../middlewares/AuthMiddleware.js';
 
 const AcademicAdminRoutes = Router();
-
+// Optionally, route to get all students
+AcademicAdminRoutes.get('/report',verifyToken, Report);
 // Route to add a new student
 AcademicAdminRoutes.post('/addstudent',verifyToken, addStudent);
 
-// Optionally, route to get all students
+//route to get all students
 AcademicAdminRoutes.get('/getstudent',verifyToken, getAllStudents);
 
 // Route to delete a student

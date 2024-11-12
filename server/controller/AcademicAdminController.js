@@ -17,6 +17,84 @@ const auth_token = "f28213b4ad4f47ca83499349a49e732d";
 
 const twilioClient = twilio(sid, auth_token);
 
+export const Report = async (req, res) => {
+  try {
+    const { role, ...data } = req.query; // Destructure role and remaining query data
+    let reportData;
+
+    const filters = {};  // Initialize an empty object for query filters
+
+    switch (role) {
+      case 'student':
+        // Apply filters for student role based on query parameters
+        if (data) {
+          if (data.branch) filters["Academic_info.Branch"] = data.branch;
+          if (data.semester) filters["Academic_info.Semester"] = data.semester;
+          if (data.degree) filters["Academic_info.Degree"] = data.degree;
+        }
+        reportData = await Student.find(filters); // Apply filters
+        break;
+
+      case 'faculty':
+        // Apply filters for faculty role based on query parameters
+        if (data) {
+          if (data.department) filters["department"] = data.department;
+        }
+        reportData = await Faculty.find(filters); // Apply filters
+        break;
+
+      case 'ta':
+        // Apply filters for TA role based on query parameters
+        if (data) {
+          if (data.teachingSem) filters["teachingSemester"] = data.teachingSem;
+          if (data.facultyId) filters["facultyId"] = data.facultyId;
+        }
+        reportData = await TAModel.find(filters); // Apply filters
+        break;
+
+      case 'course':
+        // Apply filters for course role based on query parameters
+        if (data) {
+          if (data.branch) filters["branch"] = data.branch;
+          if (data.semester) filters["semester"] = data.semester;
+          if (data.department) filters["department"] = data.department;
+          if (data.facultyId) filters["courseInstructorID"] = data.facultyId;
+        }
+        reportData = await Course.find(filters); // Apply filters
+        break;
+
+      case 'exam':
+        // Apply filters for exam role based on query parameters
+        if (data) {
+          if (data.branch) filters["branch"] = data.branch;
+          if (data.semester) filters["semester"] = data.semester;
+          if (data.degree) filters["degree"] = data.degree;
+        }
+        reportData = await Exam.find(filters); // Apply filters
+        break;
+
+      default:
+        return res.status(400).json({ message: "Invalid role specified." });
+    }
+
+    if (reportData.length === 0) {
+      return res.status(404).json({ message: "No data found matching the given filters." });
+    }
+
+    // Send response with the retrieved report data
+    return res.status(200).json({
+      message: `${role} report data retrieved successfully.`,
+      data: reportData,
+    });
+  } catch (error) {
+    console.error("Error retrieving report data:", error);
+    return res.status(500).json({ message: "Internal Server Error", error });
+  }
+};
+
+
+
+
 export const Overview = async (req, res) => {
   try {
     // Total students
@@ -73,10 +151,10 @@ export const Overview = async (req, res) => {
 
 export const UserDetails = async (req, res) => {
   try {
-    const user = await User.findOne({role:"academic-admin"}, {
-      user_id: 1,            
-      role: 1,    
-      email:1,             
+    const user = await User.findOne({ role: "academic-admin" }, {
+      user_id: 1,
+      role: 1,
+      email: 1,
     });
 
     return res.status(200).json({
@@ -318,7 +396,7 @@ export const addStudent = async (req, res) => {
       email: CollegeEmail
     });
 
-    const semesterFees = getSemesterFees(Academic_info.Degree,Academic_info.Branch);
+    const semesterFees = getSemesterFees(Academic_info.Degree, Academic_info.Branch);
     await Fees.create({
       studentId: enrollment,
       semesters: semesterFees
@@ -440,7 +518,7 @@ export const searchStudents = async (req, res) => {
 export const editStudent = async (req, res) => {
   try {
     const { enrollmentNo } = req.params; // Get the enrollment number from the URL
-    const { tempPassword,image_url, ...otherDetails } = req.body; // Get new details and temp password
+    const { tempPassword, image_url, ...otherDetails } = req.body; // Get new details and temp password
     // Check if the student exists
     const student = await Student.findOne({ enrollment: enrollmentNo });
     if (!student) {
@@ -452,9 +530,9 @@ export const editStudent = async (req, res) => {
     if (tempPassword) {
       otherDetails.tempPassword = await hash(tempPassword, 10);
     }
-    const updateData = {...otherDetails}
-    if(image_url){
-      updateData.image_url=image_url;
+    const updateData = { ...otherDetails }
+    if (image_url) {
+      updateData.image_url = image_url;
     }
     // Update the student details in the database
     const updatedStudent = await Student.findOneAndUpdate(
@@ -516,7 +594,7 @@ const generateUniqueFacultyId = async (departmentCode) => {
 // addFaculty
 export const addFaculty = async (req, res) => {
   try {
-    const { FirstName, LastName, Email, tempPassword, contactNumber, AadharNumber,department, ...otherDetails } = req.body;
+    const { FirstName, LastName, Email, tempPassword, contactNumber, AadharNumber, department, ...otherDetails } = req.body;
 
     // Check if FirstName and LastName are provided
     if (!FirstName || !LastName) {
@@ -697,7 +775,7 @@ export const searchFaculty = async (req, res) => {
 export const editFaculty = async (req, res) => {
   try {
     const { facultyId } = req.params;
-    const { tempPassword,image_url, ...otherDetails } = req.body;
+    const { tempPassword, image_url, ...otherDetails } = req.body;
     const faculty = await Faculty.findOne({ facultyId });
     if (!faculty) {
       return res.status(404).json({ message: 'Faculty not found.' });
@@ -706,9 +784,9 @@ export const editFaculty = async (req, res) => {
     if (tempPassword) {
       otherDetails.tempPassword = await hash(tempPassword, 10);
     }
-    const updateData = {...otherDetails}
-    if(image_url){
-      updateData.image_url=image_url;
+    const updateData = { ...otherDetails }
+    if (image_url) {
+      updateData.image_url = image_url;
     }
     const updatedFaculty = await Faculty.findOneAndUpdate(
       { facultyId },
@@ -773,7 +851,7 @@ export const addTA = async (req, res) => {
     });
 
     await newTA.save();
-    
+
     if (existingStudent && existingStudent.Academic_info) {
       existingStudent.Academic_info.isTA = true;
       await existingStudent.save();
@@ -996,7 +1074,7 @@ export const getAllTAs = async (req, res) => {
 // Edit TA
 export const editTA = async (req, res) => {
   try {
-    const { enrollment, facultyId, teachingCourses, startDate, stipendAmount, endDate,teachingSemester } = req.body;
+    const { enrollment, facultyId, teachingCourses, startDate, stipendAmount, endDate, teachingSemester } = req.body;
 
     // Check if the student exists and is already a TA
     const existingStudent = await Student.findOne({
@@ -1127,14 +1205,14 @@ export const addCourse = async (req, res) => {
       courseInstructorID,
       department,
       semester,
-      pdfUrl:courseFile, // Include PDF URL if provided
+      pdfUrl: courseFile, // Include PDF URL if provided
       courseInstructorName: `${faculty.FirstName} ${faculty.LastName}`, // Faculty name from Faculty model
     });
     // Create new course record with additional details
     const newAttendance = await Attendance.create({
-      courseRefID:newCourse._id,
-      enrolledStudents:[],
-      dates:[],
+      courseRefID: newCourse._id,
+      enrolledStudents: [],
+      dates: [],
     });
     // Return success response with complete course details
     return res.status(201).json({
@@ -1171,7 +1249,7 @@ export const getAllCourses = async (req, res) => {
       courseInstructorID: 1,
       courseInstructorName: 1,
       courseCredit: 1,
-      pdfUrl:1,
+      pdfUrl: 1,
     });
 
     // Return the list of courses
@@ -1192,7 +1270,7 @@ export const deleteCourse = async (req, res) => {
     // Delete the course record
 
     const course = await Course.findOneAndDelete({ courseID });
-    const attendance = await Attendance.findOneAndDelete({courseRefID:course._id})
+    const attendance = await Attendance.findOneAndDelete({ courseRefID: course._id })
     if (!course) {
       return res.status(404).json({ message: 'Course not found.' });
     }
@@ -1319,7 +1397,7 @@ const validateCourseAndFaculty = async (courseID, facultyID) => {
 
 // create a feedback form
 export const createFeedback = async (req, res) => {
-  const {  feedbackName, courseID, departmentID, branch, facultyID, startDateTime, endDateTime } = req.body;
+  const { feedbackName, courseID, departmentID, branch, facultyID, startDateTime, endDateTime } = req.body;
 
   try {
     const feedbackID = `F${courseID}`
