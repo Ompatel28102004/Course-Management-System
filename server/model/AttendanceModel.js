@@ -16,7 +16,7 @@ const AttendanceSchema = new mongoose.Schema({
   },
   enrolledStudents: [
     {
-      studentID: {
+      studentID: { //id -> ID
         type: Number,
         required: true,
       },
@@ -55,7 +55,7 @@ const AttendanceSchema = new mongoose.Schema({
       },
       attendanceRecords: [
         {
-          studentID: {
+          studentID: { //id -> ID
             type: Number,
             required: true,
           },

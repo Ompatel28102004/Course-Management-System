@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const approvalSchema = new mongoose.Schema({
-    instructor_id: Number,
+    facultyId: Number,
     student_first_name: String,
     student_last_name: String,
     student_id: Number,

@@ -10,6 +10,6 @@ const ExamSchema = new mongoose.Schema({
 });
 
 // Create and export the Mongoose model
-const Exam = mongoose.model('Examdetail', ExamSchema);
+const Exam = mongoose.model('examdetails', ExamSchema);
 
 export default Exam;

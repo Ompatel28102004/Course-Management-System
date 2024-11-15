@@ -318,7 +318,7 @@ export const submitSelectedCourses = async (req, res) => {
     }
 
     const approvalRequests = courses.map((course) => ({
-      instructor_id: course.courseInstructorID,
+      facultyId: course.courseInstructorID,
       student_first_name: firstName,
       student_last_name: lastName,
       student_id: userId,

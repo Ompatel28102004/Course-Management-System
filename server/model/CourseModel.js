@@ -1,5 +1,26 @@
 import mongoose from 'mongoose';
 
+const courseRosterSchema = new mongoose.Schema(
+  {
+      day: {
+          type: String,
+          enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        },
+      time: {
+        type: String,
+      },
+      location: {
+        type: String,
+      }
+  },
+  {
+    _id: false,
+  }
+);
+
+// To avoid Scheduling Conflict
+courseRosterSchema.index({ day: 1, time: 1, location: 1 }, { unique: true });
+
 const coursesSchema = new mongoose.Schema({
   courseID: { type: String, required: true },
   courseName: { type: String, required: true },
@@ -15,6 +36,13 @@ const coursesSchema = new mongoose.Schema({
   courseInstructorName: { type: String, required: true },
   courseCredit: { type: String, required: true },
   pdfUrl: {type: String},
+  courseGuidelines: [
+    {
+        type: String,
+        required: false,
+    }
+  ],
+  courseRoster: [courseRosterSchema],
 });
 
 // Pre-save hook to update the lastModified field
