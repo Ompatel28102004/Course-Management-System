@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, X, Bell, ChevronDown, Columns2, MessageSquare, MessagesSquare, BookMarked, GraduationCap, CalendarCheck, FilePen, CreditCard, Settings, PencilRuler, Users, FileText, BookOpen, MessageCircle, School, DollarSign, LogOut, User } from 'lucide-react'
 import avatar2 from "../../assets/avatar_2.png"
-import { FaChalkboard, FaUserGraduate, FaChalkboardTeacher, FaUserTie, FaPlusCircle, FaEye, FaEdit, FaSpinner, FaCheckCircle, FaQuestion, FaDownload } from 'react-icons/fa';
+import { FaChalkboard, FaUserGraduate, FaChalkboardTeacher, FaUserTie, FaPlusCircle, FaEye, FaEdit, FaSpinner, FaCheckCircle, FaQuestion,FaQuestionCircle } from 'react-icons/fa';
 import { FaRegCreditCard } from "react-icons/fa6";
 import { VscFeedback } from "react-icons/vsc";
 import { MdOutlineDashboard, MdAssignment, MdOutlineFormatListBulleted } from "react-icons/md";
@@ -13,6 +13,7 @@ const navItemsByRole = {
         { label: 'Overview', href: '/student/dashboard/overview', icon: MdOutlineDashboard },
         { label: 'Inbox', href: '/student/dashboard/notifications', icon: MessageSquare },
         { label: 'Fees', href: '/student/dashboard/fees', icon: FaRegCreditCard },
+        { label: 'Feedback', href: '/student/dashboard/feedback', icon: FaQuestionCircle },
       ]
     },
     {
@@ -70,8 +71,6 @@ const navItemsByRole = {
       id: 1, label: 'Dashboard', href: '/academic-admin', icon: Columns2, children: [
         { label: 'Overview', href: '/academic-admin', icon: MdOutlineDashboard },
         { label: 'Community', href: '/academic-admin/Community', icon: FaChalkboard },
-        { label: 'Report Download', href: '/academic-admin/download', icon: FaDownload },
-
       ]
     },
     {

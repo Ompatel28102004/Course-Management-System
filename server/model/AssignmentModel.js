@@ -57,7 +57,7 @@ const assignmentSchema = new mongoose.Schema({
             },
             facultyId: { 
                 type: Number, 
-                required: true 
+                required: false 
             },
             attachmentUrlFaculty: { 
                 type: String, 

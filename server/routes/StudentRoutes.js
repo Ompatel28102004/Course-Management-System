@@ -7,7 +7,13 @@ import {
     getStudentResults,
     getStudentAttendance,
     getStudentAssignments, submitAssignment,
-    downloadFile
+    downloadFile,
+    getCourseDataForFeedback,
+    getFeedbackQuestions,
+    submitFeedback,
+    getCourseForQuiz,
+    getQuizForCourse,
+    submitQuiz
 } from '../controller/StudentController.js';
 import { verifyToken } from '../middlewares/AuthMiddleware.js';
 import multer from 'multer';
@@ -33,7 +39,7 @@ StudentRoutes.get('/available-courses', verifyToken, getAvailableCourses);
 StudentRoutes.post('/enroll-selected-courses', verifyToken, submitSelectedCourses);
 
 // Fees routes 
-StudentRoutes.get('/fees',getAllFees);
+StudentRoutes.get('/fees', getAllFees);
 
 StudentRoutes.put('/fees/update/:id', verifyToken, updateFeeStatus);
 
@@ -44,9 +50,18 @@ StudentRoutes.get('/results', verifyToken, getStudentResults);
 StudentRoutes.get('/get-student-attendance', verifyToken, getStudentAttendance);
 
 // Assignment routes
-StudentRoutes.get('/assignment',verifyToken, getStudentAssignments);
-StudentRoutes.post('/assignment/submit/:assignmentId', upload.single('file'), submitAssignment); //add verify token
-StudentRoutes.get('/api/student/download', downloadFile);
+StudentRoutes.get('/assignment', verifyToken, getStudentAssignments);
+StudentRoutes.post('/assignment/submit/:assignmentId', verifyToken, upload.single('file'), submitAssignment);
+StudentRoutes.get('/download', verifyToken, downloadFile);
 
+// Quiz routes
+StudentRoutes.get("/courseID/:userId", verifyToken, getCourseForQuiz);
+StudentRoutes.get('/courses/:courseId/quiz', verifyToken, getQuizForCourse);
+StudentRoutes.post('/courses/:courseId/quiz/submit', verifyToken, submitQuiz);
 
-export default StudentRoutes
+//feedback
+StudentRoutes.get('/enrolled-courses', verifyToken, getCourseDataForFeedback);
+StudentRoutes.get('/feedback/questions/:courseId', verifyToken, getFeedbackQuestions);
+StudentRoutes.post('/feedback/submit', submitFeedback);
+
+export default StudentRoutes;

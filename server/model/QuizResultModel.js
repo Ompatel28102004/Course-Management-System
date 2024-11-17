@@ -44,7 +44,7 @@ const resultSchema = new mongoose.Schema({
     },{timestamps: true, _id: false}
 );
 
-const result = mongoose.model("Result", resultSchema);
+const result = mongoose.model("quizmarks", resultSchema);
 
 export default result;
 

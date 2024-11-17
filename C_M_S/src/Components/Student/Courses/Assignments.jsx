@@ -1,72 +1,76 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { HOST } from "../../../utils/constants";
-import LoadingAnimation from "../../Loading/loadingAnimation";
-import Toast from "../../Toast/Toast";
+import React, { useState, useEffect } from "react"
+import axios from "axios"
+import { HOST } from "../../../utils/constants"
+import LoadingAnimation from "../../Loading/loadingAnimation"
+import Toast from "../../Toast/Toast"
+import { Button } from "../../../Components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../Components/ui/card"
+import { Input } from "../../../Components/ui/input"
 
 export default function StudentAssignments() {
-  const [assignments, setAssignments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedFiles, setSelectedFiles] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [flippedCards, setFlippedCards] = useState({});
+  const [assignments, setAssignments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [selectedFiles, setSelectedFiles] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [toastMessage, setToastMessage] = useState("")
+  const [flippedCards, setFlippedCards] = useState({})
 
-  const enrollment = localStorage.getItem("userId");
-  const token = localStorage.getItem("authToken");
+  const enrollment = localStorage.getItem("userId")
+  const token = localStorage.getItem("authToken")
 
   useEffect(() => {
-    fetchAssignments();
-  }, []);
+    fetchAssignments()
+  }, [])
 
   const showToastNotification = (message) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(""), 3000);
-  };
+    setToastMessage(message)
+    setTimeout(() => setToastMessage(""), 3000)
+  }
 
   const fetchAssignments = async () => {
     try {
       const response = await axios.get(
-        `${HOST}/api/student/assignment?enrollment=${enrollment}`,
+        `${HOST}/api/student/assignment`,
         {
+          params: { enrollment },
           headers: { Authorization: `Bearer ${token}` },
         }
-      );
+      )
 
       if (response.data.success) {
-        setAssignments(response.data.data);
+        setAssignments(response.data.data)
       } else {
-        setError(response.data.message);
+        setError(response.data.message || "Failed to fetch assignments")
       }
-      setLoading(false);
+      setLoading(false)
     } catch (err) {
-      setError("Failed to fetch assignments");
-      setLoading(false);
+      setError("Failed to fetch assignments: " + (err.response?.data?.message || err.message))
+      setLoading(false)
     }
-  };
+  }
 
   const handleFileChange = (event, assignmentId) => {
     setSelectedFiles({
       ...selectedFiles,
       [assignmentId]: event.target.files[0],
-    });
-  };
+    })
+  }
 
-  const handleSubmit = async (assignmentId) => {
+  const handleSubmit = async (assignmentId, courseId) => {
     if (!selectedFiles[assignmentId]) {
-      showToastNotification("Please select a file to upload");
-      return;
+      showToastNotification("Please select a file to upload")
+      return
     }
 
-    const formData = new FormData();
-    formData.append("file", selectedFiles[assignmentId]);
-    formData.append("assignmentId", assignmentId);
-    formData.append("enrollment", enrollment);
-
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
+      const formData = new FormData()
+      formData.append("file", selectedFiles[assignmentId])
+      formData.append("enrollment", enrollment)
+      formData.append("courseId", courseId)
+
       const response = await axios.post(
         `${HOST}/api/student/assignment/submit/${assignmentId}`,
         formData,
@@ -76,180 +80,204 @@ export default function StudentAssignments() {
             "Content-Type": "multipart/form-data",
           },
         }
-      );
+      )
 
       if (response.data.success) {
-        showToastNotification("Assignment submitted successfully!");
-        setSelectedFiles({ ...selectedFiles, [assignmentId]: null });
-        fetchAssignments();
+        showToastNotification("Assignment submitted successfully!")
+        setSelectedFiles({ ...selectedFiles, [assignmentId]: null })
+        await fetchAssignments() // Refresh assignments after submission
       } else {
-        showToastNotification(response.data.message);
+        showToastNotification(response.data.message || "Failed to submit assignment")
       }
     } catch (err) {
-      showToastNotification("Error uploading assignment. Please try again.");
+      showToastNotification("Error uploading assignment: " + (err.response?.data?.message || err.message))
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const handleDownload = async (courseId, fileUrl, isSubmission = false) => {
     try {
-      const response = await fetch(fileUrl);
-      if (!response.ok) {
-        showToastNotification("Network response was not ok");
-        return;
-      }
-      const blob = await response.blob();
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-
+      const response = await axios.get(`${HOST}/api/student/download`, {
+        params: { fileUrl },
+        responseType: 'blob',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      
+      const blob = new Blob([response.data], { type: response.headers['content-type'] })
+      const link = document.createElement("a")
+      link.href = URL.createObjectURL(blob)
       const fileName = isSubmission
         ? `${courseId}_${enrollment}_submission.pdf`
-        : `${courseId}_${enrollment}_assignment.pdf`;
-
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
+        : `${courseId}_${enrollment}_assignment.pdf`
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(link.href)
     } catch (error) {
-      showToastNotification("Download Failed");
+      showToastNotification("Download Failed: " + (error.response?.data?.message || error.message))
     }
-  };
+  }
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-GB"); // Format: dd/mm/yyyy
-  };
+    const date = new Date(dateString)
+    return date.toLocaleDateString("en-GB")
+  }
 
   const toggleCardFlip = (assignmentId) => {
     setFlippedCards(prev => ({
       ...prev,
       [assignmentId]: !prev[assignmentId]
-    }));
-  };
+    }))
+  }
 
-  if (loading)
-    return (
-      <div className="text-center mt-8">
-        <LoadingAnimation />
-      </div>
-    );
-  if (error)
-    return <div className="text-center mt-8 text-red-500">{error}</div>;
+  if (loading) return (
+    <div className="text-center mt-8">
+      <LoadingAnimation />
+    </div>
+  )
+  
+  if (error) return (
+    <div className="text-center mt-8 text-red-500">{error}</div>
+  )
 
   return (
     <div className="bg-white min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">My Assignments</h1>
         {isSubmitting && (
-          <div className="text-center">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <LoadingAnimation />
           </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {assignments.map((assignment) => (
-            <div
-              key={assignment._id}
-              className="bg-white shadow-md rounded-lg overflow-hidden"
-              style={{ height: '400px' }}
-            >
-              <div className="relative w-full h-full transition-transform duration-700 transform-style-3d" 
-                   style={{ transformStyle: 'preserve-3d', transform: flippedCards[assignment._id] ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
-                {/* Front of the card */}
-                <div className="absolute w-full h-full backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
-                  <div className="p-6 flex flex-col justify-between h-full">
+          {assignments.map((courseAssignment) =>
+            courseAssignment.assignments.map((assignment) => (
+              <Card
+                key={assignment._id}
+                className={`relative overflow-hidden transition-all duration-500 ${
+                  flippedCards[assignment._id] ? 'rotate-y-180' : ''
+                }`}
+                style={{ 
+                  height: '400px',
+                  perspective: '1000px'
+                }}
+              >
+                {/* Front of card */}
+                <div className={`absolute w-full h-full transition-all duration-500 ${
+                  flippedCards[assignment._id] ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                }`}>
+                  <CardContent className="p-6 h-full flex flex-col justify-between">
                     <div>
-                      <h2 className="text-xl font-semibold mb-2">{assignment.title}</h2>
-                      <p className="mb-2 text-red-500">{assignment.description}</p>
-                      <p className="text-sm text-gray-500 mb-2">
+                      <CardTitle className="text-xl font-semibold mb-2">
+                        {assignment.title}
+                      </CardTitle>
+                      <p className="mb-2 text-gray-700">{assignment.description}</p>
+                      <p className="text-sm text-gray-500">
                         Due: {formatDate(assignment.dueDate)}
                       </p>
-                      <p className="text-sm text-gray-500 mb-2">
-                        Course: {assignment.courseId}
+                      <p className="text-sm text-gray-500">
+                        Course: {courseAssignment.courseId}
                       </p>
                       <p className="text-sm text-gray-500 mb-4">
                         Max Score: {assignment.maxScore}
                       </p>
                     </div>
+
                     <div className="space-y-4">
-                      <button
-                        onClick={() => handleDownload(assignment.courseId, assignment.attachmentUrl)}
-                        className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded"
+                      <Button
+                        onClick={() => handleDownload(courseAssignment.courseId, assignment.attachmentUrlFaculty)}
+                        className="w-full"
+                        variant="outline"
                       >
                         Download Assignment
-                      </button>
-                      {assignment.submissions && assignment.submissions.length > 0 ? (
-                        <button
+                      </Button>
+                      
+                      {assignment.submissions?.length > 0 ? (
+                        <Button
                           onClick={() => toggleCardFlip(assignment._id)}
-                          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                          className="w-full"
+                          variant="default"
                         >
-                          Show Result
-                        </button>
+                          View Submission
+                        </Button>
                       ) : (
-                        <div className="space-y-4">
-                          <input
+                        <div className="space-y-2">
+                          <Input
                             type="file"
                             onChange={(e) => handleFileChange(e, assignment._id)}
-                            className="w-full text-sm text-gray-500
-                              file:mr-4 file:py-2 file:px-4
-                              file:rounded-full file:border-0
-                              file:text-sm file:font-semibold
-                              file:bg-purple-50 file:text-purple-700
-                              hover:file:bg-purple-100"
+                            className="w-full"
+                            accept=".pdf,.doc,.docx"
                           />
-                          <button
-                            onClick={() => handleSubmit(assignment._id)}
-                            className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded"
+                          <Button
+                            onClick={() => handleSubmit(assignment._id, courseAssignment.courseId)}
+                            className="w-full"
+                            variant="default"
+                            disabled={!selectedFiles[assignment._id]}
                           >
-                            Submit Assignment
-                          </button>
+                            Submit
+                          </Button>
                         </div>
                       )}
                     </div>
-                  </div>
+                  </CardContent>
                 </div>
-                {/* Back of the card */}
-                <div className="absolute w-full h-full backface-hidden transform rotate-y-180" 
-                     style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                  <div className="p-6 flex flex-col justify-between h-full">
+
+                {/* Back of card */}
+                <div className={`absolute w-full h-full transition-all duration-500 ${
+                  flippedCards[assignment._id] ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}>
+                  <CardContent className="p-6 h-full flex flex-col justify-between bg-gray-50">
                     <div>
-                      <h2 className="text-xl font-semibold mb-2">{assignment.title} - Result</h2>
-                      {assignment.submissions && assignment.submissions.length > 0 && (
+                      <CardTitle className="text-xl font-semibold mb-4">
+                        Submission Details
+                      </CardTitle>
+                      {assignment.submissions?.[0] && (
                         <div className="space-y-2">
-                          <p>Submission Date: {formatDate(assignment.submissions[0].submissionDate)}</p>
-                          <p>Status: {assignment.submissions[0].isLate ? "Late" : "On time"}</p>
+                          <p><span className="font-medium">Submitted:</span> {formatDate(assignment.submissions[0].submissionDate)}</p>
+                          <p><span className="font-medium">Status:</span> {assignment.submissions[0].isLate ? "Late" : "On Time"}</p>
                           {assignment.submissions[0].score !== null && (
-                            <p>Score: {assignment.submissions[0].score} / {assignment.maxScore}</p>
+                            <p><span className="font-medium">Score:</span> {assignment.submissions[0].score}/{assignment.maxScore}</p>
                           )}
                           {assignment.submissions[0].feedback && (
-                            <p>Feedback: {assignment.submissions[0].feedback}</p>
+                            <div className="mt-4">
+                              <p className="font-medium">Feedback:</p>
+                              <p className="text-gray-700 mt-1">{assignment.submissions[0].feedback}</p>
+                            </div>
                           )}
                         </div>
                       )}
                     </div>
+
                     <div className="space-y-4">
-                      <button
-                        onClick={() => handleDownload(assignment.courseId, assignment.submissions[0].attachmentUrl, true)}
-                        className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                      <Button
+                        onClick={() => handleDownload(
+                          courseAssignment.courseId,
+                          assignment.submissions[0].attachmentUrlStudent,
+                          true
+                        )}
+                        className="w-full"
+                        variant="outline"
                       >
-                        Download Your Submission
-                      </button>
-                      <button
+                        Download Submission
+                      </Button>
+                      <Button
                         onClick={() => toggleCardFlip(assignment._id)}
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                        className="w-full"
+                        variant="default"
                       >
-                        Hide Result
-                      </button>
+                        Back to Assignment
+                      </Button>
                     </div>
-                  </div>
+                  </CardContent>
                 </div>
-              </div>
-            </div>
-          ))}
+              </Card>
+            ))
+          )}
         </div>
         {toastMessage && <Toast message={toastMessage} />}
       </div>
     </div>
-  );
+  )
 }

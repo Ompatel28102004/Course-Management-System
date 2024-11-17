@@ -13,30 +13,20 @@ const feedbackSchema = new mongoose.Schema({
   endDateTime: { type: Date, required: true },
   isActive: { type: Boolean, default: true },
   questions: [{
-    questionID: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true }, // Reference to Question model
+    questionID: { type: String, required: true }, // Changed to String
   }],
   responses: [{
-    studentID: { type: String, required: true }, // Identifier for the student giving feedback
+    studentID: { type: String, required: true },
     answers: [{
-      questionID: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true }, // Relates back to a question
-      response: { type: mongoose.Schema.Types.Mixed, required: true } // Answer (text or numeric for ratings)
+      questionID: { type: String, required: true }, // Changed to String
+      response: { type: mongoose.Schema.Types.Mixed, required: true }
     }]
   }],
   submittedOn: { type: Date, default: Date.now },
   lastModified: { type: Date, default: Date.now },
 });
 
-// Pre-save hook to update the lastModified field and check isActive status
-feedbackSchema.pre('save', function(next) {
-  this.lastModified = Date.now();
-
-  // Check if the endDateTime has passed
-  if (this.endDateTime && this.endDateTime < new Date()) {
-    this.isActive = false; // Set isActive to false if the endDateTime is in the past
-  }
-
-  next();
-});
+// Pre-save hook remains unchanged
 
 const Feedback = mongoose.model('Feedback', feedbackSchema);
 

@@ -9,6 +9,8 @@ import Result from '../Student/Courses/Results.jsx';
 import Notification from '../AcademicAdmin/Notification';
 import Setting from '../AcademicAdmin/Setting';
 import Assignments from '../Student/Courses/Assignments.jsx';
+import Feedback from "../Student/Dashboard/Feedback.jsx"
+import Quiz from '../Student/Courses/Quiz.jsx';
 const Student = () => {
   return (
       <div>
@@ -20,11 +22,12 @@ const Student = () => {
           <Route path="/dashboard/overview" element={<Overview />} />
           <Route path="/dashboard/notifications" element={<Notification />} />
           <Route path="/dashboard/fees" element={<FeesSection />} />
+          <Route path="/dashboard/feedback" element={<Feedback />} />
           <Route path="/courses/enrolled-courses" element={<EnrolledCourses />} />
           <Route path="/courses/attendance" element={<Attendance />} />
           <Route path="/courses/course-forum" element={<EnrolledCourses />} />
           <Route path="/courses/assignments" element={<Assignments />} />
-          <Route path="/courses/quiz" element={<EnrolledCourses />} />
+          <Route path="/courses/quiz" element={<Quiz />} />
           <Route path="/courses/results" element={<Result />} />
         </Routes>
       </div>

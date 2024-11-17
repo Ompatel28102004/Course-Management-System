@@ -6,8 +6,14 @@ import Fee from "../model/FeesModel.js";
 import Result from "../model/ResultModel.js";
 import Assignment from "../model/AssignmentModel.js"
 import uploadFile from "../cloudinary_files.js";
+import mongoose from "mongoose";
+import fetch from 'node-fetch'; 
+import Feedback from '../model/feedbackModel.js'
+import Question from "../model/FeedbackQuestionModel.js"
+import courseExam from '../model/QuizModel.js';
+import questionBank from '../model/QuestionBankModel.js';
+import result from '../model/QuizResultModel.js';
 
-// Get Student Data Controller
 export const getStudentData = async (req, res) => {
   const { userId } = req.query;
   try {
@@ -489,20 +495,25 @@ export const getStudentAttendance = async (req, res) => {
 };
 
 // Assignments
+
 export const getStudentAssignments = async (req, res) => {
   try {
-    const { enrollment } = req.query; // Get enrollment from query parameters
-    const IntEnrollment = parseFloat(enrollment); // Parse enrollment
+    const { enrollment } = req.query;
+    const IntEnrollment = parseInt(enrollment, 10);
 
-    // 1. Find the courses where the student is enrolled
+    if (isNaN(IntEnrollment)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid enrollment number",
+      });
+    }
+
     const attendanceRecords = await Attendance.find({
       "enrolledStudents.studentID": IntEnrollment,
     });
 
-    // 2. Extract and format the required information from the attendance records
     const courses = [];
     for (const record of attendanceRecords) {
-      // Lookup the course information from the Courses collection
       const courseInfo = await Course.findById(record.courseRefID).select(
         "courseID courseName"
       );
@@ -515,82 +526,108 @@ export const getStudentAssignments = async (req, res) => {
       }
     }
 
-    const courseIds = courses.map(course => course.Course_Id);
+    const courseIds = courses.map((course) => course.Course_Id);
     const assignments = await Assignment.find({
-      courseId: { $in: courseIds }
-    }).sort({ dueDate: 1 });
+      courseId: { $in: courseIds },
+    }).sort({ "assignments.dueDate": 1 });
 
-    const assignmentsWithSubmissions = assignments.map(assignment => {
-      const submission = assignment.submissions.find(sub => sub.studentId === IntEnrollment);
+    const assignmentsWithSubmissions = assignments.map((assignment) => {
+      const courseAssignments = assignment.assignments.map((a) => {
+        const submission = a.submissions.find(
+          (sub) => sub.studentId === IntEnrollment
+        );
+        return {
+          ...a.toObject(),
+          submissions: submission ? [submission] : [],
+        };
+      });
       return {
-        ...assignment.toObject(),
-        submissions: submission ? [submission] : []
+        courseId: assignment.courseId,
+        assignments: courseAssignments,
       };
     });
 
     res.json({
       success: true,
-      data: assignmentsWithSubmissions
+      data: assignmentsWithSubmissions,
     });
   } catch (error) {
     console.error("Error fetching assignments:", error.message);
-    res.status(500).json({ success: false, message: 'Error fetching assignments', error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching assignments",
+      error: error.message,
+    });
   }
 };
 
+
 export const submitAssignment = async (req, res) => {
   try {
-    const { assignmentId } = req.body;
-    
+    const { assignmentId } = req.params;
+    const { enrollment, courseId } = req.body;
 
-    console.log("query",req.query)
-    console.log("body",req.body)
     if (!req.file) {
-      console.log("This is not file found")
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
     }
 
     const upload = await uploadFile(req.file.path);
 
-    const assignment = await Assignment.findById(assignmentId);
-    console.log(assignment)
-    if (!assignment) {
-      console.log("This is not assignment found")
-      return res.status(404).json({ success: false, message: 'Assignment not found' });
-    }
-
-    const { enrollment } = req.body; // Get enrollment from query parameters
-    const student = await Student.findOne({ enrollment });
-    console.log("student",student)
+    const student = await Student.findOne({ enrollment: parseInt(enrollment, 10) });
     if (!student) {
-      console.log("stu not found ")
-      return res.status(404).json({ success: false, message: 'Student not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
     }
 
-    const isLate = new Date() > assignment.dueDate;
+    const assignment = await Assignment.findOne({
+      courseId: courseId,
+      "assignments._id": new mongoose.Types.ObjectId(assignmentId),
+    });
+
+    if (!assignment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Assignment not found" });
+    }
+
+    const targetAssignment = assignment.assignments.find(
+      (a) => a._id.toString() === assignmentId
+    );
+
+    if (!targetAssignment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Specific assignment not found" });
+    }
+
+    const isLate = new Date() > targetAssignment.dueDate;
 
     const submission = {
       studentId: student.enrollment,
       submissionDate: new Date(),
-      attachmentUrl: upload.secure_url,
+      attachmentUrlStudent: upload.secure_url,
       isLate,
     };
 
-    const existingSubmissionIndex = assignment.submissions.findIndex(
+    const existingSubmissionIndex = targetAssignment.submissions.findIndex(
       (sub) => sub.studentId === student.enrollment
     );
 
     if (existingSubmissionIndex !== -1) {
-      assignment.submissions[existingSubmissionIndex] = submission;
+      targetAssignment.submissions[existingSubmissionIndex] = submission;
     } else {
-      assignment.submissions.push(submission);
+      targetAssignment.submissions.push(submission);
     }
 
     await assignment.save();
 
-    // Update student's UpcomingDeadlines
     const deadlineIndex = student.UpcomingDeadlines.findIndex(
-      (deadline) => deadline.heading === assignment.title
+      (deadline) =>
+        deadline.heading === targetAssignment.title &&
+        deadline.date.toDateString() === targetAssignment.dueDate.toDateString()
     );
     if (deadlineIndex !== -1) {
       student.UpcomingDeadlines.splice(deadlineIndex, 1);
@@ -599,22 +636,24 @@ export const submitAssignment = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Assignment submitted successfully',
-      data: {
-        submission: {
-          ...submission,
-          _id: assignment.submissions[assignment.submissions.length - 1]._id,
-        },
-      },
+      message: "Assignment submitted successfully",
+      data: { submission },
     });
   } catch (error) {
     console.error("Assignment submission error:", error.message);
-    res.status(500).json({ success: false, message: 'Error submitting assignment', error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error submitting assignment",
+      error: error.message,
+    });
   }
 };
+
+
+
 export const downloadFile = async (req, res) => {
   const { fileUrl } = req.query;
-  console.log(req.query)
+
   if (!fileUrl) {
     return res.status(400).json({ success: false, message: 'File URL is required' });
   }
@@ -630,11 +669,353 @@ export const downloadFile = async (req, res) => {
     const contentType = response.headers.get('content-type');
     res.setHeader('Content-Type', contentType);
 
-    // Pipe the response to the client
-    response.body.pipe(res);
+    // Get the file content as a buffer
+    const buffer = await response.arrayBuffer();
+
+    // Send the buffer as the file response
+    res.send(buffer);
 
   } catch (error) {
     console.error('Download failed:', error);
     res.status(500).json({ success: false, message: 'Failed to download the file', error: error.message });
   }
 };
+
+
+
+export const getCourseDataForFeedback = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const student = await Student.findOne({ enrollment: userId });
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const attendanceRecords = await Attendance.find({
+      "enrolledStudents.studentID": student.enrollment,
+    });
+
+    const courses = [];
+    for (const record of attendanceRecords) {
+      const courseInfo = await Course.findById(record.courseRefID).select(
+        "courseID courseName courseInstructorName"
+      );
+
+      // Check if the course has an active feedback
+      const feedback = await Feedback.findOne({ courseID: courseInfo.courseID });
+
+      if (courseInfo && feedback && feedback.isActive) {
+        // Check if the student has already submitted responses for this feedback
+        const hasResponded = feedback.responses.some(response => response.studentID === student.enrollment);
+
+        if (!hasResponded) {
+          const feedbackData = {
+            courseId: courseInfo.courseID,
+            courseName: courseInfo.courseName,
+            facultyName: courseInfo.courseInstructorName,
+            feedbackID: feedback.feedbackID,
+            feedbackName: feedback.feedbackName,
+            questions: feedback.questions, // Assuming questions array contains the question details
+          };
+
+          // Optionally, you can format the questions if necessary (e.g., retrieving detailed question text)
+          const formattedQuestions = await Promise.all(
+            feedback.questions.map(async (q) => {
+              const question = await Question.findById(q.questionID); // Assuming questions are in Question model
+              return {
+                questionID: question.questionID,
+                questionText: question.questionText,
+                responseType: question.responseType,
+              };
+            })
+          );
+
+          feedbackData.questions = formattedQuestions;
+
+          courses.push(feedbackData);
+        }
+      }
+    }
+
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error('Error fetching course data for feedback:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+export const getFeedbackQuestions = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const feedback = await Feedback.findOne({ courseID: courseId, isActive: true });
+    console.log(feedback)
+    if (!feedback) {
+      return res.status(404).json({ message: 'No active feedback found for this course' });
+    }
+
+    const questions = await Question.find({ 
+      _id: { $in: feedback.questions.map(q => q.questionID) },
+      isActive: true
+    });
+    console.log(questions)
+    const formattedQuestions = questions.map(q => ({
+      questionId: q.questionID,
+      questionText: q.questionText,
+      responseType: q.responseType
+    }));
+
+    res.status(200).json(formattedQuestions);
+  } catch (error) {
+    console.error('Error fetching feedback questions:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const submitFeedback = async (req, res) => {
+  try {
+    const { courseId, studentId, responses } = req.body;
+    console.log('Received feedback submission:', { courseId, studentId, responses });
+
+    // Check if the required fields are provided
+    if (!courseId || !studentId || !responses || !Array.isArray(responses) || responses.length === 0) {
+      return res.status(400).json({ message: 'Missing or invalid required fields' });
+    }
+
+    // Fetch active feedback for the course
+    const feedback = await Feedback.findOne({ courseID: courseId, isActive: true });
+    if (!feedback) {
+      return res.status(404).json({ message: 'No active feedback found for this course' });
+    }
+
+    // Check if student has already submitted feedback
+    const existingResponse = feedback.responses.find(r => r.studentID === studentId);
+    if (existingResponse) {
+      return res.status(400).json({ message: 'You have already submitted feedback for this course' });
+    }
+
+    // Fetch active questions for the feedback
+    const activeQuestions = await Question.find({ 
+      questionID: { $in: feedback.questions.map(q => q.questionID) },
+      isActive: true
+    });
+  
+    // Extract valid question IDs
+    const validQuestionIds = activeQuestions.map(q => q.questionID);
+
+    // Validate the response structure
+    const studentResponse = responses.find(r => r.studentID === studentId);  // Assuming each student has their own response
+    if (!studentResponse || !Array.isArray(studentResponse.answers)) {
+      return res.status(400).json({ message: 'Invalid response structure' });
+    }
+
+    // Validate the responses against the question IDs
+    const invalidResponses = studentResponse.answers.filter(r => validQuestionIds.includes(r.questionID));
+    if (invalidResponses.length > 0) {
+      return res.status(400).json({ 
+        message: 'Invalid question IDs in responses', 
+        invalidQuestions: invalidResponses.map(r => r.questionID) 
+      });
+    }
+
+    // Check if all required questions are answered
+    const missingResponses = validQuestionIds.filter(id => 
+      !studentResponse.answers.some(r => r.questionID === id)
+    );
+    if (missingResponses.length > 0) {
+      return res.status(400).json({ 
+        message: 'Missing responses for some questions', 
+        missingQuestions: missingResponses 
+      });
+    }
+
+    // Add the new response to the feedback
+    feedback.responses.push({
+      studentID: studentId,
+      answers: studentResponse.answers.map(r => ({
+        questionID: r.questionID,
+        response: r.response
+      }))
+    });
+
+    // Save the feedback
+    await feedback.save();
+
+    res.status(200).json({ message: 'Feedback submitted successfully' });
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+
+//Quiz
+// controllers/quizController.js
+
+export const getCourseForQuiz = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const enrolledCourses = await Attendance.find({
+      "enrolledStudents.studentID": parseInt(userId),
+    });
+
+    if (!enrolledCourses || enrolledCourses.length === 0) {
+      return res.status(404).json({ message: 'No courses found for this student' });
+    }
+
+    const courses = await Promise.all(enrolledCourses.map(async (record) => {
+      const course = await Course.findById(record.courseRefID);
+      return course ? { courseId: course.courseID } : null;
+    }));
+
+    const filteredCourses = courses.filter(course => course !== null);
+    res.status(200).json(filteredCourses);
+  } catch (error) {
+    console.error('Error fetching enrolled courses for quiz:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const getQuizForCourse = async (req, res) => {
+  const { courseId } = req.params;
+  const { userId } = req.query;
+  try {
+    const course = await courseExam.findOne({ courseId });
+    if (!course || course.exam.length === 0) {
+      return res.status(404).json({ message: 'No quiz found for this course' });
+    }
+
+    const quiz = course.exam[0];
+    const response = {
+      examId: quiz.examId,
+      examName: quiz.examName,
+      isPublished: quiz.isPublished,
+      date: quiz.date
+    };
+
+    if (quiz.isPublished) {
+      const studentResult = await result.findOne({
+        courseId,
+        'parinam.examId': quiz.examId,
+        'parinam.results.studentId': parseInt(userId)
+      });
+
+      if (studentResult) {
+        const examResult = studentResult.parinam.find(exam => exam.examId === quiz.examId);
+        const userResult = examResult.results.find(r => r.studentId === parseInt(userId));
+        response.alreadyTaken = true;
+        response.result = {
+          marks: userResult.marks,
+          remarks: userResult.remarks
+        };
+      } else {
+        response.alreadyTaken = false;
+        response.totalMarks = quiz.totalMarks;
+        response.duration = quiz.duration;
+        response.examGuidelines = quiz.examGuidelines;
+        response.questions = await Promise.all(quiz.questions.map(async (q) => {
+          const fullQuestion = await questionBank.findOne(
+            { 'Bank.questionId': q.questionRefId },
+            { 'Bank.$': 1 }
+          );
+          return {
+            ...fullQuestion.Bank[0],
+            marks: q.marks
+          };
+        }));
+      }
+    }
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error fetching quiz:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const submitQuiz = async (req, res) => {
+  const { courseId } = req.params;
+  const { userId, answers } = req.body;
+  console.log("userId", userId)
+  console.log("answers", answers)
+
+  try {
+    const course = await courseExam.findOne({ courseId });
+    if (!course || course.exam.length === 0) {
+      return res.status(404).json({ message: 'No quiz found for this course' });
+    }
+
+    const quiz = course.exam[0];
+    let totalScore = 0;
+
+    for (const [questionId, userAnswer] of Object.entries(answers)) {
+      const question = quiz.questions.find(q => q.questionRefId.toString() === questionId);
+      if (question) {
+        const fullQuestion = await questionBank.findOne(
+          { 'Bank.questionId': question.questionRefId },
+          { 'Bank.$': 1 }
+        );
+        
+        if (fullQuestion && fullQuestion.Bank && fullQuestion.Bank.length > 0) {
+          const correctAnswers = fullQuestion.Bank[0].options
+            .filter(option => option.isCorrect)
+            .map(option => option.text);
+
+          // Convert userAnswer to array if it's not already
+          const userAnswerArray = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
+
+          // Sort both arrays to ensure order doesn't matter
+          const sortedUserAnswer = userAnswerArray.sort();
+          const sortedCorrectAnswers = correctAnswers.sort();
+
+          if (JSON.stringify(sortedUserAnswer) === JSON.stringify(sortedCorrectAnswers)) {
+            totalScore += question.marks;
+          }
+        }
+      }
+    }
+
+    const scorePercentage = (totalScore / quiz.totalMarks) * 100;
+    let remarks = '';
+    if (scorePercentage >= 90) remarks = 'Excellent';
+    else if (scorePercentage >= 80) remarks = 'Very Good';
+    else if (scorePercentage >= 70) remarks = 'Good';
+    else if (scorePercentage >= 60) remarks = 'Satisfactory';
+    else remarks = 'Needs Improvement';
+
+    await result.findOneAndUpdate(
+      { courseId },
+      {
+        $push: {
+          parinam: {
+            examId: quiz.examId,
+            examName: quiz.examName,
+            date: new Date(),
+            results: [{
+              studentId: parseInt(userId),
+              marks: totalScore,
+              remarks
+            }]
+          }
+        }
+      },
+      { upsert: true, new: true }
+    );
+
+    res.status(200).json({
+      score: totalScore,
+      totalMarks: quiz.totalMarks,
+      remarks
+    });
+  } catch (error) {
+    console.error('Error submitting quiz:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+// Include other existing functions from StudentController.js here
+// ...
+
+
+
+// ... (include all other existing functions)
