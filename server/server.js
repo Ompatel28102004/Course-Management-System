@@ -7,6 +7,7 @@ import AuthRoutes from "./routes/AuthRoutes.js";
 import FilesUploadRoutes from "./routes/FilesUploadRoutes.js";
 import StudentRoutes from "./routes/StudentRoutes.js";
 import AcademicAdminRoutes from "./routes/AcademicAdminRoutes.js";
+import FacultyRoutes from "./routes/facultyRoutes.js";
 import cron from 'node-cron';
 import Feedback from './model/feedbackModel.js';
 import TAModel from './model/TaModel.js';
@@ -31,6 +32,7 @@ const MONGO_URI = process.env.MONGO_URI;
 app.use('/api/auth', AuthRoutes);
 app.use('/api/student', StudentRoutes);
 app.use('/api/academic-admin', AcademicAdminRoutes);
+app.use('/api/faculty', FacultyRoutes);
 app.use('/api/file', FilesUploadRoutes);
 
 
