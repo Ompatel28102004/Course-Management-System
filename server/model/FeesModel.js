@@ -9,10 +9,10 @@ const semesterSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  degree:{
+  degree: {
     type: String,
     required: true,
-  }, // added by om
+  },
   amount: {
     type: Number,
     required: true,
@@ -28,7 +28,7 @@ const semesterSchema = new mongoose.Schema({
   },
   dueDate: {
     type: Date,
-  }, // removed required true by om
+  },
   paidAt: {
     type: Date,
   },
@@ -39,6 +39,14 @@ const semesterSchema = new mongoose.Schema({
   lateFee: {
     type: Number,
     default: 0,
+  },
+  transactionId: {
+    type: String,
+    default: null,
+  },
+  invoiceId: {
+    type: String,
+    default: null,
   }
 });
 

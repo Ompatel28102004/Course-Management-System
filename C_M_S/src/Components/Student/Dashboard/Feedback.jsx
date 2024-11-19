@@ -135,7 +135,8 @@ export default function FeedbackForm() {
   const isFormComplete = selectedCourse && Object.keys(responses).length === questions.length
 
   return (
-    <div className="max-w-2xl mx-auto p-4 bg-white shadow-md rounded-lg">
+    <div className='bg-white h-screen'>
+      <div className="max-w-2xl mx-auto p-4 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Course Feedback</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -190,6 +191,7 @@ export default function FeedbackForm() {
           {submitMessage}
         </div>
       )}
+    </div>
     </div>
   )
 }

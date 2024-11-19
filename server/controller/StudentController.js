@@ -373,24 +373,25 @@ export const getAllFees = async (req, res) => {
 
 export const updateFeeStatus = async (req, res) => {
   try {
-    const { id } = req.params; // Assuming this is the semesterId
-    const { userId, status, reason } = req.body;
-
+    const { id } = req.params; 
+    const { userId, status, transactionId, invoiceId } = req.body;
+    console.log("Id",id)
+    console.log("userId",userId)
+    console.log("TransactionId",transactionId)
+    console.log("invoiceId",invoiceId)
     if (!["pending", "paid", "overdue", "waived"].includes(status)) {
-      return res
-        .status(400)
-        .json({
-          message: "Invalid status. Must be pending, paid, overdue, or waived.",
-        });
+      return res.status(400).json({
+        message: "Invalid status. Must be pending, paid, overdue, or waived.",
+      });
     }
 
     const studentFees = await Fee.findOne({ studentId: userId });
     if (!studentFees) {
       return res.status(404).json({ message: "Student fee record not found" });
     }
-
-    const semester = studentFees.semesters.find((sem) => sem.semesterId === id);
-
+    console.log(studentFees.semesters[0])
+    const semester = studentFees.semesters.find((sem) => sem._id == id);
+    console.log("semester",semester)
     if (!semester) {
       return res.status(404).json({ message: "Semester fee record not found" });
     }
@@ -399,19 +400,15 @@ export const updateFeeStatus = async (req, res) => {
 
     if (status === "paid") {
       semester.paidAt = new Date();
-    }
-
-    if (reason) {
-      semester.remarks = reason;
+      semester.transactionId = transactionId;
+      semester.invoiceId = invoiceId;
     }
 
     await studentFees.save();
 
     res.json({ message: "Fee status updated successfully", semester });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error updating fee status", error: error.message });
+    res.status(500).json({ message: "Error updating fee status", error: error.message });
   }
 };
 
@@ -1013,9 +1010,3 @@ export const submitQuiz = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-// Include other existing functions from StudentController.js here
-// ...
-
-
-
-// ... (include all other existing functions)

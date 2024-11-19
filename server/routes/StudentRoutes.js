@@ -40,6 +40,7 @@ StudentRoutes.post('/enroll-selected-courses', verifyToken, submitSelectedCourse
 
 // Fees routes 
 StudentRoutes.get('/fees', getAllFees);
+StudentRoutes.put('/fees/update/:id', verifyToken, updateFeeStatus);
 
 StudentRoutes.put('/fees/update/:id', verifyToken, updateFeeStatus);
 

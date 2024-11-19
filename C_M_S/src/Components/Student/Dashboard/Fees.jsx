@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Check,
-  X,
-  FileText,
-  Loader2,
-  AlertTriangle,
-  Calendar,
-} from "lucide-react";
+import { Check, X, FileText, Loader2, AlertTriangle, Calendar } from 'lucide-react';
 import { HOST } from "../../../utils/constants";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -62,6 +55,7 @@ const FeesSection = () => {
   const token = localStorage.getItem("authToken");
   const userId = localStorage.getItem("userId");
   const studentName = localStorage.getItem("firstName");
+
   useEffect(() => {
     if (!userId || !token) {
       setError("User ID or token not found. Please log in again.");
@@ -95,19 +89,27 @@ const FeesSection = () => {
     setConfirmationModal({ isOpen: true, semesterInfo });
   };
 
+  const generateRandomId = () => {
+    return Math.random().toString(36).substr(2, 9).toUpperCase();
+  };
+
   const confirmPayment = async () => {
     if (!confirmationModal.semesterInfo) return;
 
-    const semesterId = confirmationModal.semesterInfo.semesterId;
+    const semesterId = confirmationModal.semesterInfo._id;
+    console.log("semesterId",semesterId)
     setPaymentProcessing(semesterId);
     setConfirmationModal({ isOpen: false, semesterInfo: null });
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 5000));
 
+      const transactionId = generateRandomId();
+      const invoiceId = generateRandomId();
+
       const response = await axios.put(
         `${HOST}/api/student/fees/update/${semesterId}`,
-        { userId, status: "paid" },
+        { userId, status: "paid", transactionId, invoiceId },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -115,8 +117,8 @@ const FeesSection = () => {
 
       setFeesData((prevData) =>
         prevData.map((fee) =>
-          fee.semesterId === semesterId
-            ? { ...fee, ...response.data.semester }
+          fee._id === semesterId
+            ? { ...fee, ...response.data.semester, transactionId, invoiceId }
             : fee
         )
       );
@@ -196,6 +198,14 @@ const FeesSection = () => {
             <tr>
               <th>Payment Status</th>
               <td>${semesterInfo.status}</td>
+            </tr>
+            <tr>
+              <th>Transaction ID</th>
+              <td>${semesterInfo.transactionId || 'N/A'}</td>
+            </tr>
+            <tr>
+              <th>Invoice ID</th>
+              <td>${semesterInfo.invoiceId || 'N/A'}</td>
             </tr>
           </table>
         </div>
@@ -311,19 +321,24 @@ const FeesSection = () => {
                   : `Due date: ${formatDate(fee.dueDate)}`}
               </span>
             </div>
+            {fee.status === "paid" && (
+              <div className="mt-2">
+                <p className="text-sm text-gray-600">Invoice ID: {fee.invoiceId}</p>
+              </div>
+            )}
           </div>
           <div className="flex-shrink-0 w-full lg:w-auto">
             {fee.status !== "paid" && fee.status !== "waived" && (
               <button
                 onClick={() => handlePayFees(fee)}
                 className={`w-full lg:w-auto px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  paymentProcessing === fee.semesterId
+                  paymentProcessing === fee._id
                     ? "opacity-50 cursor-not-allowed"
                     : ""
                 }`}
-                disabled={paymentProcessing === fee.semesterId}
+                disabled={paymentProcessing === fee._id}
               >
-                {paymentProcessing === fee.semesterId ? (
+                {paymentProcessing === fee._id ? (
                   <span className="flex items-center justify-center">
                     <Loader2 className="animate-spin mr-2" size={20} />
                     Processing...
