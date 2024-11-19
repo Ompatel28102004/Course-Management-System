@@ -170,9 +170,14 @@ const formatDateForInput = (date) => {
           required
         >
           <option value="">Select department</option>
-          <option value="Electrical & Computer department">Electrical & Computer Engineering</option>
+          <option value="Computer department">Computer department</option>
           <option value="Mechanical department">Mechanical department</option>
+          <option value="Electrical department">Electrical department</option>
           <option value="Civil department">Civil department</option>
+          <option value="Physics department">Physics department</option>
+          <option value="Maths department">Maths department</option>
+          <option value="Chemistry department">Chemistry department</option>
+          <option value="Humanities and Social Sciences department">Humanities and Social Sciences department</option>
         </select>
 
         <label>Faculty ID:</label>

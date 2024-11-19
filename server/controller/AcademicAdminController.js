@@ -92,9 +92,6 @@ export const Report = async (req, res) => {
   }
 };
 
-
-
-
 export const Overview = async (req, res) => {
   try {
     // Total students
@@ -279,6 +276,7 @@ const getSemesterFees = (degree, branch) => {
   return Array.from({ length: totalSemesters }, (_, index) => ({
     semester: index + 1,
     branch,
+    degree,
     amount: feePerSemester,
     status: "unpaid",
     dueDate: null, // Adjust as necessary for your application logic
@@ -604,9 +602,14 @@ export const addFaculty = async (req, res) => {
     // Generate CollegeEmail based on FirstName and LastName
     const CollegeEmail = generateFacultyCollegeEmail(FirstName, LastName);
     const departmentCodeMapping = {
-      "Electrical & Computer department": "300",
-      "Mechanical department": "200",
-      "Civil department": "100"
+        "Computer department" : 100,
+        "Mechanical department" : 200,
+        "Electrical department" : 300,
+        "Civil department" : 400,
+        "Physics department" : 500,
+        "Maths department" : 600,
+        "Chemistry department" : 700,
+        "Humanities and Social Sciences department" : 800
     };
     const facultyId = await generateUniqueFacultyId(departmentCodeMapping[department]);
     // Check if faculty with the same facultyId, Email, CollegeEmail, or AadharNumber already exists
@@ -1315,7 +1318,6 @@ export const searchCourses = async (req, res) => {
     return res.status(500).send({ message: 'Internal Server Error', error });
   }
 };
-
 
 // Edit course details
 export const editCourse = async (req, res) => {

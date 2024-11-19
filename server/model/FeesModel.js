@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 
 const semesterSchema = new mongoose.Schema({
-  semesterId: {
-    type: String,
-    required: true,
-    unique: true
-  },
   semester: {
     type: Number,
     required: true,
@@ -14,6 +9,10 @@ const semesterSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  degree:{
+    type: String,
+    required: true,
+  }, // added by om
   amount: {
     type: Number,
     required: true,
@@ -29,8 +28,7 @@ const semesterSchema = new mongoose.Schema({
   },
   dueDate: {
     type: Date,
-    required: true,
-  },
+  }, // removed required true by om
   paidAt: {
     type: Date,
   },
@@ -42,8 +40,6 @@ const semesterSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   }
-}, {
-  _id: false // This will prevent Mongoose from creating an _id for subdocuments
 });
 
 const feeSchema = new mongoose.Schema({
