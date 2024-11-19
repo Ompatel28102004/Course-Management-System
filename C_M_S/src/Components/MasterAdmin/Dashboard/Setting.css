@@ -1,0 +1,204 @@
+/* Reset default styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f4f4;
+}
+
+/* Main container for settings */
+.settings-container {
+  max-width: 550px;
+  margin: 40px auto;
+  padding: 25px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Title styles */
+h2 {
+  text-align: center;
+  color: #B21FDC;
+  margin-bottom: 25px;
+  font-size: 26px;
+}
+
+/* Section styles */
+.setting-section {
+  margin-bottom: 25px;
+  padding: 18px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Section heading styles */
+.setting-section h3 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+/* Input fields styles */
+input[type="text"],
+input[type="password"],
+select,
+.role-select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus,
+.role-select:focus {
+  border-color: #B21FDC;
+  box-shadow: 0 0 5px rgba(178, 31, 220, 0.5);
+  outline: none;
+}
+
+/* Button styles */
+.save-button,
+.log-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #B21FDC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.save-button:hover,
+.log-button:hover {
+  background-color: #8707a8;
+  transform: translateY(-2px);
+}
+
+/* Status and description text */
+.save-status,
+.privacy-description,
+.user-role-description {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* System log list styles */
+.system-log-list {
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.system-log-list li {
+  background-color: #ffffff;
+  padding: 10px;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.system-log-list li:hover {
+  background-color: #f1f1f1;
+  transform: translateY(-1px);
+}
+
+/* Admin feature styles */
+.admin-features {
+  margin-top: 25px;
+}
+
+.admin-features h4 {
+  color: #B21FDC;
+  margin-bottom: 15px;
+}
+
+.admin-features ul {
+  list-style: inside disc;
+  padding-left: 18px;
+  margin-top: 10px;
+  color: #333;
+}
+
+/* Icon styles */
+.icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* Tooltip styles */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 140px;
+  background-color: #B21FDC;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -70px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .settings-container {
+    margin: 20px;
+    padding: 15px;
+  }
+  
+  h2 {
+    font-size: 22px;
+  }
+  
+  .setting-section {
+    margin-bottom: 15px;
+  }
+} 

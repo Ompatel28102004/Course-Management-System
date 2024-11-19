@@ -1,0 +1,45 @@
+.delete-admin-container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  
+  .delete-button {
+    background-color: #dc2626;
+    color: white;
+    margin-right: 10px;
+  }
+  
+  .deactivate-button {
+    background-color: #4f46e5;
+    color: white;
+  }
+  
+  .alert {
+    margin-bottom: 20px;
+  }
+  
+  .alert-success {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .alert-danger {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .table th, .table td {
+    padding: 12px;
+    text-align: left;
+  }
+  

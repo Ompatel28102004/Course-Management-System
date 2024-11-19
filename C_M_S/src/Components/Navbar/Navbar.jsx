@@ -52,19 +52,19 @@ const navItemsByRole = {
   ],
   'master-admin': [
     {
-      id: 1, label: 'Dashboard', href: '/dashboard', icon: Columns2, children: [
-        { label: 'Overview', href: '/admin_dashboard', icon: Users },
-        { label: 'Settings', href: '/settings', icon: Users }
+      id: 1, label: 'Dashboard', href: '/master-admin/dashboard/overview', icon: Columns2, children: [
+        { label: 'Overview', href: '/master-admin/dashboard/overview', icon: Users },
+        { label: 'Activity', href: '/master-admin/dashboard/activity', icon: Users },
+        { label: 'Report', href: '/master-admin/dashboard/report', icon: Users },
+        { label: 'Settings', href: '/master-admin/dashboard/settings', icon: Users }
       ]
     },
     {
-      id: 2, label: 'Users', href: '/users', icon: Users, children: [
-        { label: 'Manage Users', href: '/manage-users', icon: Users },
-        { label: 'Permissions', href: '/permissions', icon: Users }
+      id: 2, label: 'Admin Management', href: '/master-admin/user-management/manage-admin', icon: Users, children: [
+        { label: 'Manage Admin', href: '/master-admin/user-management/manage-admin', icon: Users },
+        { label: 'Create Admin', href: '/master-admin/user-management/create-admin', icon: Users }
       ]
     },
-    { id: 3, label: 'Reports', href: '/reports', icon: FileText },
-    { id: 4, label: 'System Settings', href: '/system-settings', icon: Settings }
   ],
   'academic-admin': [
     {

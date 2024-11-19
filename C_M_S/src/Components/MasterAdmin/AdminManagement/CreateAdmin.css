@@ -1,0 +1,180 @@
+/* Colors */
+:root {
+    --purple-color: #B21FDC;
+    --hover-purple: #8707a8;
+    --gray-color: #eaeaea;
+    --text-color: #333333;
+    --positive-color: #28a745;
+    --negative-color: #dc3545;
+    --card-background: #ffffff;
+  }
+  
+  /* Layout */
+  .dashboard-container {
+    display: flex;
+    font-family: Arial, sans-serif;
+    color: var(--text-color);
+    background-color: var(--gray-color);
+    height: 100vh;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    background-color: var(--purple-color);
+    color: white;
+    width: 250px;
+    padding: 1rem;
+  }
+  
+  .sidebar h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    margin: 0.5rem 0;
+  }
+  
+  .sidebar a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem;
+    display: block;
+  }
+  
+  .sidebar a:hover {
+    background-color: var(--hover-purple);
+    border-radius: 4px;
+  }
+  
+  /* Main Content */
+  .main-content {
+    flex-grow: 1;
+    padding: 2rem;
+    overflow-y: auto;
+  }
+  
+  /* Header */
+  .header {
+    margin-bottom: 2rem;
+  }
+  
+  .header h2 {
+    color: var(--purple-color);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .header p {
+    color: var(--text-color);
+    font-size: 1rem;
+  }
+  
+  /* Sections */
+  section {
+    margin-bottom: 2rem;
+  }
+  
+  section h2 {
+    color: var(--purple-color);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Cards */
+  .card {
+    background-color: var(--card-background);
+    border: 1px solid var(--gray-color);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+  }
+  
+  .card h3 {
+    font-size: 1.2rem;
+    color: var(--purple-color);
+  }
+  
+  .action-button {
+    background-color: var(--purple-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  
+  .action-button:hover {
+    background-color: var(--hover-purple);
+  }
+  
+  /* Overview Card */
+  .overview-card .count {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    color: var(--text-color);
+  }
+  
+  .overview-card .change {
+    font-size: 0.9rem;
+    font-weight: bold;
+  }
+  
+  .overview-card .positive {
+    color: var(--positive-color);
+  }
+  
+  .overview-card .negative {
+    color: var(--negative-color);
+  }
+  
+  /* Log Card */
+  .log-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-background);
+    border: 1px solid var(--gray-color);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+  
+  .log-card p {
+    margin: 0;
+  }
+  
+  .log-card small {
+    color: gray;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      flex-direction: column;
+    }
+  
+    .sidebar {
+      width: 100%;
+      padding: 0.5rem;
+    }
+  
+    .main-content {
+      padding: 1rem;
+    }
+  
+    .card-container, .management-cards, .settings-cards, .security-cards, .log-cards, .report-cards, .notifications-cards {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  

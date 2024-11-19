@@ -18,7 +18,7 @@ const HomePage = () => {
     // Redirect based on user role
     switch (userRole) {
       case 'master-admin':
-        navigate('/master-admin');
+        navigate('/master-admin/dashboard/overview');
         break;
       case 'finance-admin':
         navigate('/finance-admin');

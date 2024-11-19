@@ -6,6 +6,7 @@ import ContactUs from './Components/ContactUsPage/ContactUs.jsx';
 import Login from './Components/LoginPage/Login.jsx';
 import Student from './Components/Routes/StudentRoutes.jsx';
 import Faculty from './Components/Routes/FacultyRoutes.jsx';
+import MasterAdmin from './Components/Routes/MasterAdminRoutes.jsx';
 import AcademicAdmin from './Components/Routes/AcademicAdminRoutes.jsx';
 import ProtectedRoute from './Components/ProtectedRoutes/ProtectedRoute.jsx'; // Import the ProtectedRoute component
 import Navbar from './Components/Navbar/Navbar.jsx';
@@ -54,6 +55,15 @@ function App() {
               <ProtectedRoute
                 element={<Faculty />}
                 requiredRole="faculty"
+              />
+            }
+          />
+          <Route
+            path="/master-admin/*"
+            element={
+              <ProtectedRoute
+                element={<MasterAdmin />}
+                requiredRole="master-admin"
               />
             }
           />

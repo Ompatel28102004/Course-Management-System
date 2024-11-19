@@ -1,0 +1,182 @@
+/* dashboard.css */
+
+/* Root Variables */
+:root {
+  --primary: hsl(222.2 47.4% 11.2%); /* Dark Purple */
+  --primary-foreground: hsl(210 40% 98%); /* Light Text */
+  --background: hsl(0 0% 100%); /* White Background */
+  --card: hsl(0 0% 100%); /* White Card */
+  --card-foreground: hsl(222.2 47.4% 11.2%); /* Dark Text */
+  --popover: hsl(0 0% 100%); /* Popover Background */
+  --popover-foreground: hsl(222.2 47.4% 11.2%); /* Dark Popover Text */
+  --muted: hsl(210 40% 96.1%); /* Muted Background */
+  --muted-foreground: hsl(215.4 16.3% 46.9%); /* Muted Text */
+  --accent: hsl(210 40% 96.1%); /* Accent Background */
+  --accent-foreground: hsl(222.2 47.4% 11.2%); /* Accent Text */
+  --destructive: hsl(0 84.2% 60.2%); /* Red */
+  --destructive-foreground: hsl(210 40% 98%); /* Red Text */
+  --border: hsl(214.3 31.8% 91.4%); /* Border Color */
+  --input: hsl(214.3 31.8% 91.4%); /* Input Field Color */
+  --ring: hsl(222.2 47.4% 11.2%); /* Ring Color */
+  --radius: 0.5rem; /* Border Radius */
+}
+
+/* Dark Mode */
+.dark {
+  --primary: hsl(210 40% 98%);
+  --primary-foreground: hsl(222.2 47.4% 11.2%);
+  --background: hsl(222.2 47.4% 11.2%);
+  --card: hsl(222.2 47.4% 11.2%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222.2 47.4% 11.2%);
+  --popover-foreground: hsl(210 40% 98%);
+  --muted: hsl(217.2 32.6% 17.5%);
+  --muted-foreground: hsl(215 20.2% 65.1%);
+  --accent: hsl(217.2 32.6% 17.5%);
+  --accent-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(217.2 32.6% 17.5%);
+  --input: hsl(217.2 32.6% 17.5%);
+  --ring: hsl(212.7 26.8% 83.9%);
+}
+
+/* General Body Styles */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
+  color: var(--primary);
+  background-color: var(--background);
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Cards */
+.card {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card h3 {
+  font-size: 26px;
+  color: var(--primary);
+}
+
+.card p {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Button Styles */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.button-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.button-primary:hover {
+  background-color: hsl(222.2 47.4% 15.2%);
+}
+
+.button-outline {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+
+.button-outline:hover {
+  background-color: var(--muted);
+}
+
+/* Overview Card */
+.overview-card .count {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Log Card */
+.log-card {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.log-card:last-child {
+  border-bottom: none;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  border-radius: 50%;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  .overview-card .count { font-size: 1.5rem; }
+}
+
+/* Grid and Layout */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  border-radius: 20px;
+  border: 2px solid var(--background);
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}

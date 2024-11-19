@@ -1,0 +1,183 @@
+/* General Styling */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #fafafa;
+}
+
+/* Container and Main Layout */
+.report-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px;
+  background-color: #f0e6ff;
+  text-align: center;
+}
+
+/* Heading and Subheading */
+h2 {
+  color: #B21FDC;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+p {
+  color: #4A4A4A;
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin-bottom: 35px;
+  max-width: 650px;
+}
+
+/* Report Options (Cards) */
+.report-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.report-option {
+  background: linear-gradient(to bottom right, #ffffff, #f3eaff);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.report-option:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.15);
+}
+
+.report-option h3 {
+  color: #B21FDC;
+  font-size: 1.9rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.report-option p {
+  color: #616161;
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+/* Button Styling */
+.report-button {
+  padding: 12px 28px;
+  background-color: #B21FDC;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 10px 0;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 5px 12px rgba(178, 31, 220, 0.4);
+}
+
+.report-button:hover {
+  background-color: #8707a8;
+  box-shadow: 0 8px 18px rgba(135, 7, 168, 0.4);
+  transform: translateY(-3px);
+}
+
+/* Filters Section */
+.report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin-bottom: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+.report-filters label {
+  color: #4A4A4A;
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  align-items: center;
+}
+
+.report-filters input[type="date"],
+.report-filters select {
+  padding: 10px;
+  width: 200px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #ffffff;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.report-filters input[type="date"]:focus,
+.report-filters select:focus {
+  border-color: #B21FDC;
+  outline: none;
+  box-shadow: 0 0 6px rgba(178, 31, 220, 0.3);
+}
+
+/* Summary Overview */
+.summary-overview {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  padding: 20px 30px;
+  margin-bottom: 40px;
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+}
+
+.summary-overview h3 {
+  color: #B21FDC;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.summary-overview ul {
+  list-style-type: none;
+  padding: 0;
+  color: #4A4A4A;
+}
+
+.summary-overview ul li {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 2.2rem;
+  }
+
+  .report-option {
+    width: 100%;
+    max-width: 90%;
+  }
+
+  .summary-overview {
+    max-width: 100%;
+  }
+}

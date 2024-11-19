@@ -1,0 +1,164 @@
+/* Main Container */
+.min-h-screen {
+    min-height: 100vh;
+    background-color: #E5D5FB;
+  }
+  
+  .bg-purple-50 {
+    background-color: #E5D5FB;
+  }
+  
+  .p-6 {
+    padding: 40px; /* Increased padding for the overall section */
+  }
+  
+  .max-w-4xl {
+    max-width: 80%;
+    margin: auto;
+  }
+  
+  /* Header Styles */
+  .text-2xl {
+    font-size: 2.5rem; /* Increased font size for header */
+    color: #333333;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .font-bold {
+    font-weight: bold;
+  }
+  
+  .mb-6 {
+    margin-bottom: 2rem; /* Increased bottom margin for spacing */
+  }
+  
+  /* Subtitle */
+  .text-gray-600 {
+    color: #666666;
+  }
+  
+  /* Filter Section */
+  .grid-cols-1 {
+    grid-template-columns: 1fr;
+  }
+  
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .gap-4 {
+    gap: 30px; /* Increased gap between filters */
+  }
+  
+  .mb-6 {
+    margin-bottom: 2rem;
+  }
+  
+  .space-x-2 > * + * {
+    margin-left: 15px; /* Increased spacing between date inputs */
+  }
+  
+  .text-sm {
+    font-size: 1rem; /* Larger label text */
+    color: #333333;
+  }
+  
+  .font-medium {
+    font-weight: 500;
+  }
+  
+  .mb-1 {
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Inputs */
+  .input-date {
+    padding: 18px; /* Increased padding for larger input fields */
+    border-radius: 6px;
+    border: 1px solid #CCCCCC;
+    font-size: 1.1rem; /* Larger font size */
+    color: #333333;
+  }
+  
+  /* Select */
+  .select-trigger {
+    padding: 18px;
+    border-radius: 6px;
+    border: 1px solid #CCCCCC;
+    font-size: 1.1rem;
+    width: 100%;
+    background-color: #ffffff;
+    color: #333333;
+  }
+  
+  .select-content {
+    padding: 18px;
+  }
+  
+  /* Card Container */
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .gap-6 {
+    gap: 40px; /* Increased gap between cards */
+  }
+  
+  /* Individual Card */
+  .bg-white {
+    background-color: #ffffff;
+    padding: 30px; /* Increased padding for larger cards */
+    border-radius: 12px;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1); /* Slightly deeper shadow for emphasis */
+    width: 100%;
+  }
+  
+  .text-lg {
+    font-size: 1.5rem; /* Larger title text */
+    color: #333333;
+  }
+  
+  .font-semibold {
+    font-weight: 600;
+  }
+  
+  .card-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Button Styling */
+  .button {
+    background-color: #333333;
+    color: #ffffff;
+    padding: 15px 20px; /* Increased padding for larger buttons */
+    border-radius: 6px;
+    width: 100%;
+    font-size: 1.1rem; /* Larger button text */
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .button:hover {
+    background-color: #555555;
+  }
+  
+  /* Flexbox Alignment */
+  .flex {
+    display: flex;
+  }
+  
+  .flex-col {
+    flex-direction: column;
+  }
+  
+  .items-center {
+    align-items: center;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 15px; /* Increased spacing between button elements */
+  }
+  
