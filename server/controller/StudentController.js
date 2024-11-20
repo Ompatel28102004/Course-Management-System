@@ -13,6 +13,7 @@ import Question from "../model/FeedbackQuestionModel.js"
 import courseExam from '../model/QuizModel.js';
 import questionBank from '../model/QuestionBankModel.js';
 import result from '../model/QuizResultModel.js';
+import Exam from "../model/ExamDetailsModel.js";
 
 export const getStudentData = async (req, res) => {
   const { userId } = req.query;
@@ -91,6 +92,72 @@ export const getLecturesData = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
+
+export const getUpcomingEvaluations = async (req, res) => {
+    try {
+        const { semester } = req.query;
+
+        // Fetch all exam details for the specified semester
+        const upcomingEvaluations = await Exam.find({ semester: parseInt(semester) });
+
+        return res.status(200).json({
+            success: true,
+            upcomingEvaluations: upcomingEvaluations
+        });
+    } catch (error) {
+        console.error("Error fetching upcoming evaluations:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+};
+
+
+export const getUpcomingQuizzes = async (req, res) => {
+    try {
+        const { semester } = req.query;
+        const today = new Date();
+
+        // Lookup courses based on the semester
+        const courses = await Course.find({ semester: parseInt(semester) });
+
+        if (!courses || courses.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No courses found for the given semester'
+            });
+        }
+
+        // Collect course IDs
+        const courseIds = courses.map(course => course.courseID);
+
+        // Lookup exams for those courses where the date is greater than today's date
+        const upcomingQuizzesCount = await courseExam.aggregate([
+            { $match: { courseId: { $in: courseIds } } },
+            { $unwind: "$exam" },
+            { $match: { "exam.date": { $gt: today } } },
+            { $count: "totalUpcomingQuizzes" }
+        ]);
+
+        const totalUpcomingQuizzes = upcomingQuizzesCount.length > 0 ? upcomingQuizzesCount[0].totalUpcomingQuizzes : 0;
+
+        return res.status(200).json({
+            success: true,
+            totalUpcomingQuizzes: totalUpcomingQuizzes
+        });
+    } catch (error) {
+        console.error("Error fetching upcoming quizzes:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+};
+
 
 export const updateStudentData = async (req, res) => {
   const { userId } = req.query; // Extract userId from the request parameters
