@@ -572,24 +572,20 @@ export const getMessages = asyncHandler(async(req,res) => {
     }
 });
 
-//Accept the request, make changes in the enroll_req_accepted in "Attendance" and then delete that approval document
 export const acceptRequest = asyncHandler(async(req,res) => {
     try {
-        const { courseId } = req.params;
 
-        const { student_first_name, student_last_name } = req.body;
+        const { courseId, courseRefId, student_first_name, student_last_name } = req.body;
 
         if (!courseId) {
             return res.status(400).json({message: "course Id is required."});
         }
 
-        const markEnrolled = {
-            enroll_req_accepted: true
-        };
+        const courseRefID = new mongoose.Types.ObjectId(courseRefId);
 
         let makeModification = await Attendance.findOneAndUpdate(
             {
-                courseId,
+                courseRefID,
                 'enrolledStudents.firstName': student_first_name,
                 'enrolledStudents.lastName': student_last_name
             },
@@ -603,7 +599,7 @@ export const acceptRequest = asyncHandler(async(req,res) => {
 
         const deleteApproval = await Approvals.findOneAndDelete(
             {
-                courseId,
+                course_id: courseId,
                 student_first_name: student_first_name,
                 student_last_name: student_last_name,
             }

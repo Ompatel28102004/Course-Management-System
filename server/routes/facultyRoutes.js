@@ -30,7 +30,7 @@ Routes.get("/result/:courseId",verifyToken,getExamsResult);
 Routes.get("/assignment/:courseId",verifyToken, getAssignments);
 Routes.post("/assignment/:courseId",verifyToken, postAssignments);
 Routes.get("/inbox/:facultyId",verifyToken,getMessages);
-Routes.put("/inbox/:courseId",verifyToken,acceptRequest);
+Routes.put("/inbox",verifyToken,acceptRequest);
 
 
 export default Routes;
