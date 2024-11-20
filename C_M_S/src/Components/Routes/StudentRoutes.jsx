@@ -6,7 +6,7 @@ import EnrolledCourses from '../Student/Courses/Enrolled_Courses';
 import Attendance from '../Student/Courses/Attendance.jsx';
 import FeesSection from '../Student/Dashboard/Fees.jsx';
 import Result from '../Student/Courses/Results.jsx';
-import Notification from '../AcademicAdmin/Notification';
+import Notification from '../Student/Dashboard/Inbox.jsx';
 import Setting from '../AcademicAdmin/Setting';
 import Assignments from '../Student/Courses/Assignments.jsx';
 import Feedback from "../Student/Dashboard/Feedback.jsx"

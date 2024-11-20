@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { 
-    getStudentData, getLecturesData, updateStudentData, 
+    getStudentData, getLecturesData, getUpcomingEvaluations, getUpcomingQuizzes, updateStudentData, 
     getCourseData, getAvailableCourses, submitSelectedCourses,
     addDeleteDeadline,
     getAllFees, updateFeeStatus,
@@ -25,6 +25,10 @@ const upload = multer({ dest: 'uploads/' });
 StudentRoutes.get('/get-data', verifyToken, getStudentData);
 
 StudentRoutes.get('/get-lectures-data', verifyToken, getLecturesData);
+
+StudentRoutes.get('/get-upcoming-evaluations', verifyToken, getUpcomingEvaluations);
+
+StudentRoutes.get('/get-upcoming-quizzes', verifyToken, getUpcomingQuizzes);
 
 StudentRoutes.post('/deadlines', verifyToken, addDeleteDeadline);
 
