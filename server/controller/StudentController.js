@@ -13,7 +13,6 @@ import Question from "../model/FeedbackQuestionModel.js"
 import courseExam from '../model/QuizModel.js';
 import questionBank from '../model/QuestionBankModel.js';
 import result from '../model/QuizResultModel.js';
-import Exam from "../model/ExamDetailsModel.js";
 
 export const getStudentData = async (req, res) => {
   const { userId } = req.query;
@@ -92,73 +91,6 @@ export const getLecturesData = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
-
-
-export const getUpcomingEvaluations = async (req, res) => {
-    try {
-        const { semester } = req.query;
-
-        // Fetch all exam details for the specified semester
-        const upcomingEvaluations = await Exam.find({ semester: parseInt(semester) });
-
-        return res.status(200).json({
-            success: true,
-            upcomingEvaluations: upcomingEvaluations
-        });
-    } catch (error) {
-        console.error("Error fetching upcoming evaluations:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-            error: error.message
-        });
-    }
-};
-
-
-export const getUpcomingQuizzes = async (req, res) => {
-    try {
-        const { semester } = req.query;
-        const today = new Date();
-
-        // Lookup courses based on the semester
-        const courses = await Course.find({ semester: parseInt(semester) });
-        // console.log(courses);
-
-        if (!courses || courses.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'No courses found for the given semester'
-            });
-        }
-
-        // Collect course IDs
-        const courseIds = courses.map(course => course.courseID);
-
-        // Lookup exams for those courses where the date is greater than today's date
-        const upcomingQuizzesCount = await courseExam.aggregate([
-            { $match: { courseId: { $in: courseIds } } },
-            { $unwind: "$exam" },
-            { $match: { "exam.date": { $gt: today } } },
-            { $count: "totalUpcomingQuizzes" }
-        ]);
-
-        const totalUpcomingQuizzes = upcomingQuizzesCount.length > 0 ? upcomingQuizzesCount[0].totalUpcomingQuizzes : 0;
-
-        return res.status(200).json({
-            success: true,
-            totalUpcomingQuizzes: totalUpcomingQuizzes
-        });
-    } catch (error) {
-        console.error("Error fetching upcoming quizzes:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-            error: error.message
-        });
-    }
-};
-
 
 export const updateStudentData = async (req, res) => {
   const { userId } = req.query; // Extract userId from the request parameters
@@ -915,6 +847,9 @@ export const submitFeedback = async (req, res) => {
 };
 
 
+//Quiz
+// controllers/quizController.js
+
 export const getCourseForQuiz = async (req, res) => {
   const { userId } = req.params;
   try {
@@ -956,21 +891,23 @@ export const getQuizForCourse = async (req, res) => {
       date: quiz.date
     };
 
-    if (quiz.isPublished) {
+    if (true) {
       const studentResult = await result.findOne({
         courseId,
         'parinam.examId': quiz.examId,
         'parinam.results.studentId': parseInt(userId)
       });
-
+      console.log("SR",studentResult)
       if (studentResult) {
         const examResult = studentResult.parinam.find(exam => exam.examId === quiz.examId);
-        const userResult = examResult.results.find(r => r.studentId === parseInt(userId));
+        const userResult = examResult.results.find(r => r.studentId == parseInt(userId));
+        console.log("UR",userResult)
         response.alreadyTaken = true;
         response.result = {
           marks: userResult.marks,
           remarks: userResult.remarks
         };
+        console.log(response.result)
       } else {
         response.alreadyTaken = false;
         response.totalMarks = quiz.totalMarks;
@@ -999,18 +936,17 @@ export const getQuizForCourse = async (req, res) => {
 export const submitQuiz = async (req, res) => {
   const { courseId } = req.params;
   const { userId, answers } = req.body;
-  console.log("userId", userId)
-  console.log("answers", answers)
 
   try {
     const course = await courseExam.findOne({ courseId });
-    if (!course || course.exam.length === 0) {
+    if (!course || !course.exam || course.exam.length === 0) {
       return res.status(404).json({ message: 'No quiz found for this course' });
     }
 
     const quiz = course.exam[0];
     let totalScore = 0;
 
+    // Scoring logic remains the same
     for (const [questionId, userAnswer] of Object.entries(answers)) {
       const question = quiz.questions.find(q => q.questionRefId.toString() === questionId);
       if (question) {
@@ -1024,21 +960,21 @@ export const submitQuiz = async (req, res) => {
             .filter(option => option.isCorrect)
             .map(option => option.text);
 
-          // Convert userAnswer to array if it's not already
           const userAnswerArray = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
-
-          // Sort both arrays to ensure order doesn't matter
           const sortedUserAnswer = userAnswerArray.sort();
           const sortedCorrectAnswers = correctAnswers.sort();
 
           if (JSON.stringify(sortedUserAnswer) === JSON.stringify(sortedCorrectAnswers)) {
-            totalScore += question.marks;
+            totalScore += question.marks || 0;
           }
         }
       }
     }
 
-    const scorePercentage = (totalScore / quiz.totalMarks) * 100;
+    const scorePercentage = quiz.totalMarks > 0 
+      ? (totalScore / quiz.totalMarks) * 100 
+      : 0;
+
     let remarks = '';
     if (scorePercentage >= 90) remarks = 'Excellent';
     else if (scorePercentage >= 80) remarks = 'Very Good';
@@ -1046,24 +982,68 @@ export const submitQuiz = async (req, res) => {
     else if (scorePercentage >= 60) remarks = 'Satisfactory';
     else remarks = 'Needs Improvement';
 
-    await result.findOneAndUpdate(
-      { courseId },
-      {
-        $push: {
-          parinam: {
-            examId: quiz.examId,
-            examName: quiz.examName,
-            date: new Date(),
-            results: [{
-              studentId: parseInt(userId),
-              marks: totalScore,
-              remarks
-            }]
+    // Find existing result or create new
+    let existingResult = await result.findOne({ courseId });
+
+    if (existingResult) {
+      // Check if this specific exam already exists
+      const examExists = existingResult.parinam.some(
+        exam => exam.examId === quiz.examId
+      );
+
+      if (examExists) {
+        // Update existing exam results
+        await result.findOneAndUpdate(
+          { 
+            courseId, 
+            'parinam.examId': quiz.examId 
+          },
+          { 
+            $push: {
+              'parinam.$.results': {
+                studentId: parseInt(userId),
+                marks: totalScore,
+                remarks
+              }
+            }
           }
-        }
-      },
-      { upsert: true, new: true }
-    );
+        );
+      } else {
+        // Add new exam to existing result
+        await result.findOneAndUpdate(
+          { courseId },
+          {
+            $push: {
+              parinam: {
+                examId: quiz.examId,
+                examName: quiz.examName,
+                date: new Date(),
+                results: [{
+                  studentId: parseInt(userId),
+                  marks: totalScore,
+                  remarks
+                }]
+              }
+            }
+          }
+        );
+      }
+    } else {
+      // Create new result document
+      await result.create({
+        courseId,
+        parinam: [{
+          examId: quiz.examId,
+          examName: quiz.examName,
+          date: new Date(),
+          results: [{
+            studentId: parseInt(userId),
+            marks: totalScore,
+            remarks
+          }]
+        }]
+      });
+    }
 
     res.status(200).json({
       score: totalScore,
@@ -1072,6 +1052,6 @@ export const submitQuiz = async (req, res) => {
     });
   } catch (error) {
     console.error('Error submitting quiz:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', errorDetails: error.message });
   }
 };
