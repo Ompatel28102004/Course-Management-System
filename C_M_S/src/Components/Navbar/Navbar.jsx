@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, Bell, ChevronDown, Columns2, MessageSquare, MessagesSquare, BookMarked, GraduationCap, CalendarCheck, FilePen, CreditCard, Settings, PencilRuler, Users, FileText, BookOpen, MessageCircle, School, DollarSign, LogOut, User } from 'lucide-react'
+import { Menu, X, Bell, ChevronDown, Columns2, MessageSquare, MessagesSquare, BookMarked, GraduationCap, CalendarCheck, FilePen, CreditCard, Settings, PencilRuler, Users, FileText, BookOpen, MessageCircle, School, DollarSign, LogOut, User, UserPlus, Activity, UserCog } from 'lucide-react'
 import avatar2 from "../../assets/avatar_2.png"
 import { FaChalkboard, FaUserGraduate, FaChalkboardTeacher, FaUserTie, FaPlusCircle, FaEye, FaEdit, FaSpinner, FaCheckCircle, FaQuestion,FaQuestionCircle, FaDownload } from 'react-icons/fa';
 import { FaRegCreditCard } from "react-icons/fa6";
@@ -20,49 +20,49 @@ const navItemsByRole = {
       id: 2, label: 'Courses', href: '/student/courses/enrolled-courses', icon: BookOpen, children: [
         { label: 'Enrolled Courses', href: '/student/courses/enrolled-courses', icon: BookMarked },
         { label: 'Attendance', href: '/student/courses/attendance', icon: CalendarCheck },
-        { label: 'Course Forum', href: '/student/courses/course-forum', icon: MessagesSquare},
+        // { label: 'Course Forum', href: '/student/courses/course-forum', icon: MessagesSquare},
         { label: 'Assignments', href: '/student/courses/assignments', icon: MdAssignment },
         { label: 'Quiz', href: '/student/courses/quiz', icon: FilePen },
         { label: 'Results', href: '/student/courses/results', icon: GraduationCap },
       ]
     },
-    { id: 3, label: 'Community', href: '/community', icon: Users },
+    // { id: 3, label: 'Community', href: '/community', icon: Users },
   ],
   faculty: [
     {
       id: 1, label: 'Dashboard', href: '/dashboard', icon: Columns2, children: [
         { label: 'Profile', href: '/profile', icon: Users },
-        { label: 'Settings', href: '/settings', icon: Users }
+        { label: 'Settings', href: '/settings', icon: Users },
+        { label: 'Notifications', href: '/notifications', icon: Users }
       ]
     },
     {
       id: 2, label: 'Classes', href: '/classes', icon: School, children: [
         { label: 'Manage Classes', href: '/manage-classes', icon: Users },
         { label: 'Grades', href: '/grades', icon: Users },
-        { label: 'Schedule', href: '/schedule', icon: Users }
+        { label: 'Schedule', href: '/schedule', icon: Users },
       ]
     },
-    {
-      id: 3, label: 'Faculty Forum', href: '/forum', icon: MessageCircle, children: [
-        { label: 'Posts', href: '/posts', icon: Users },
-        { label: 'Topics', href: '/topics', icon: Users },
-        { label: 'Notifications', href: '/notifications', icon: Users }
-      ]
-    }
+    // {
+    //   id: 3, label: 'Faculty Forum', href: '/forum', icon: MessageCircle, children: [
+    //     { label: 'Posts', href: '/posts', icon: Users },
+    //     { label: 'Topics', href: '/topics', icon: Users },
+    //   ]
+    // }
   ],
   'master-admin': [
     {
       id: 1, label: 'Dashboard', href: '/master-admin/dashboard/overview', icon: Columns2, children: [
-        { label: 'Overview', href: '/master-admin/dashboard/overview', icon: Users },
-        { label: 'Activity', href: '/master-admin/dashboard/activity', icon: Users },
-        { label: 'Report', href: '/master-admin/dashboard/report', icon: Users },
-        { label: 'Settings', href: '/master-admin/dashboard/settings', icon: Users }
+        { label: 'Overview', href: '/master-admin/dashboard/overview', icon: MdOutlineDashboard },
+        { label: 'Activity', href: '/master-admin/dashboard/activity', icon: Activity },
+        { label: 'Report', href: '/master-admin/dashboard/report', icon: MdAssignment },
+        { label: 'Settings', href: '/master-admin/dashboard/settings', icon: UserCog }
       ]
     },
     {
       id: 2, label: 'Admin Management', href: '/master-admin/user-management/manage-admin', icon: Users, children: [
         { label: 'Manage Admin', href: '/master-admin/user-management/manage-admin', icon: Users },
-        { label: 'Create Admin', href: '/master-admin/user-management/create-admin', icon: Users }
+        { label: 'Create Admin', href: '/master-admin/user-management/create-admin', icon: UserPlus }
       ]
     },
   ],
@@ -70,7 +70,7 @@ const navItemsByRole = {
     {
       id: 1, label: 'Dashboard', href: '/academic-admin', icon: Columns2, children: [
         { label: 'Overview', href: '/academic-admin', icon: MdOutlineDashboard },
-        { label: 'Community', href: '/academic-admin/Community', icon: FaChalkboard },
+        // { label: 'Community', href: '/academic-admin/Community', icon: FaChalkboard },
         { label: 'Report', href: '/academic-admin/download', icon: FaDownload },
       ]
     },
@@ -231,21 +231,21 @@ export default function Navbar({ role = '' }) {
     profile: {
       student: '/student/profile',
       faculty: '/faculty/profile',
-      'master-admin': '/admin/profile',
+      'master-admin': '/master-admin/profile',
       'academic-admin': '/academic-admin/profile',
-      'finance-admin': '/finance/profile',
+      'finance-admin': '/finance-admin/profile',
     },
     settings: {
       student: '/student/settings',
       faculty: '/faculty/settings',
-      'master-admin': '/admin/settings',
+      'master-admin': '/master-admin/dashboard/settings',
       'academic-admin': '/academic-admin/settings',
-      'finance-admin': '/finance/settings',
+      'finance-admin': '/finance-admin/settings',
     },
     notifications: {
       student: '/student/dashboard/notifications',
       faculty: '/faculty/notifications',
-      'master-admin': '/admin/notifications',
+      'master-admin': '/master-admin/dashboard/activity',
       'academic-admin': '/academic-admin/notifications',
       'finance-admin': '/finance/notifications',
     }

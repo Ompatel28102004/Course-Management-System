@@ -6,6 +6,7 @@ import Activity from "../MasterAdmin/Dashboard/Activity";
 import Overview from '../MasterAdmin/Dashboard/Overview';
 import ManageAdmin from '../MasterAdmin/AdminManagement/ManageAdmin';
 import CreateAdmin from '../MasterAdmin/AdminManagement/CreateAdmin';
+import Profile from '../MasterAdmin/Profile';
 
 const MasterAdmin = () => {
   return (
@@ -23,6 +24,9 @@ const MasterAdmin = () => {
         {/* User Management Routes */}
         <Route path="/user-management/manage-admin" element={<ManageAdmin />} />
         <Route path="/user-management/create-admin" element={<CreateAdmin />} />
+
+        {/* Profile Routes */}
+        <Route path="/profile" element={<Profile/>} />
       </Routes>
     </div>
   );

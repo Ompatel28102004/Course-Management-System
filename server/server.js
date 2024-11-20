@@ -6,6 +6,7 @@ import cors from "cors";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import FilesUploadRoutes from "./routes/FilesUploadRoutes.js";
 import StudentRoutes from "./routes/StudentRoutes.js";
+import MasterAdminRoutes from "./routes/MasterAdminRoutes.js";
 import AcademicAdminRoutes from "./routes/AcademicAdminRoutes.js";
 import FinanceAdminRoutes from "./routes/FinanceAdminRoutes.js";
 import FacultyRoutes from "./routes/facultyRoutes.js";
@@ -32,10 +33,12 @@ const MONGO_URI = process.env.MONGO_URI;
 
 app.use('/api/auth', AuthRoutes);
 app.use('/api/student', StudentRoutes);
+app.use('/api/master-admin', MasterAdminRoutes);
 app.use('/api/academic-admin', AcademicAdminRoutes);
+app.use('/api/finance-admin', FinanceAdminRoutes);
 app.use('/api/faculty', FacultyRoutes);
 app.use('/api/file', FilesUploadRoutes);
-app.use('/api/finance-admin', FinanceAdminRoutes);
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -1,125 +1,108 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { HOST } from "../../../utils/constants";
 import { Button } from "../../../Components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../Components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "../../../Components/ui/alert";
-import { X, Check } from 'lucide-react';
+import Toast from '../../Toast/Toast';
 
 export default function ManageAdmin() {
   const [admins, setAdmins] = useState([]);
-  const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
+  const token = localStorage.getItem("authToken");
+  const userId = localStorage.getItem("userId");
+
   useEffect(() => {
     fetchAdmins();
   }, []);
-  
+
   const fetchAdmins = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admins'); // Adjust URL as per your backend
-      const data = await response.json();
-      setAdmins(data.admins || []);
+      const response = await axios.get(`${HOST}/api/master-admin/get-admins`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { masterAdminId: userId },
+      });
+      setAdmins((response.data.admins.filter(admin => admin.user_id != userId)) || []);
     } catch (error) {
       console.error('Error fetching admins:', error);
-      setError('Failed to fetch admins. Please try again.');
+      showToastNotification('Failed to fetch admins. Please try again.');
     }
   };
 
-  const deactivateAdmin = async (adminId) => {
+  const deleteAdmin = async (adminId) => {
     try {
-      await fetch(`http://localhost:5000/api/admins/deactivate/${adminId}`, { method: 'PUT' });
-      setAdmins(admins.map(admin => 
-        admin.id === adminId ? { ...admin, status: 'deactivated' } : admin
-      ));
-      setSuccessMessage('Admin has been deactivated successfully.');
-    } catch (error) {
-      setError('Failed to deactivate admin. Please try again.');
-    }
-  };
-
-  const ManageAdmin = async (adminId) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/admins/${adminId}`, { method: 'DELETE' });
-      if (response.ok) {
-        setAdmins(admins.filter(admin => admin.id !== adminId));
+      const response = await axios.delete(`${HOST}/api/master-admin/delete-admin`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { masterAdminId: userId, adminId },
+      });
+      if (response.status === 200) {
+        setAdmins(admins.filter(admin => admin.user_id !== adminId));
         setSuccessMessage('Admin has been deleted successfully.');
+        showToastNotification('Admin has been deleted successfully.');
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Failed to delete admin. Please try again.');
+        showToastNotification(response.data.message || 'Failed to delete admin. Please try again.');
       }
     } catch (error) {
-      setError('Failed to delete admin. Please try again.');
+      console.log(error);
+      showToastNotification('Failed to delete admin. Please try again.');
     }
+  };
+
+  const showToastNotification = (message) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(''), 5000);
   };
 
   const filteredAdmins = admins.filter(admin => 
-    admin.username.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    admin.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    admin.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    admin.user_id.toString().includes(searchQuery)
+  );  
 
   return (
-    <div className="delete-admin-container">
-      <h2>Manage Admins</h2>
+    <div className="manage-admin-container p-4">
+      <h2 className="text-2xl font-bold mb-4">Manage Admins</h2>
 
       {/* Search Admins */}
       <input
         type="text"
-        placeholder="Search by username or email"
+        placeholder="Search by userID or role"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="search-input"
+        className="search-input mb-4 p-2 border border-gray-300 rounded"
       />
 
-      {/* Error and Success Alerts */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      {successMessage && (
-        <Alert variant="success">
-          <AlertTitle>Success</AlertTitle>
-          <AlertDescription>{successMessage}</AlertDescription>
-        </Alert>
-      )}
-
       {/* Admin Table */}
-      <Table>
-        <TableHeader>
+      <Table className="w-full border-collapse">
+        <TableHeader className="bg-gray-100">
           <TableRow>
-            <TableHead>Username</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="p-2 border border-gray-300">UserID</TableHead>
+            <TableHead className="p-2 border border-gray-300">Email</TableHead>
+            <TableHead className="p-2 border border-gray-300">Role</TableHead>
+            <TableHead className="p-2 border border-gray-300">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {filteredAdmins.map((admin) => (
-            <TableRow key={admin.id}>
-              <TableCell>{admin.username}</TableCell>
-              <TableCell>{admin.email}</TableCell>
-              <TableCell>{admin.status === 'deactivated' ? 'Deactivated' : 'Active'}</TableCell>
-              <TableCell>
+            <TableRow key={admin.user_id} className="hover:bg-gray-50">
+              <TableCell className="p-2 border border-gray-300">{admin.user_id}</TableCell>
+              <TableCell className="p-2 border border-gray-300">{admin.email}</TableCell>
+              <TableCell className="p-2 border border-gray-300">{admin.role}</TableCell>
+              <TableCell className="p-2 border border-gray-300">
                 <Button
                   variant="destructive"
-                  onClick={() => ManageAdmin(admin.id)}
-                  className="delete-button"
+                  onClick={() => deleteAdmin(admin.user_id)}
+                  className="mr-2"
                 >
                   Delete
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => deactivateAdmin(admin.id)}
-                  className="deactivate-button"
-                >
-                  {admin.status === 'deactivated' ? 'Reactivate' : 'Deactivate'}
                 </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      {successMessage && <Toast message={successMessage} />}
     </div>
   );
 }

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { HOST } from "../../../utils/constants";
 import { Button } from "../../../Components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../Components/ui/card";
 import { Textarea } from "../../../Components/ui/textarea";
@@ -8,34 +10,61 @@ import './Activity.css';
 const Report = () => {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [statusFilter, setStatusFilter] = useState('All');
-  const [updates, setUpdates] = useState([
-    { id: 1, admin: 'John Doe', action: 'Updated user permissions', date: '2023-06-01', status: 'Pending' },
-    { id: 2, admin: 'Jane Smith', action: 'Modified payment gateway settings', date: '2023-06-02', status: 'Pending' },
-    { id: 3, admin: 'Mike Johnson', action: 'Added new course category', date: '2023-06-03', status: 'Reviewed' },
-  ]);
+  const [updates, setUpdates] = useState([]);
   const [response, setResponse] = useState('');
   const [selectedUpdate, setSelectedUpdate] = useState(null);
+  const [error, setError] = useState('');
 
-  const handleResponseSubmit = () => {
-    if (selectedUpdate) {
-      setUpdates(updates.map(update => 
-        update.id === selectedUpdate.id ? { ...update, status: 'Reviewed' } : update
-      ));
-      setSelectedUpdate(null);
-      setResponse('');
+  useEffect(() => {
+    fetchUpdates();
+  }, []);
+
+  const fetchUpdates = async () => {
+    try {
+      const response = await axios.get(`${HOST}/api/master-admin/get-all-admin-activities`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
+      });
+      setUpdates(response.data.activities || []);
+    } catch (error) {
+      console.error('Error fetching updates:', error);
+      setError('Failed to fetch updates. Please try again.');
+      showToastNotification('Failed to fetch updates. Please try again.');
     }
+  };
+
+  const handleResponseSubmit = async () => {
+    if (selectedUpdate) {
+      try {
+        await axios.put(`${HOST}/api/master-admin/submit-activity-response`, {
+          id: selectedUpdate._id,
+          response: response,
+          status: 'Reviewed'
+        }, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
+        });
+
+        setUpdates(updates.map(update => 
+          update._id === selectedUpdate._id ? { ...update, status: 'Reviewed', masterAdminResponse: response } : update
+        ));
+        setSelectedUpdate(null);
+        setResponse('');
+        showToastNotification('Response submitted successfully.');
+      } catch (error) {
+        console.error('Error submitting response:', error);
+        setError('Failed to submit response. Please try again.');
+        showToastNotification('Failed to submit response. Please try again.');
+      }
+    }
+  };
+
+  const showToastNotification = (message) => {
+    setError(message);
+    setTimeout(() => setError(''), 5000);
   };
 
   return (
     <div className="min-h-screen bg-[#f0e6ff] p-10 font-sans">
       <div className="container mx-auto">
-        {/* <h2 className="text-4xl font-bold mb-6 text-[#B21FDC] uppercase tracking-wider text-center">
-          Master Admin Dashboard
-        </h2>
-        <p className="text-lg font-medium mb-8 text-[#4A4A4A] max-w-2xl mx-auto text-center">
-          Monitor and respond to recent admin updates, and view a summary of system activities.
-        </p> */}
-
         {/* Recent Admin Updates Table */}
         <Card className="mb-8 bg-gradient-to-br from-white to-[#f3eaff] shadow-lg rounded-2xl">
           <CardHeader>
@@ -54,10 +83,10 @@ const Report = () => {
               </TableHeader>
               <TableBody>
                 {updates.map((update) => (
-                  <TableRow key={update.id}>
-                    <TableCell className="text-[#616161]">{update.admin}</TableCell>
-                    <TableCell className="text-[#616161]">{update.action}</TableCell>
-                    <TableCell className="text-[#616161]">{update.date}</TableCell>
+                  <TableRow key={update._id}>
+                    <TableCell className="text-[#616161]">{update.name + " (" + update.user_id + ")  "}</TableCell>
+                    <TableCell className="text-[#616161]">{update.activity}</TableCell>
+                    <TableCell className="text-[#616161]">{new Date(update.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-[#616161]">{update.status}</TableCell>
                     <TableCell>
                       <Button
@@ -83,7 +112,7 @@ const Report = () => {
             </CardHeader>
             <CardContent>
               <p className="mb-4 text-[#4A4A4A]">
-                Responding to: {selectedUpdate.action} by {selectedUpdate.admin}
+                Responding to: {selectedUpdate.activity} by {selectedUpdate.name + " (" + selectedUpdate.user_id + ")  "}
               </p>
               <Textarea
                 placeholder="Enter your response..."

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './Toast.css'; 
 
-const Toast = ({ message, duration = 3000 }) => {
+const Toast = ({ message, duration = 5000 }) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
