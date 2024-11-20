@@ -21,7 +21,7 @@ const HomePage = () => {
         navigate('/master-admin/dashboard/overview');
         break;
       case 'finance-admin':
-        navigate('/finance-admin');
+        navigate('/finance-admin/overview/totalFeesCollected');
         break;
       case 'academic-admin':
         navigate('/academic-admin');

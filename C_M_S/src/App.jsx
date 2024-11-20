@@ -8,6 +8,7 @@ import Student from './Components/Routes/StudentRoutes.jsx';
 import Faculty from './Components/Routes/FacultyRoutes.jsx';
 import MasterAdmin from './Components/Routes/MasterAdminRoutes.jsx';
 import AcademicAdmin from './Components/Routes/AcademicAdminRoutes.jsx';
+import FinanceAdmin from './Components/Routes/FinanceAdminRoutes.jsx';
 import ProtectedRoute from './Components/ProtectedRoutes/ProtectedRoute.jsx'; // Import the ProtectedRoute component
 import Navbar from './Components/Navbar/Navbar.jsx';
 import { useEffect, useState } from 'react';
@@ -73,6 +74,15 @@ function App() {
               <ProtectedRoute
                 element={<AcademicAdmin />}
                 requiredRole="academic-admin"
+              />
+            }
+          />
+          <Route
+            path="/finance-admin/*"
+            element={
+              <ProtectedRoute
+                element={<FinanceAdmin />}
+                requiredRole="finance-admin"
               />
             }
           />

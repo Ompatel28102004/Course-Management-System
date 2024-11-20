@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, Bell, ChevronDown, Columns2, MessageSquare, MessagesSquare, BookMarked, GraduationCap, CalendarCheck, FilePen, CreditCard, Settings, PencilRuler, Users, FileText, BookOpen, MessageCircle, School, DollarSign, LogOut, User, UserPlus, Activity, UserCog } from 'lucide-react'
+import { Menu, X, Bell, ChevronDown, Columns2, MessageSquare, MessagesSquare, BookMarked, GraduationCap, CalendarCheck, FilePen, CreditCard, Settings, PencilRuler, Users, FileText, BookOpen, MessageCircle, School, DollarSign, LogOut, User, UserPlus, Activity, UserCog, PanelsTopLeft, ChartSpline, BellRing, NotebookPen, FileDown, HandCoins, Hourglass, Pyramid } from 'lucide-react'
 import avatar2 from "../../assets/avatar_2.png"
 import { FaChalkboard, FaUserGraduate, FaChalkboardTeacher, FaUserTie, FaPlusCircle, FaEye, FaEdit, FaSpinner, FaCheckCircle, FaQuestion,FaQuestionCircle, FaDownload } from 'react-icons/fa';
 import { FaRegCreditCard } from "react-icons/fa6";
@@ -99,10 +99,19 @@ const navItemsByRole = {
     }
   ],
   'finance-admin': [
-    { id: 1, label: 'Dashboard', href: '/dashboard', icon: Columns2 },
-    { id: 2, label: 'Financial Overview', href: '/financial-overview', icon: DollarSign },
-    { id: 3, label: 'Student Fees', href: '/student-fees', icon: CreditCard },
-    { id: 4, label: 'Financial Reports', href: '/financial-reports', icon: FileText }
+    { id: 1, label: 'Overview', href: '/finance-admin/overview/totalFeesCollected', icon: PanelsTopLeft, children: [
+        { label: 'Total Fees', href: '/finance-admin/overview/totalFeesCollected', icon: ChartSpline },
+        { label: 'Pending Fees', href: '/finance-admin/overview/pendingStudentFees', icon: BellRing },
+        { label: 'Notes', href: '/finance-admin/overview/upcomingPaymentDeadline', icon: NotebookPen },
+      ]
+    },
+    { id: 2, label: 'Student Fees', href: '/finance-admin/studentFees/totalFeesStatus', icon: CreditCard, children: [
+        { label: 'Fees Status', href: '/finance-admin/studentFees/totalFeesStatus', icon: Pyramid },
+        { label: 'Degreewise Fees', href: '/finance-admin/studentFees/degreewiseFeesStatus', icon: HandCoins },
+        { label: 'Deadlines', href: '/finance-admin/studentFees/upcomingDeadlines', icon: Hourglass },
+        { label: 'Invoice', href: '/finance-admin/studentFees/invoiceDetails', icon: FileDown },
+      ] 
+    },
   ]
 }
 
@@ -247,7 +256,7 @@ export default function Navbar({ role = '' }) {
       faculty: '/faculty/notifications',
       'master-admin': '/master-admin/dashboard/activity',
       'academic-admin': '/academic-admin/notifications',
-      'finance-admin': '/finance/notifications',
+      'finance-admin': '/finance-admin/notifications',
     }
   };
 

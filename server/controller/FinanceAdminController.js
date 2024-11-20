@@ -1,5 +1,23 @@
 import Fee from "../model/FeesModel.js";
-import Student from "../model/StudentModel.js";
+import User from "../model/UserModel.js";
+
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findOne({ role: "finance-admin" }, {
+      user_id: 1,
+      role: 1,
+      email: 1,
+    });
+
+    return res.status(200).json({
+      user,
+      message: 'user Data retrieved successfully!',
+    });
+  } catch (error) {
+    console.error('Error fetching User:', error);
+    return res.status(500).send({ message: 'Internal Server Error', error });
+  }
+};
 
 export const Overview = async (req, res) => {
   try {
