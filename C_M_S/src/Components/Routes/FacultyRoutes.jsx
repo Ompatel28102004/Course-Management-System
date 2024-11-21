@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import Profile from "../Faculty/Profile";
+import Setting from "../Faculty/Setting";
 import { Attendance } from "../Faculty/Attendance/Attendance";
 import CourseInfo from "../Faculty/CourseInfo/CourseInfo";
 import ExamConduction from "../Faculty/ExamPages/ExamConduction";
@@ -106,6 +107,10 @@ const Faculty = () => {
                 <Route
                     path="/profile"
                     element={<Profile />}
+                />
+                <Route
+                    path="/settings"
+                    element={<Setting />}
                 />
             </Routes>
         </div>

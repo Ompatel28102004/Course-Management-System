@@ -27,7 +27,6 @@ const resultSchema = new mongoose.Schema({
                         },
                         studentName: {
                             type: String,
-                            required: true
                         },
                         marks: {
                             type: Number,
@@ -41,7 +40,7 @@ const resultSchema = new mongoose.Schema({
                 ]
             }
         ]
-    },{timestamps: true, _id: false}
+    },{timestamps: true}
 );
 
 const result = mongoose.model("quizmarks", resultSchema);
