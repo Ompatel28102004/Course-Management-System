@@ -73,13 +73,13 @@ export const getRegStudents = asyncHandler(async (req, res) => {
     }
 });
 
-//It gives the attendance report for a particular date 
+//It gives the attendance report for a particular date
 export const getAttenByDate = asyncHandler(async (req, res) => {
     try {
         const { courseId, date } = req.params;
-    
-        const courseRefID = new mongoose.Types.ObjectId(courseId)
-
+        
+        const courseRefID = new mongoose.Types.ObjectId(courseId);
+        
         // Check for a valid date format
         const isValidDate = !isNaN(new Date(date).getTime());
         if (!isValidDate) {
@@ -89,26 +89,38 @@ export const getAttenByDate = asyncHandler(async (req, res) => {
             });
         }
 
+        // Convert date to start and end of day for comparison
+        const startDate = new Date(date);
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(date);
+        endDate.setHours(23, 59, 59, 999);
+        
         // Find attendance record for the specified course and date
         const attendance = await Attendance.findOne(
-            { courseRefID, "dates.date": new Date(date) },
-            { "dates.$": 1 }  // Retrieve only the matched date entry in the dates array
+            { courseRefID }
         );
-
-        const enroll = await Attendance.findOne({courseRefID});
-
+        
         if (!attendance) {
             return res.status(404).json({
                 success: false,
-                message: "No attendance record found for this date and course"
+                message: "No attendance record found for this course"
             });
         }
 
+        // Filter all attendance records for the specified date
+        const dateAttendances = attendance.dates.filter(d => {
+            const recordDate = new Date(d.date);
+            return recordDate >= startDate && recordDate <= endDate;
+        });
+        
         const attendanceData = {
-            enrolledStudents: enroll.enrolledStudents,
-            attendanceStudents: attendance,
-        }
-
+            enrolledStudents: attendance.enrolledStudents,
+            attendanceStudents: {
+                _id: attendance._id,
+                dates: dateAttendances
+            }
+        };
+        
         return res.status(200).json(attendanceData);
     } catch (error) {
         console.log("Error getting attendance by date", error);
@@ -119,7 +131,7 @@ export const getAttenByDate = asyncHandler(async (req, res) => {
 //Posts the attendance records into the DB
 export const postAttendance = asyncHandler(async (req, res) => {
     const { courseId } = req.params;
-    const students = req.body.students; // Expecting an array of { studentId, attendanceType, status }
+    const students = req.body.finalStudentArray; // Expecting an array of { studentId, attendanceType, status }
 
     const courseRefID = new mongoose.Types.ObjectId(courseId);
 
@@ -141,23 +153,13 @@ export const postAttendance = asyncHandler(async (req, res) => {
     const attendance = await Attendance.findOne({ courseRefID });
 
     if (attendance) {
-        // Check if there is already an entry for today's date
-        const dateEntry = attendance.dates.find(entry => entry.date.toISOString() === formattedDate.toISOString());
-
-        if (dateEntry) {
-            // If today's date entry exists, append the new attendance records
-            await Attendance.updateOne(
-                { courseRefID, "dates.date": formattedDate },
-                { $push: { "dates.$.attendanceRecords": { $each: attendanceData.attendanceRecords } } }
-            );
-        } else {
-            // If today's date entry does not exist, push a new date entry into the data array
-            await Attendance.updateOne(
-                { courseRefID },
-                { $push: { dates: attendanceData } }
-            );
-        }
-    } else {
+        // If today's date entry does not exist, push a new date entry into the data array
+        await Attendance.updateOne(
+            { courseRefID },
+            { $push: { dates: attendanceData } }
+        );
+    }
+    else {
         // If the document does not exist, create a new one with the attendance data
         const newAttendance = new Attendance({
             courseRefID,
@@ -559,7 +561,8 @@ export const getMessages = asyncHandler(async(req,res) => {
             return res.status(400).json({message: "Faculty ID is required"});
         }
 
-        const messages = await Approvals.findOne({facultyId});
+        //const messages = await Approvals.findOne({facultyId});
+        const messages = await Approvals.find({facultyId : Number(facultyId)});
 
         if(!messages){
             return res.status(404).json({message: "No messages for this faculty ID"});
@@ -572,36 +575,35 @@ export const getMessages = asyncHandler(async(req,res) => {
     }
 });
 
+//Accept the request, make changes in the enroll_req_accepted in "Attendance" and then delete that approval document
 export const acceptRequest = asyncHandler(async(req,res) => {
     try {
+        // const { courseId } = req.params;
 
-        const { courseId, courseRefId, student_first_name, student_last_name } = req.body;
+        const { courseId, courseRefID, student_id } = req.body;
+
+        //console.log(req.body);
+        console.log(courseId, courseRefID, student_id);
 
         if (!courseId) {
             return res.status(400).json({message: "course Id is required."});
         }
 
-        const courseRefID = new mongoose.Types.ObjectId(courseRefId);
+        const courseRefId = new mongoose.Types.ObjectId(courseRefID);
 
-        let makeModification = await Attendance.findOneAndUpdate(
+        await Attendance.updateOne(
             {
-                courseRefID,
-                'enrolledStudents.firstName': student_first_name,
-                'enrolledStudents.lastName': student_last_name
+                courseRefId,
+                'enrolledStudents.student_id': student_id,
             },
             { $set: {'enrolledStudents.$.enroll_req_accepted':true}},
             { new: true }
         );
 
-        if (!makeModification) {
-            return res.status(404).json({ message: "Attendance record or student not found." });
-        }
-
         const deleteApproval = await Approvals.findOneAndDelete(
             {
                 course_id: courseId,
-                student_first_name: student_first_name,
-                student_last_name: student_last_name,
+                student_id : student_id
             }
         )
 
@@ -610,7 +612,7 @@ export const acceptRequest = asyncHandler(async(req,res) => {
         }
 
         return res.status(200).json({
-            message: "Enrollment request accepted, and approval document deleted.",makeModification});
+            message: "Enrollment request accepted, and approval document deleted."});
     } catch (error) {
         console.error('Error deleting approvals:', error);
         res.status(500).json({ message: 'Failed to delete approvals', error });

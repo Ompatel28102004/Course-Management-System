@@ -1,6 +1,6 @@
 // export const HOST = import.meta.env.VITE_SERVER_URL;
 export const HOST = 'http://localhost:3000';
-// export const HOST = 'http://192.168.1.7:3000'; use your ip address here
+// export const HOST = 'http://10.10.64.236:3000'; use your ip address here
 
 // student
 export const student = "api/academic-admin";

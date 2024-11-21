@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, Bell, ChevronDown, Columns2, MessageSquare, MessagesSquare, BookMarked, GraduationCap, CalendarCheck, FilePen, CreditCard, Settings, PencilRuler, Users, FileText, BookOpen, MessageCircle, School, DollarSign, LogOut, User, UserPlus, Activity, UserCog, PanelsTopLeft, ChartSpline, BellRing, NotebookPen, FileDown, HandCoins, Hourglass, Pyramid } from 'lucide-react'
+import axios from 'axios'
+import { HOST } from '../../utils/constants'
 import avatar2 from "../../assets/avatar_2.png"
-import { FaChalkboard, FaUserGraduate, FaChalkboardTeacher, FaUserTie, FaPlusCircle, FaEye, FaEdit, FaSpinner, FaCheckCircle, FaQuestion,FaQuestionCircle, FaDownload } from 'react-icons/fa';
-import { FaRegCreditCard } from "react-icons/fa6";
-import { VscFeedback } from "react-icons/vsc";
-import { MdOutlineDashboard, MdAssignment, MdOutlineFormatListBulleted } from "react-icons/md";
+
+// Lucide React icons
+import { BarChartIcon as ChartSpline, PanelsTopLeft, UserCog, UserPlus, Activity, Menu, X, Bell, ChevronDown, Columns2, MessageSquare, MessagesSquare, BookMarked, GraduationCap, CalendarCheck, FilePen, CreditCard, Settings, PencilRuler, Users, FileText, BookOpen, School, LogOut, User, NotebookPen, Info, Inbox, Pyramid, HandCoins, Hourglass, FileDown, BellRing } from 'lucide-react'
+
+// React Icons
+import { 
+  FaDownload, FaChalkboard, FaUserGraduate, FaChalkboardTeacher, FaUserTie, 
+  FaPlusCircle, FaEye, FaEdit, FaSpinner, FaCheckCircle, FaQuestion, FaQuestionCircle 
+} from 'react-icons/fa'
+import { FaRegCreditCard } from "react-icons/fa6"
+import { VscFeedback } from "react-icons/vsc"
+import { MdOutlineDashboard, MdAssignment, MdOutlineFormatListBulleted } from "react-icons/md"
+
 const navItemsByRole = {
   student: [
     {
@@ -20,35 +30,22 @@ const navItemsByRole = {
       id: 2, label: 'Courses', href: '/student/courses/enrolled-courses', icon: BookOpen, children: [
         { label: 'Enrolled Courses', href: '/student/courses/enrolled-courses', icon: BookMarked },
         { label: 'Attendance', href: '/student/courses/attendance', icon: CalendarCheck },
-        // { label: 'Course Forum', href: '/student/courses/course-forum', icon: MessagesSquare},
         { label: 'Assignments', href: '/student/courses/assignments', icon: MdAssignment },
         { label: 'Quiz', href: '/student/courses/quiz', icon: FilePen },
         { label: 'Results', href: '/student/courses/results', icon: GraduationCap },
       ]
     },
-    // { id: 3, label: 'Community', href: '/community', icon: Users },
   ],
   faculty: [
     {
-      id: 1, label: 'Dashboard', href: '/dashboard', icon: Columns2, children: [
-        { label: 'Profile', href: '/profile', icon: Users },
-        { label: 'Settings', href: '/settings', icon: Users },
-        { label: 'Notifications', href: '/notifications', icon: Users }
+      id: 1, label: 'Courses', href: `/faculty/courses/course-info/${localStorage.getItem('currentCourse')}`, icon: School, children: [
+        { label: 'Course Info', href: `/faculty/courses/course-info/${localStorage.getItem('currentCourse')}`, icon: Info },
+        { label: 'Attendance', href: `/faculty/courses/attendance/${localStorage.getItem('currentCourse')}`, icon: Users },
+        { label: 'Exam Conduction', href: `/faculty/courses/exam-conduction/${localStorage.getItem('currentCourse')}`, icon: FileText },
+        { label: 'Results', href: `/faculty/courses/results/${localStorage.getItem('currentCourse')}`, icon: NotebookPen },
+        { label: 'Inbox', href: `/faculty/courses/inbox/${localStorage.getItem('currentCourse')}`, icon: Inbox }
       ]
-    },
-    {
-      id: 2, label: 'Classes', href: '/classes', icon: School, children: [
-        { label: 'Manage Classes', href: '/manage-classes', icon: Users },
-        { label: 'Grades', href: '/grades', icon: Users },
-        { label: 'Schedule', href: '/schedule', icon: Users },
-      ]
-    },
-    // {
-    //   id: 3, label: 'Faculty Forum', href: '/forum', icon: MessageCircle, children: [
-    //     { label: 'Posts', href: '/posts', icon: Users },
-    //     { label: 'Topics', href: '/topics', icon: Users },
-    //   ]
-    // }
+    }
   ],
   'master-admin': [
     {
@@ -70,7 +67,6 @@ const navItemsByRole = {
     {
       id: 1, label: 'Dashboard', href: '/academic-admin', icon: Columns2, children: [
         { label: 'Overview', href: '/academic-admin', icon: MdOutlineDashboard },
-        // { label: 'Community', href: '/academic-admin/Community', icon: FaChalkboard },
         { label: 'Report', href: '/academic-admin/download', icon: FaDownload },
       ]
     },
@@ -118,7 +114,7 @@ const navItemsByRole = {
 export default function Navbar({ role = '' }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState({})
-  const [navRole, setNavRole] = useState(); 
+  const [navRole, setNavRole] = useState()
   const [navItems, setNavItems] = useState(navItemsByRole[navRole] || [])
   const [activeMainLink, setActiveMainLink] = useState(navItems[0]?.id)
   const [activeChildLink, setActiveChildLink] = useState('')
@@ -158,6 +154,37 @@ export default function Navbar({ role = '' }) {
   const handleLogoutCancel = () => {
     setShowLogoutConfirmation(false)
   }
+
+  const fetchCourses = async () => {
+    const token = localStorage.getItem('authToken')
+    const userId = localStorage.getItem('userId')
+  
+    try {
+      const response = await axios.get(`${HOST}/api/faculty/coursesAssigned/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+  
+      return response.data
+    } catch (error) {
+      console.error('Error fetching courses:', error)
+      return []
+    }
+  }
+  
+  useEffect(() => {
+    const fetchAndSetCourses = async () => {
+      if (localStorage.getItem('userRole') === 'faculty') {
+        const allCourses = await fetchCourses()
+        if (allCourses.length === 0) return
+  
+        const firstCourse = allCourses[0].courseID
+        localStorage.setItem('currentCourse', firstCourse)
+      }
+    }
+  
+    fetchAndSetCourses()
+  }, [])
+
   useEffect(() => {
     const fetchUserData = () => {
       const storedFirstName = localStorage.getItem('firstName')
@@ -165,7 +192,7 @@ export default function Navbar({ role = '' }) {
       const storedIsTA = localStorage.getItem('isTA')
       const storedUserRole = localStorage.getItem('userRole').toString()
 
-      if (storedUserRole) setNavRole(storedUserRole); 
+      if (storedUserRole) setNavRole(storedUserRole)
       if (storedUserRole === 'academic-admin') {
         setFirstName('Academic Admin')
       }
@@ -235,7 +262,7 @@ export default function Navbar({ role = '' }) {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [isProfileDropdownOpen])
-  // Define role-based routes for profile, settings, and notifications
+
   const roleBasedRoutes = {
     profile: {
       student: '/student/profile',
@@ -258,25 +285,24 @@ export default function Navbar({ role = '' }) {
       'academic-admin': '/academic-admin/notifications',
       'finance-admin': '/finance-admin/notifications',
     }
-  };
+  }
 
-  // Updated handler functions to include role-based navigation
   const handleProfileClick = () => {
-    const profileRoute = roleBasedRoutes.profile[navRole] || '/profile';
-    navigate(profileRoute);
-    setIsProfileDropdownOpen(false);
-  };
+    const profileRoute = roleBasedRoutes.profile[navRole] || '/profile'
+    navigate(profileRoute)
+    setIsProfileDropdownOpen(false)
+  }
 
   const handleSettingsClick = () => {
-    const settingsRoute = roleBasedRoutes.settings[navRole] || '/settings';
-    navigate(settingsRoute);
-    setIsProfileDropdownOpen(false);
-  };
+    const settingsRoute = roleBasedRoutes.settings[navRole] || '/settings'
+    navigate(settingsRoute)
+    setIsProfileDropdownOpen(false)
+  }
 
   const handleNotificationsClick = () => {
-    const notificationsRoute = roleBasedRoutes.notifications[navRole] || '/notifications';
-    navigate(notificationsRoute);
-  };
+    const notificationsRoute = roleBasedRoutes.notifications[navRole] || '/notifications'
+    navigate(notificationsRoute)
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 ">
@@ -339,9 +365,11 @@ export default function Navbar({ role = '' }) {
                               ? 'bg-purple-100 text-purple-600'
                               : 'text-gray-500 hover:bg-purple-50 hover:text-purple-600'
                               }`}
-                            onClick={() => setActiveChildLink(child.href)}
+                              onClick={() => {
+                                setActiveChildLink(child.href)
+                                localStorage.setItem('currentPage', child.label)
+                              }}  
                           >
-                            {/* {child.label} */}
                             <span className="flex items-center">
                               <child.icon className="mr-2 h-5 w-5" />
                               {child.label}
@@ -386,9 +414,7 @@ export default function Navbar({ role = '' }) {
             </ul>
           </nav>
           <div className="flex items-center space-x-4">
-            <button className="text-gray-500 hover:text-purple-600 transition-colors duration-200" onClick={() => {
-                      handleNotificationsClick()
-                    }}>
+            <button className="text-gray-500 hover:text-purple-600 transition-colors duration-200" onClick={handleNotificationsClick}>
               <Bell className="h-6 w-6" />
             </button>
             <div className="relative profile-dropdown">
@@ -407,22 +433,14 @@ export default function Navbar({ role = '' }) {
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
                   <button
-                    onClick={() => {
-                      // navigate('/profile')
-                      handleProfileClick()
-                      setIsProfileDropdownOpen(false)
-                    }}
+                    onClick={handleProfileClick}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-100 w-full text-left"
                   >
                     <User className="inline-block w-4 h-4 mr-2" />
                     Profile
                   </button>
                   <button
-                    onClick={() => {
-                      // navigate('/settings')
-                      handleSettingsClick()
-                      setIsProfileDropdownOpen(false)
-                    }}
+                    onClick={handleSettingsClick}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-100 w-full text-left"
                   >
                     <Settings className="inline-block w-4 h-4 mr-2" />
@@ -471,3 +489,4 @@ export default function Navbar({ role = '' }) {
     </div>
   )
 }
+

@@ -27,7 +27,7 @@ const HomePage = () => {
         navigate('/academic-admin');
         break;
       case 'faculty':
-        navigate('/faculty');
+        navigate(`/faculty/courses/course-info/${localStorage.getItem('currentCourse')}`);
         break;
       case 'student':
         navigate('/student/dashboard/overview');

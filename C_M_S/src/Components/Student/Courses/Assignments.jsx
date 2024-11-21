@@ -98,15 +98,14 @@ export default function StudentAssignments() {
 
   const handleDownload = async (courseId, fileUrl, isSubmission = false) => {
     try {
-      const response = await axios.get(`${HOST}/api/student/download`, {
-        params: { fileUrl },
-        responseType: 'blob',
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const response = await fetch(fileUrl); // Fetch the file
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
       
-      const blob = new Blob([response.data], { type: response.headers['content-type'] })
-      const link = document.createElement("a")
-      link.href = URL.createObjectURL(blob)
+      const blob = await response.blob(); // Convert the response to a Blob
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob); // Create a URL for the Blob
       const fileName = isSubmission
         ? `${courseId}_${enrollment}_submission.pdf`
         : `${courseId}_${enrollment}_assignment.pdf`

@@ -31,9 +31,8 @@ const examSchema = new mongoose.Schema(
         questions: [
             {
                 questionRefId: { //id -> RefId
-                    type: mongoose.Schema.Types.ObjectId, // Reference to Question Bank document
+                    type: String, // Reference to Question Bank document
                     required: true,
-                    ref: 'questionbanks',
                 },
                 marks: {
                     type: Number,

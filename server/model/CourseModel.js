@@ -19,7 +19,7 @@ const courseRosterSchema = new mongoose.Schema(
 );
 
 // To avoid Scheduling Conflict
-courseRosterSchema.index({ day: 1, time: 1, location: 1 }, { unique: true });
+// courseRosterSchema.index({ day: 1, time: 1, location: 1 }, { unique: true });
 
 const coursesSchema = new mongoose.Schema({
   courseID: { type: String, required: true },

@@ -1,0 +1,26 @@
+.collapsible-content {
+    overflow: hidden;
+    transition: max-height 0.25s ease; /* Transition on max-height for smooth open/close */
+    background-color: rgb(244, 231, 231);
+}
+  
+.collapse-button {
+    background-color: transparent;
+    color: purple;
+    border: 2px solid purple;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    width: 200px;
+    text-align: left;
+}
+  
+.collapse-button:hover {
+    background-color: #f2e8f5;
+    color: purple;
+}
+  
+ul {
+    padding-left: 20px;
+}
