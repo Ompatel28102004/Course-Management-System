@@ -6,7 +6,9 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ["master-admin", "academic-admin", "finance-admin", "faculty", "student"], required: true },
   securityCode: { type: String, default: false },
   mustChangePassword: { type: Boolean, default: true },  
-  email: { type: String, required: true }
+  email: { type: String, required: true },
+  Name: {type: String},
+  ImgUrl:{type: String},
 }, { timestamps: true });
 
 const User = mongoose.model("users", userSchema);

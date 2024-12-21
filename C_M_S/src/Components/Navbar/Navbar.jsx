@@ -68,6 +68,7 @@ const navItemsByRole = {
       id: 1, label: 'Dashboard', href: '/academic-admin', icon: Columns2, children: [
         { label: 'Overview', href: '/academic-admin', icon: MdOutlineDashboard },
         { label: 'Report', href: '/academic-admin/download', icon: FaDownload },
+        { label: 'Community', href: '/academic-admin/Community', icon: FaChalkboard },
       ]
     },
     {

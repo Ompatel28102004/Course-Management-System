@@ -5,6 +5,10 @@
   --pagination-color: #f1eded;
 }
 
+.chat{
+  height: 29.6rem;
+}
+
 .pagination-container {
   display: flex;
   align-items: center;
@@ -422,11 +426,16 @@ input[type=number]::-webkit-outer-spin-button {
     height: 50%;
     font-size: 1rem;
   }
+  .chat{
+    height: 900px;
+  }
 }
 
 /* Mobile (max-width: 480px) */
 @media screen and (max-width: 480px) {
-
+  .chat{
+    height: 49rem;
+  }
   .student-form input,
   .student-form select {
     width: 90%;

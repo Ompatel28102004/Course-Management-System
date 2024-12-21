@@ -5,7 +5,7 @@ import Community from './Community.jsx'
 import Download from './Download.jsx';
 function dashboard() {
     return (
-    <div className='user_management'>
+    <div className='user_management h-100 bg-red'>
       <Routes>
         <Route path="*" element={<Overview/>} /> 
         <Route path="/" element={<Overview/>} />
