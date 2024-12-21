@@ -34,7 +34,7 @@ export default function LandingPageNavbar() {
             </div>
 
             <NavLink
-              is
+              // is
               to="/about-us"
               className={({ isActive }) =>
                 isActive
@@ -46,7 +46,7 @@ export default function LandingPageNavbar() {
             </NavLink>
 
             <NavLink
-              is
+              // is
               to="/contact-us"
               className={({ isActive }) =>
                 isActive
@@ -104,3 +104,4 @@ export default function LandingPageNavbar() {
     </>
   )
 }
+

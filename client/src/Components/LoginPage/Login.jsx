@@ -98,7 +98,6 @@ const Login = () => {
         setToastMessage("Login successful!");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 500);
-        console.log("Login successful!", response.data);
         securityCodeErrorRef.current.innerText = "";
   
         // Redirect to HomePage

@@ -1,6 +1,6 @@
 // export const HOST = import.meta.env.VITE_SERVER_URL;
 export const HOST = 'http://localhost:3000';
-// export const HOST = 'http://10.10.64.236:3000'; use your ip address here
+// export const HOST = 'http://172.20.10.4:3000'; // use your ip address here
 
 // student
 export const student = "api/academic-admin";
@@ -109,3 +109,6 @@ export const EDITEXAM_ROUTE = (examID) => `${HOST}/${exam}/editexam/${examID}`;
 
 // Delete an exam by examID
 export const DELETEEXAM_ROUTE = (examID) => `${HOST}/${exam}/deleteexam/${examID}`;
+
+export const ADDMessage_ROUTE = `${HOST}/api/message/addmessage`;
+export const GETMessage_ROUTE = (communityId) => `${HOST}/api/message/getmessage/${(communityId)}`;

@@ -1,5 +1,5 @@
 import React from "react";
-// import MessageContainer from "../../Community/MessageContainer";
+import MessageContainer from "../../Community/MessageContainer";
 
 const ChatRoom = () => {
   return (
@@ -8,7 +8,7 @@ const ChatRoom = () => {
         <h1 className="responsive">COMMUNITY</h1>
       </div>
 
-      {/* <MessageContainer /> */}
+      <MessageContainer />
     </div>
   );
 };

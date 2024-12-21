@@ -210,3 +210,28 @@ export const forgotPassword = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+export const getUserRole = async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "User ID is required." });
+    }
+
+    const user = await User.findOne({ user_id: userId });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    return res.status(200).json({ success: true, role: user.role });
+  } catch (error) {
+    console.error("Error fetching user role:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+      error: error.message,
+    });
+  }
+};

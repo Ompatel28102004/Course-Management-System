@@ -9,6 +9,8 @@ import StudentRoutes from "./routes/StudentRoutes.js";
 import MasterAdminRoutes from "./routes/MasterAdminRoutes.js";
 import AcademicAdminRoutes from "./routes/AcademicAdminRoutes.js";
 import FinanceAdminRoutes from "./routes/FinanceAdminRoutes.js";
+import MessageRoutes from "./routes/MessageRoutes.js";
+import setupSocket from './socket.js';
 import FacultyRoutes from "./routes/facultyRoutes.js";
 import cron from 'node-cron';
 import Feedback from './model/feedbackModel.js';
@@ -37,13 +39,15 @@ app.use('/api/master-admin', MasterAdminRoutes);
 app.use('/api/academic-admin', AcademicAdminRoutes);
 app.use('/api/finance-admin', FinanceAdminRoutes);
 app.use('/api/faculty', FacultyRoutes);
+app.use('/api/message', MessageRoutes);
 app.use('/api/file', FilesUploadRoutes);
 
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
+// Setup WebSocket
+setupSocket(server);
 mongoose.connect(MONGO_URI)
     .then(() => console.log("Database connected successfully"))
     .catch((err) => {
