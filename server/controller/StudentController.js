@@ -930,7 +930,7 @@ export const getCourseForQuiz = async (req, res) => {
 
     const courses = await Promise.all(enrolledCourses.map(async (record) => {
       const course = await Course.findById(record.courseRefID);
-      return course ? { courseId: course.courseID } : null;
+      return course ? { courseName: course.courseName, courseId: course.courseID } : null;
     }));
 
     const filteredCourses = courses.filter(course => course !== null);

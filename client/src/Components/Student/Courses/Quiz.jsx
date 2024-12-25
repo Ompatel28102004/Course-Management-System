@@ -259,7 +259,7 @@ export default function QuizApplication() {
                   }}
                   className="w-full"
                 >
-                  <span>{course.courseId}</span>
+                  <span>{course.courseName} ({course.courseId})</span>
                   <Book className="w-5 h-5 ml-2" />
                 </Button>
               ))}
@@ -295,7 +295,7 @@ export default function QuizApplication() {
           <Card>
             <CardHeader>
               <CardTitle>Available Quizzes</CardTitle>
-              <CardDescription>Quizzes for {selectedCourse.courseId}</CardDescription>
+              <CardDescription>Quizzes for {selectedCourse.courseName} ({selectedCourse.courseId})</CardDescription>
             </CardHeader>
             <CardContent>
               {availableQuizzes.length > 0 ? (
@@ -353,7 +353,7 @@ export default function QuizApplication() {
         <Card>
           <CardHeader>
             <CardTitle>{selectedQuiz.examName}</CardTitle>
-            <CardDescription>Course: {selectedCourse.courseId}</CardDescription>
+            <CardDescription>Course: {selectedCourse.courseName} ({selectedCourse.courseId})</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button
