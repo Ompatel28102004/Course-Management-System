@@ -1,7 +1,7 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom';
 import Overview from './Overview.jsx'
-import Community from './Community.jsx'
+import ChatRoom from '../../Community/ChatRoom.jsx'
 import Download from './Download.jsx';
 function dashboard() {
     return (
@@ -9,7 +9,7 @@ function dashboard() {
       <Routes>
         <Route path="*" element={<Overview/>} /> 
         <Route path="/" element={<Overview/>} />
-        <Route path="/Community" element={<Community />} />
+        <Route path="/Community" element={<ChatRoom />} />
         <Route path="/download" element={<Download />} />
       </Routes>
     </div>

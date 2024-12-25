@@ -24,6 +24,7 @@ const navItemsByRole = {
         { label: 'Inbox', href: '/student/dashboard/notifications', icon: MessageSquare },
         { label: 'Fees', href: '/student/dashboard/fees', icon: FaRegCreditCard },
         { label: 'Feedback', href: '/student/dashboard/feedback', icon: FaQuestionCircle },
+        { label: 'Community', href: '/student/Community', icon: FaChalkboard },
       ]
     },
     {
@@ -43,7 +44,8 @@ const navItemsByRole = {
         { label: 'Attendance', href: `/faculty/courses/attendance/${localStorage.getItem('currentCourse')}`, icon: Users },
         { label: 'Exam Conduction', href: `/faculty/courses/exam-conduction/${localStorage.getItem('currentCourse')}`, icon: FileText },
         { label: 'Results', href: `/faculty/courses/results/${localStorage.getItem('currentCourse')}`, icon: NotebookPen },
-        { label: 'Inbox', href: `/faculty/courses/inbox/${localStorage.getItem('currentCourse')}`, icon: Inbox }
+        { label: 'Inbox', href: `/faculty/courses/inbox/${localStorage.getItem('currentCourse')}`, icon: Inbox },
+        { label: 'Community', href: '/faculty/Community', icon: FaChalkboard },
       ]
     }
   ],
@@ -53,7 +55,8 @@ const navItemsByRole = {
         { label: 'Overview', href: '/master-admin/dashboard/overview', icon: MdOutlineDashboard },
         { label: 'Activity', href: '/master-admin/dashboard/activity', icon: Activity },
         { label: 'Report', href: '/master-admin/dashboard/report', icon: MdAssignment },
-        { label: 'Settings', href: '/master-admin/dashboard/settings', icon: UserCog }
+        { label: 'Settings', href: '/master-admin/dashboard/settings', icon: UserCog },
+        { label: 'Community', href: '/master-admin/Community', icon: FaChalkboard },
       ]
     },
     {
@@ -100,6 +103,7 @@ const navItemsByRole = {
         { label: 'Total Fees', href: '/finance-admin/overview/totalFeesCollected', icon: ChartSpline },
         { label: 'Pending Fees', href: '/finance-admin/overview/pendingStudentFees', icon: BellRing },
         { label: 'Notes', href: '/finance-admin/overview/upcomingPaymentDeadline', icon: NotebookPen },
+        { label: 'Community', href: '/finance-admin/Community', icon: FaChalkboard },
       ]
     },
     { id: 2, label: 'Student Fees', href: '/finance-admin/studentFees/totalFeesStatus', icon: CreditCard, children: [

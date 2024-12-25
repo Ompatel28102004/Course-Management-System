@@ -3,6 +3,7 @@ import { HOST } from '../../../utils/constants'
 import axios from 'axios';
 import LoadingAnimation from "../../Loading/LoadingAnimation"
 import './Enrolled_Courses.css';
+import { useNavigate } from 'react-router-dom';
 
 function EnrolledCourses() {
   const [firstName, setFirstName] = useState("");
@@ -13,7 +14,7 @@ function EnrolledCourses() {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const[sem, SetSem] = useState();
+  const [sem, SetSem] = useState();
   const [loading, setLoading] = useState(true);
   const [enrolledIndex, setEnrolledIndex] = useState(0);
   const [completedIndex, setCompletedIndex] = useState(0);
@@ -24,7 +25,7 @@ function EnrolledCourses() {
 
   const token = localStorage.getItem('authToken');
   const userId = localStorage.getItem('userId');
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchStudentCourseData = async () => {
       try {
@@ -108,22 +109,22 @@ function EnrolledCourses() {
       setTimeout(() => setShowToast(false), 3000);
     }
   };
-  
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
-  
+
   const handleCourseSelect = (courseId) => {
     setAvailableCourses(availableCourses.map(course => (
       course._id === courseId ? { ...course, selected: !course.selected } : course
     )));
     setSelectedCourses(prev => {
       const selectedCourse = availableCourses.find(course => course._id === courseId);
-      return prev.some(course => course._id === courseId) 
-        ? prev.filter(course => course._id !== courseId) 
+      return prev.some(course => course._id === courseId)
+        ? prev.filter(course => course._id !== courseId)
         : [...prev, selectedCourse];
     });
-  };    
+  };
 
   // Function to download the file
   const handleDownload = async (courseID, fileUrl) => {
@@ -153,7 +154,7 @@ function EnrolledCourses() {
     } else {
       openConfirmationModal();
     }
-  };    
+  };
 
   const openConfirmationModal = () => {
     setShowConfirmationModal(true);
@@ -162,12 +163,12 @@ function EnrolledCourses() {
   const closeConfirmationModal = () => {
     setShowConfirmationModal(false);
   };
-  
+
   const handleConfirmationSubmit = async () => {
     try {
       await axios.post(`${HOST}/api/student/enroll-selected-courses`, {
         userId,
-        firstName, 
+        firstName,
         lastName,
         courses: selectedCourses,
       }, {
@@ -201,7 +202,14 @@ function EnrolledCourses() {
         <h3>{Courses.Course_Name}</h3>
         <p><strong>Course Code:</strong> {Courses.Course_Id}</p>
         <p><strong>Instructor:</strong> {Courses.faculty_Name}</p>
-        <button className="forum-button">Forum</button>
+
+        <button
+          className="forum-button"
+          onClick={() => navigate(`/student/courses/${Courses.Course_Id}/forum`)}
+        >
+          Forum
+        </button>
+
       </div>
     );
   };
@@ -212,7 +220,7 @@ function EnrolledCourses() {
       <p>You have not enrolled in any courses for this semester.</p>
       <button className="button" onClick={openModal}>Enroll Now</button>
     </div>
-  );  
+  );
 
   const renderCompletedCourseCard = (Courses) => (
     <div className="Courses-card-completed">
@@ -233,7 +241,7 @@ function EnrolledCourses() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen"><LoadingAnimation/></div>;
+    return <div className="flex justify-center items-center h-screen"><LoadingAnimation /></div>;
   }
 
   return (
@@ -268,7 +276,7 @@ function EnrolledCourses() {
           </div>
         </div>
       </div>
-  
+
       {/* Select Available Modal */}
       {isModalOpen && (
         <div className="modal">
@@ -287,7 +295,7 @@ function EnrolledCourses() {
                   <span className="course-name">
                     {course.courseName} ({course.courseID})
                   </span>
-                  <a onClick={() => handleDownload(course.courseID,course.pdfUrl)} target="_blank" rel="noopener noreferrer" className="pdf-link">View PDF</a>
+                  <a onClick={() => handleDownload(course.courseID, course.pdfUrl)} target="_blank" rel="noopener noreferrer" className="pdf-link">View PDF</a>
                 </li>
               ))}
             </ul>
@@ -333,5 +341,5 @@ function EnrolledCourses() {
 }
 
 export default EnrolledCourses;
- 
+
 // Update course model for all.

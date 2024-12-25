@@ -23,11 +23,11 @@ export const SocketProvider = ({ children }) => {
         console.log("Connected to socket server");
       });
 
-      const handleRecieveChannelMessage = (message) => {
-        console.log("Message received from server:", message);
-    };
+    //   const handleRecieveChannelMessage = (message) => {
+    //     console.log("Message received from server:", message);
+    // };
 
-      newSocket.on("receive-channel-message", handleRecieveChannelMessage);
+      // newSocket.on("receive-channel-message", handleRecieveChannelMessage);
     
       setSocket(newSocket); // Update the state with the new socket instance
 

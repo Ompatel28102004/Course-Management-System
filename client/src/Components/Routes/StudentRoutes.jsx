@@ -11,6 +11,8 @@ import Setting from '../AcademicAdmin/Setting';
 import Assignments from '../Student/Courses/Assignments.jsx';
 import Feedback from "../Student/Dashboard/Feedback.jsx"
 import Quiz from '../Student/Courses/Quiz.jsx';
+import CourseForum from '../Student/Courses/CourseForum.jsx';
+import ChatRoom from '../Community/ChatRoom.jsx';
 const Student = () => {
   return (
       <div>
@@ -25,10 +27,11 @@ const Student = () => {
           <Route path="/dashboard/feedback" element={<Feedback />} />
           <Route path="/courses/enrolled-courses" element={<EnrolledCourses />} />
           <Route path="/courses/attendance" element={<Attendance />} />
-          <Route path="/courses/course-forum" element={<EnrolledCourses />} />
           <Route path="/courses/assignments" element={<Assignments />} />
           <Route path="/courses/quiz" element={<Quiz />} />
           <Route path="/courses/results" element={<Result />} />
+          <Route path="/courses/:courseId/forum" element={<CourseForum />} />
+          <Route path="/Community" element={<ChatRoom />} />
         </Routes>
       </div>
   );

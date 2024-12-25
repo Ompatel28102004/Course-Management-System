@@ -10,6 +10,7 @@ import TotalFeesStatus from '../FinanceAdmin/StudentFees/TotalFeesStatus';
 import DegreeWiseFeesStatus from '../FinanceAdmin/StudentFees/DegreeWiseFeesStatus';
 import UpcomingDeadlines from '../FinanceAdmin/StudentFees/UpcomingDeadlines';
 import InvoiceDeatils from '../FinanceAdmin/StudentFees/InvoiceDeatils';
+import ChatRoom from '../Community/ChatRoom.jsx';
 
 export default function FinanceAdmin() {
     return (
@@ -17,6 +18,7 @@ export default function FinanceAdmin() {
           <Routes>
             {/* Default Route */}
             <Route path="*" element={<TotalFeesCollected/>} />
+          <Route path="/Community" element={<ChatRoom />} />
             
             {/* Overview Routes */}
             <Route path="/overview/totalFeesCollected" element={<TotalFeesCollected/>} />

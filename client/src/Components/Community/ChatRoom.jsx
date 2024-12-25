@@ -1,5 +1,5 @@
 import React from "react";
-import MessageContainer from "../../Community/MessageContainer";
+import MessageContainer from "./MessageContainer";
 
 const ChatRoom = () => {
   return (

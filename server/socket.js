@@ -2,6 +2,7 @@ import { Server as SocketIOServer } from "socket.io";
 import Message from "./model/MessageModel.js";
 import Channel from "./model/CommunityModel.js";
 import User from "./model/UserModel.js";
+
 const setupSocket = (server) => {
     const io = new SocketIOServer(server, {
         cors: {
@@ -56,10 +57,8 @@ const setupSocket = (server) => {
                 channel.members.forEach((member) => {
                     const memberSocketId = userSocketMap.get(member.user_id.toString());
                     if (memberSocketId) {
-                        console.log("Sending message to client:", finalData);
+                        console.log(`Sending message to ${memberSocketId}`);
                         io.to(memberSocketId).emit("receive-channel-message", finalData);
-
-                        // io.to(memberSocketId).emit("receive-channel-message", finalData);
                     }
                 });
             }
@@ -68,6 +67,35 @@ const setupSocket = (server) => {
         }
     };
 
+    const deleteChannelMessage = async (messageId, communityId) => {
+        try {
+            // Remove the message from the database
+            const deletedMessage = await Message.findByIdAndDelete(messageId);
+            if (!deletedMessage) {
+                console.error(`Message with ID ${messageId} not found.`);
+                return;
+            }
+
+            // Remove the message reference from the channel
+            await Channel.findOneAndUpdate(
+                { communityId: communityId },
+                { $pull: { messages: messageId } }
+            );
+
+            const channel = await Channel.findOne({ communityId: communityId }).populate("members");
+
+            if (channel && channel.members) {
+                channel.members.forEach((member) => {
+                    const memberSocketId = userSocketMap.get(member.user_id.toString());
+                    if (memberSocketId) {
+                        io.to(memberSocketId).emit("message-deleted", { messageId, communityId });
+                    }
+                });
+            }
+        } catch (error) {
+            console.error("Error deleting channel message:", error);
+        }
+    };
 
     io.on("connection", (socket) => {
         const userId = socket.handshake.query.userId;
@@ -79,6 +107,11 @@ const setupSocket = (server) => {
         }
 
         socket.on("send-channel-message", sendChannelMessage);
+
+        socket.on("delete-message", async ({ messageId, communityId }) => {
+            await deleteChannelMessage(messageId, communityId);
+        });
+
         socket.on("disconnect", () => disconnect(socket));
     });
 };

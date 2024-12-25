@@ -9,6 +9,7 @@ import ExamResults from "../Faculty/ExamPages/Result";
 import axios from "axios";
 import { HOST } from "../../utils/constants";
 import StudentApprovalInbox from "../Faculty/StudentApproval/studentApproval";
+import ChatRoom from '../Community/ChatRoom.jsx';
 
 const Faculty = () => {
     const navigate = useNavigate();
@@ -112,6 +113,8 @@ const Faculty = () => {
                     path="/settings"
                     element={<Setting />}
                 />
+          <Route path="/Community" element={<ChatRoom />} />
+
             </Routes>
         </div>
     );

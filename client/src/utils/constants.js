@@ -110,5 +110,6 @@ export const EDITEXAM_ROUTE = (examID) => `${HOST}/${exam}/editexam/${examID}`;
 // Delete an exam by examID
 export const DELETEEXAM_ROUTE = (examID) => `${HOST}/${exam}/deleteexam/${examID}`;
 
-export const ADDMessage_ROUTE = `${HOST}/api/message/addmessage`;
+export const DELETEMessage_ROUTE = (messageId) => `${HOST}/api/message/delete/${(messageId)}`;
 export const GETMessage_ROUTE = (communityId) => `${HOST}/api/message/getmessage/${(communityId)}`;
+export const GETCommunity_ROUTE = (communityId) => `${HOST}/api/message/getcommunity/${(communityId)}`;

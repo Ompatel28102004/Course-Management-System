@@ -10,7 +10,7 @@ import Exam from '../model/ExamDetailsModel.js';
 import Attendance from '../model/AttendanceModel.js';
 import { hash } from 'bcrypt';
 import twilio from 'twilio'; // Import Twilio
-
+import Community from '../model/CommunityModel.js';
 
 const sid = "ACd20c0961e10c674a35238bb1b1e488fa";
 const auth_token = "f28213b4ad4f47ca83499349a49e732d";
@@ -391,9 +391,14 @@ export const addStudent = async (req, res) => {
       user_id: enrollment,
       password: hashedPassword,
       role: "student",
-      email: CollegeEmail
+      email: CollegeEmail,
+      Name: `${FirstName} ${LastName}`,
+      ImgUrl: image_url
     });
-
+    const community = await Community.findOneAndUpdate(
+      { communityId: "12345" },
+      { $push: { members: newUser._id } }
+    );
     const semesterFees = getSemesterFees(Academic_info.Degree, Academic_info.Branch);
     await Fees.create({
       studentId: enrollment,
@@ -647,9 +652,14 @@ export const addFaculty = async (req, res) => {
       password: hashedPassword,
       role: 'faculty',
       securityCode: hashedsecurityCode,
-      email: CollegeEmail,  // Use CollegeEmail for user entry
+      email: CollegeEmail,  
+      Name: `${FirstName} ${LastName}`,
+      ImgUrl: otherDetails.image_url
     });
-
+    const community = await Community.findOneAndUpdate(
+      { communityId: "12345" },
+      { $push: { members: newUser._id } }
+    );
     // Send SMS to the faculty (optional)
     const messageBody = `
         Welcome to StudySync, ${otherDetails.FirstName || ''} ${otherDetails.LastName || ''}!
@@ -1211,6 +1221,14 @@ export const addCourse = async (req, res) => {
       pdfUrl: courseFile, // Include PDF URL if provided
       courseInstructorName: `${faculty.FirstName} ${faculty.LastName}`, // Faculty name from Faculty model
     });
+    const community = await Community.create(
+      { 
+        communityId: courseID,
+        name: newCourse.courseName,
+        admin: faculty._id,
+        members: [faculty._id],
+      }
+    );
     // Create new course record with additional details
     const newAttendance = await Attendance.create({
       courseRefID: newCourse._id,

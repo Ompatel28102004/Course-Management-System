@@ -10,6 +10,11 @@ const communitySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    admin: [{
+        type: mongoose.Schema.ObjectId,
+        ref: "users",
+        required: true,
+    }],
     members: [{ type: mongoose.Schema.ObjectId, ref: "users", required: true }],
     messages: [{
         type: mongoose.Schema.ObjectId, ref: "Messages"
