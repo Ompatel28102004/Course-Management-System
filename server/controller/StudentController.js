@@ -947,73 +947,80 @@ export const getQuizForCourse = async (req, res) => {
   try {
     const course = await courseExam.findOne({ courseId });
     if (!course || course.exam.length === 0) {
-      return res.status(404).json({ message: 'No quiz found for this course' });
+      return res.status(404).json({ message: 'No quizzes found for this course' });
     }
 
-    const quiz = course.exam[0];
-    const response = {
-      examId: quiz.examId,
-      examName: quiz.examName,
-      isPublished: quiz.isPublished,
-      date: quiz.date
-    };
+    const quizzes = await Promise.all(course.exam.map(async (quiz) => {
+      const response = {
+        examId: quiz.examId,
+        examName: quiz.examName,
+        isPublished: quiz.isPublished,
+        date: quiz.date,
+        totalMarks: quiz.totalMarks,
+        duration: quiz.duration,
+        examGuidelines: quiz.examGuidelines
+      };
 
-    if (true) {
-      const studentResult = await result.findOne({
-        courseId,
-        'parinam.examId': quiz.examId,
-        'parinam.results.studentId': parseInt(userId)
-      });
-      console.log("SR",studentResult)
-      if (studentResult) {
-        const examResult = studentResult.parinam.find(exam => exam.examId === quiz.examId);
-        const userResult = examResult.results.find(r => r.studentId == parseInt(userId));
-        console.log("UR",userResult)
-        response.alreadyTaken = true;
-        response.result = {
-          marks: userResult.marks,
-          remarks: userResult.remarks
-        };
-        console.log(response.result)
-      } else {
-        response.alreadyTaken = false;
-        response.totalMarks = quiz.totalMarks;
-        response.duration = quiz.duration;
-        response.examGuidelines = quiz.examGuidelines;
-        response.questions = await Promise.all(quiz.questions.map(async (q) => {
-          const fullQuestion = await questionBank.findOne(
-            { 'Bank.questionId': q.questionRefId },
-            { 'Bank.$': 1 }
-          );
-          return {
-            ...fullQuestion.Bank[0],
-            marks: q.marks
+      if (quiz.isPublished) {
+        const studentResult = await result.findOne({
+          courseId,
+          'parinam.examId': quiz.examId,
+          'parinam.results.studentId': parseInt(userId)
+        });
+
+        if (studentResult) {
+          const examResult = studentResult.parinam.find(exam => exam.examId === quiz.examId);
+          const userResult = examResult.results.find(r => r.studentId == parseInt(userId));
+          response.alreadyTaken = true;
+          response.result = {
+            marks: userResult.marks,
+            remarks: userResult.remarks
           };
-        }));
+        } else {
+          response.alreadyTaken = false;
+          response.questions = await Promise.all(quiz.questions.map(async (q) => {
+            const fullQuestion = await questionBank.findOne(
+              { 'Bank.questionId': q.questionRefId },
+              { 'Bank.$': 1 }
+            );
+            return {
+              questionId: fullQuestion.Bank[0].questionId,
+              questionText: fullQuestion.Bank[0].questionText,
+              options: fullQuestion.Bank[0].options,
+              marks: q.marks
+            };
+          }));
+        }
       }
-    }
 
-    res.status(200).json(response);
+      return response;
+    }));
+
+    res.status(200).json(quizzes);
   } catch (error) {
-    console.error('Error fetching quiz:', error);
+    console.error('Error fetching quizzes:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 export const submitQuiz = async (req, res) => {
   const { courseId } = req.params;
-  const { userId, answers } = req.body;
+  const { userId, examId, answers } = req.body;
 
   try {
     const course = await courseExam.findOne({ courseId });
     if (!course || !course.exam || course.exam.length === 0) {
-      return res.status(404).json({ message: 'No quiz found for this course' });
+      return res.status(404).json({ message: 'No quizzes found for this course' });
     }
 
-    const quiz = course.exam[0];
+    const quiz = course.exam.find(exam => exam.examId === examId);
+    if (!quiz) {
+      return res.status(404).json({ message: 'Quiz not found' });
+    }
+
     let totalScore = 0;
 
-    // Scoring logic remains the same
+    // Scoring logic
     for (const [questionId, userAnswer] of Object.entries(answers)) {
       const question = quiz.questions.find(q => q.questionRefId.toString() === questionId);
       if (question) {
@@ -1054,11 +1061,11 @@ export const submitQuiz = async (req, res) => {
 
     if (existingResult) {
       // Check if this specific exam already exists
-      const examExists = existingResult.parinam.some(
+      const examIndex = existingResult.parinam.findIndex(
         exam => exam.examId === quiz.examId
       );
 
-      if (examExists) {
+      if (examIndex !== -1) {
         // Update existing exam results
         await result.findOneAndUpdate(
           { 
@@ -1067,10 +1074,11 @@ export const submitQuiz = async (req, res) => {
           },
           { 
             $push: {
-              'parinam.$.results': {
+              [`parinam.${examIndex}.results`]: {
                 studentId: parseInt(userId),
                 marks: totalScore,
-                remarks
+                remarks,
+                date: new Date()
               }
             }
           }
@@ -1088,7 +1096,8 @@ export const submitQuiz = async (req, res) => {
                 results: [{
                   studentId: parseInt(userId),
                   marks: totalScore,
-                  remarks
+                  remarks,
+                  date: new Date()
                 }]
               }
             }
@@ -1106,19 +1115,51 @@ export const submitQuiz = async (req, res) => {
           results: [{
             studentId: parseInt(userId),
             marks: totalScore,
-            remarks
+            remarks,
+            date: new Date()
           }]
         }]
       });
     }
 
+    // Fetch all test results for this student in this course
+    const allResults = await result.aggregate([
+      { $match: { courseId } },
+      { $unwind: '$parinam' },
+      { $unwind: '$parinam.results' },
+      { $match: { 'parinam.results.studentId': parseInt(userId) } },
+      {
+        $project: {
+          examName: '$parinam.examName',
+          examId: '$parinam.examId',
+          marks: '$parinam.results.marks',
+          remarks: '$parinam.results.remarks',
+          date: '$parinam.results.date'
+        }
+      }
+    ]);
+
+    const formattedResults = allResults.map(exam => ({
+      examName: exam.examName,
+      marks: exam.marks,
+      totalMarks: course.exam.find(e => e.examId === exam.examId)?.totalMarks || 0,
+      remarks: exam.remarks,
+      date: exam.date
+    }));
+
     res.status(200).json({
-      score: totalScore,
-      totalMarks: quiz.totalMarks,
-      remarks
+      currentQuiz: {
+        examName: quiz.examName,
+        score: totalScore,
+        totalMarks: quiz.totalMarks,
+        remarks
+      },
+      allResults: formattedResults
     });
   } catch (error) {
     console.error('Error submitting quiz:', error);
     res.status(500).json({ message: 'Internal server error', errorDetails: error.message });
   }
 };
+
+

@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { AlertTriangle, Timer, ArrowRight, Send, Book, CheckCircle, ChevronLeft, RefreshCcw, Eye } from 'lucide-react'
 import axios from 'axios'
 import { Button } from "../../ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../../ui/card"
 import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import { Label } from "../../ui/label"
 import { Progress } from "../../ui/progress"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../../ui/dialog"
 import { Alert, AlertDescription, AlertTitle } from "../../ui/alert"
 import { HOST } from "../../../utils/constants"
 import LoadingAnimation from '../../Loading/LoadingAnimation'
@@ -16,7 +16,6 @@ export default function QuizApplication() {
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [quizzes, setQuizzes] = useState([])
   const [selectedQuiz, setSelectedQuiz] = useState(null)
-  const [quizData, setQuizData] = useState(null)
   const [questions, setQuestions] = useState([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState({})
@@ -27,9 +26,12 @@ export default function QuizApplication() {
   const [quizResult, setQuizResult] = useState(null)
   const [showExitConfirmation, setShowExitConfirmation] = useState(false)
   const [showResultDialog, setShowResultDialog] = useState(false)
+  const [allResults, setAllResults] = useState([])
+  const [warningCount, setWarningCount] = useState(0)
+  const [showWarningDialog, setShowWarningDialog] = useState(false)
 
-  const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
+  const userId = localStorage.getItem('userId')
+  const token = localStorage.getItem('authToken')
 
   useEffect(() => {
     fetchCourses()
@@ -60,7 +62,7 @@ export default function QuizApplication() {
       const response = await axios.get(`${HOST}/api/student/courses/${courseId}/quiz?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      setQuizzes(Array.isArray(response.data) ? response.data : [response.data])
+      setQuizzes(response.data)
     } catch (error) {
       console.error('Error fetching quizzes:', error)
       setError(`Failed to fetch quizzes: ${error.message}`)
@@ -69,38 +71,31 @@ export default function QuizApplication() {
     }
   }
 
-  const fetchQuizData = async (quizId) => {
-    try {
-      setLoading(true)
-      console.log(`Fetching quiz data for course ${selectedCourse.courseId} and user ${userId}`)
-      const response = await axios.get(`${HOST}/api/student/courses/${selectedCourse.courseId}/quiz?userId=${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      console.log('Quiz data:', response.data)
-      setQuizData(response.data)
-      if (response.data.isPublished && !response.data.alreadyTaken) {
-        setTimeLeft(response.data.duration * 60)
-        const plainQuestions = response.data.questions.map(q => ({
-          questionId: q.questionId || q._doc.questionId,
-          questionText: q.questionText || q._doc.questionText,
-          options: q.options || q._doc.options,
-          marks: q.marks || q._doc.marks
-        }))
-        console.log('Processed questions:', plainQuestions)
-        setQuestions(plainQuestions)
-      }
-    } catch (error) {
-      console.error('Error fetching quiz data:', error)
-      setError(`Failed to fetch quiz data: ${error.response?.data?.message || error.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const startQuiz = async () => {
     try {
-      await document.documentElement.requestFullscreen()
       setQuizStarted(true)
+      setTimeLeft(selectedQuiz.duration * 60)
+      if (selectedQuiz && selectedQuiz.questions) {
+        setQuestions(selectedQuiz.questions)
+        setCurrentQuestion(0)
+        setAnswers({})
+        
+        // Request fullscreen on the quiz container
+        const quizElement = document.getElementById('quiz-container')
+        if (quizElement?.requestFullscreen) {
+          await quizElement.requestFullscreen()
+        } else if (quizElement?.webkitRequestFullscreen) {
+          await quizElement.webkitRequestFullscreen()
+        } else if (quizElement?.msRequestFullscreen) {
+          await quizElement.msRequestFullscreen()
+        }
+
+        // Prevent opening inspect tools
+        document.addEventListener('keydown', preventInspect)
+        document.addEventListener('contextmenu', preventContextMenu)
+      } else {
+        throw new Error('No questions available for this quiz')
+      }
     } catch (error) {
       console.error('Error starting quiz:', error)
       setError(`Failed to start quiz: ${error.message}`)
@@ -113,6 +108,7 @@ export default function QuizApplication() {
         `${HOST}/api/student/courses/${selectedCourse.courseId}/quiz/submit`,
         {
           userId,
+          examId: selectedQuiz.examId,
           answers,
         },
         {
@@ -123,13 +119,26 @@ export default function QuizApplication() {
         }
       )
 
-      setQuizResult(response.data)
+      setQuizResult(response.data.currentQuiz)
+      setAllResults(response.data.allResults)
       setQuizStarted(false)
-      document.exitFullscreen()
       
+      // Exit fullscreen
+      if (document.fullscreenElement) {
+        await document.exitFullscreen()
+      } else if (document.webkitFullscreenElement) {
+        await document.webkitExitFullscreen()
+      } else if (document.msFullscreenElement) {
+        await document.msExitFullscreen()
+      }
+      
+      // Remove event listeners
+      document.removeEventListener('keydown', preventInspect)
+      document.removeEventListener('contextmenu', preventContextMenu)
+
       await fetchQuizzes(selectedCourse.courseId)
       setSelectedQuiz(null)
-      setQuizData(null)
+      setShowResultDialog(true)
     } catch (error) {
       console.error('Error submitting quiz:', error)
       setError(`Failed to submit quiz: ${error.message}`)
@@ -154,25 +163,62 @@ export default function QuizApplication() {
   }, [quizStarted, timeLeft])
 
   const handleVisibilityChange = useCallback(() => {
-    if (quizStarted && !document.fullscreenElement) {
-      setShowExitConfirmation(true)
+    if (quizStarted && !document.fullscreenElement && 
+        !document.webkitFullscreenElement && 
+        !document.msFullscreenElement) {
+      setWarningCount((prevCount) => {
+        const newCount = prevCount + 1
+        if (newCount >= 3) {
+          submitQuiz()
+        } else {
+          setShowWarningDialog(true)
+        }
+        return newCount
+      })
     }
   }, [quizStarted])
 
   useEffect(() => {
     document.addEventListener('fullscreenchange', handleVisibilityChange)
+    document.addEventListener('webkitfullscreenchange', handleVisibilityChange)
+    document.addEventListener('msfullscreenchange', handleVisibilityChange)
+    
     return () => {
       document.removeEventListener('fullscreenchange', handleVisibilityChange)
+      document.removeEventListener('webkitfullscreenchange', handleVisibilityChange)
+      document.removeEventListener('msfullscreenchange', handleVisibilityChange)
     }
   }, [handleVisibilityChange])
 
-  const handleExitConfirmation = (continueQuiz) => {
+  const handleExitConfirmation = async (continueQuiz) => {
     if (continueQuiz) {
-      document.documentElement.requestFullscreen()
+      const quizElement = document.getElementById('quiz-container')
+      if (quizElement?.requestFullscreen) {
+        await quizElement.requestFullscreen()
+      } else if (quizElement?.webkitRequestFullscreen) {
+        await quizElement.webkitRequestFullscreen()
+      } else if (quizElement?.msRequestFullscreen) {
+        await quizElement.msRequestFullscreen()
+      }
     } else {
       submitQuiz()
     }
     setShowExitConfirmation(false)
+  }
+
+  const preventInspect = (e) => {
+    if (
+      e.keyCode === 123 || // F12
+      (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+      (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+      (e.ctrlKey && e.keyCode === 85) // Ctrl+U
+    ) {
+      e.preventDefault()
+    }
+  }
+
+  const preventContextMenu = (e) => {
+    e.preventDefault()
   }
 
   const formatTime = (seconds) => {
@@ -259,7 +305,6 @@ export default function QuizApplication() {
                       key={quiz.examId}
                       onClick={() => {
                         setSelectedQuiz(quiz)
-                        fetchQuizData(quiz.examId)
                       }}
                       className="w-full bg-green-600 hover:bg-green-700"
                     >
@@ -286,7 +331,6 @@ export default function QuizApplication() {
                       key={quiz.examId}
                       onClick={() => {
                         setSelectedQuiz(quiz)
-                        fetchQuizData(quiz.examId)
                       }}
                       className="w-full bg-blue-600 hover:bg-blue-700"
                     >
@@ -308,14 +352,13 @@ export default function QuizApplication() {
       return (
         <Card>
           <CardHeader>
-            <CardTitle>{quizData?.examName}</CardTitle>
+            <CardTitle>{selectedQuiz.examName}</CardTitle>
             <CardDescription>Course: {selectedCourse.courseId}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button
               onClick={() => {
                 setSelectedQuiz(null)
-                setQuizData(null)
               }}
               variant="outline"
               className="flex items-center"
@@ -323,33 +366,26 @@ export default function QuizApplication() {
               <ChevronLeft className="w-4 h-4 mr-1" />
               Back to Quizzes
             </Button>
-            {!quizData?.isPublished && (
-              <p className="text-yellow-600 font-medium">
-                This quiz is not yet available. It will be published on {new Date(quizData?.date).toLocaleString()}.
-              </p>
-            )}
-            {quizData?.isPublished && !quizData?.alreadyTaken && (
+            {selectedQuiz.isPublished && !selectedQuiz.alreadyTaken && (
               <>
-                <p className="font-medium">Duration: {quizData?.duration} minutes</p>
-                <p className="font-medium">Total Marks: {quizData?.totalMarks}</p>
+                <p className="font-medium">Duration: {selectedQuiz.duration} minutes</p>
+                <p className="font-medium">Total Marks: {selectedQuiz.totalMarks}</p>
                 <div className="bg-yellow-50 p-4 rounded-md">
                   <h3 className="font-semibold mb-2">Guidelines:</h3>
-                  <div dangerouslySetInnerHTML={{ __html: quizData?.examGuidelines }} />
+                  <div dangerouslySetInnerHTML={{ __html: selectedQuiz.examGuidelines }} />
                 </div>
               </>
             )}
-            {quizData?.alreadyTaken && (
+            {selectedQuiz.alreadyTaken && (
               <div>
                 <h3 className="font-semibold mb-2">Quiz Completed</h3>
-                <Button onClick={() => setShowResultDialog(true)} className="flex items-center">
-                  See Result
-                  <Eye className="w-4 h-4 ml-2" />
-                </Button>
+                <p>Marks: {selectedQuiz.result.marks}</p>
+                <p>Remarks: {selectedQuiz.result.remarks}</p>
               </div>
             )}
           </CardContent>
           <CardFooter>
-            {quizData?.isPublished && !quizData?.alreadyTaken && (
+            {selectedQuiz.isPublished && !selectedQuiz.alreadyTaken && (
               <Button
                 onClick={startQuiz}
                 className="w-full bg-green-600 hover:bg-green-700"
@@ -383,7 +419,7 @@ export default function QuizApplication() {
                   {questions[currentQuestion]?.options?.map((option, index) => (
                     <div className="flex items-center space-x-2" key={index}>
                       <RadioGroupItem value={option.text} id={`option-${index}`} />
-                <Label htmlFor={`option-${index}`}>{option.text}</Label>
+                      <Label htmlFor={`option-${index}`}>{option.text}</Label>
                     </div>
                   ))}
                 </RadioGroup>
@@ -396,8 +432,7 @@ export default function QuizApplication() {
             <Button
               onClick={() => setCurrentQuestion((prev) => Math.max(0, prev - 1))}
               disabled={currentQuestion === 0}
-              variant="outline"
-            >
+              variant="outline">
               Previous
             </Button>
             {currentQuestion < questions.length - 1 ? (
@@ -424,7 +459,7 @@ export default function QuizApplication() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div id="quiz-container" className="min-h-screen bg-gray-50 p-4">
       {renderQuizContent()}
 
       <Dialog open={showExitConfirmation} onOpenChange={setShowExitConfirmation}>
@@ -446,14 +481,49 @@ export default function QuizApplication() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Warning</DialogTitle>
+            <DialogDescription>
+              You have exited fullscreen mode. This is warning {warningCount} of 3. 
+              Please return to fullscreen mode to continue the quiz.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => {
+              setShowWarningDialog(false)
+              handleExitConfirmation(true)
+            }} className="bg-blue-600 hover:bg-blue-700">
+              Return to Fullscreen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Quiz Result</DialogTitle>
+            <DialogTitle>Quiz Results</DialogTitle>
           </DialogHeader>
-          <div>
-            <p>Marks: {quizData?.result?.marks}</p>
-            <p>Remarks: {quizData?.result?.remarks}</p>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold">Current Quiz Result:</h3>
+              <p>Exam: {quizResult?.examName}</p>
+              <p>Marks: {quizResult?.score} / {quizResult?.totalMarks}</p>
+              <p>Remarks: {quizResult?.remarks}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold">All Quiz Results:</h3>
+              {allResults.map((result, index) => (
+                <div key={index} className="mt-2">
+                  <p>Exam: {result.examName}</p>
+                  <p>Marks: {result.marks} / {result.totalMarks}</p>
+                  <p>Remarks: {result.remarks}</p>
+                  <p>Date: {new Date(result.date).toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
           </div>
           <DialogFooter>
             <Button onClick={() => setShowResultDialog(false)}>Close</Button>
@@ -463,3 +533,4 @@ export default function QuizApplication() {
     </div>
   )
 }
+
