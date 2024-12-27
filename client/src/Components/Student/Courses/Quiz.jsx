@@ -462,7 +462,7 @@ export default function QuizApplication() {
     <div id="quiz-container" className="min-h-screen bg-gray-50 p-4">
       {renderQuizContent()}
 
-      <Dialog open={showExitConfirmation} onOpenChange={setShowExitConfirmation}>
+      <Dialog open={showExitConfirmation} onOpenChange={() => {}} hideClose>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Exit Fullscreen Mode</DialogTitle>
@@ -481,25 +481,29 @@ export default function QuizApplication() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Warning</DialogTitle>
-            <DialogDescription>
-              You have exited fullscreen mode. This is warning {warningCount} of 3. 
-              Please return to fullscreen mode to continue the quiz.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => {
-              setShowWarningDialog(false)
-              handleExitConfirmation(true)
-            }} className="bg-blue-600 hover:bg-blue-700">
-              Return to Fullscreen
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <Dialog open={showWarningDialog} onOpenChange={() =>{}}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Warning</DialogTitle>
+      <DialogDescription>
+        You have exited fullscreen mode. This is warning {warningCount} of 3. 
+        Please return to fullscreen mode to continue the quiz.
+      </DialogDescription>
+    </DialogHeader>
+    <DialogFooter>
+      <Button
+        onClick={() => {
+          setShowWarningDialog(false);
+          handleExitConfirmation(true);
+        }}
+        className="bg-blue-600 hover:bg-blue-700"
+      >
+        Return to Fullscreen
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
 
       <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
         <DialogContent>
