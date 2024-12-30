@@ -3,10 +3,26 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import { SocketProvider } from './context/SocketContext.jsx'
-createRoot(document.getElementById('root')).render(
-  <SocketProvider>
+import { AuthProvider, useAuth } from "./context/authContext.jsx"; // Import the AuthProvider and useAuth hook
+
+const Root = () => {
+  const { isLoggedIn } = useAuth(); // Access isLoggedIn from the context
+  console.log("isLoggedIn: ", isLoggedIn);
+
+  return (
     <StrictMode>
-      <App />
+      {isLoggedIn ? (
+        <SocketProvider>
+          <App />
+        </SocketProvider>
+      ) : (
+        <App />
+      )}
     </StrictMode>
-  </SocketProvider>
+  );
+};
+createRoot(document.getElementById('root')).render(
+  <AuthProvider> 
+    <Root />
+  </AuthProvider>
 )

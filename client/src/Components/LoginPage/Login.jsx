@@ -7,7 +7,7 @@ import axios from "axios";
 import { Modal, Form, Spinner } from 'react-bootstrap';
 import "./Login.css";
 import { assets } from "../../assets/assets";
-
+import { useAuth } from "../../context/AuthContext";
 const Login = () => {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +29,7 @@ const Login = () => {
   // Toast notification state
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
-
+  const { login } = useAuth();
   // Handle Login Submission
   const handleLogin = async () => {
     try {
@@ -51,7 +51,8 @@ const Login = () => {
         localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('userRole', response.data.role);
         localStorage.setItem('userId', userId);
-
+        localStorage.setItem('isLoggedIn', true);
+        login(); 
         setToastMessage("Login successful!");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 500);
@@ -94,7 +95,8 @@ const Login = () => {
         localStorage.setItem('authToken', response.data.token); // Store the JWT token in localStorage
         localStorage.setItem('userRole', response.data.role); // Store user role
         localStorage.setItem('userId', userId);
-
+        localStorage.setItem('isLoggedIn', true);
+        login(); 
         setToastMessage("Login successful!");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 500);

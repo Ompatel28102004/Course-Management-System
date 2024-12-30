@@ -11,7 +11,9 @@ import Attendance from '../model/AttendanceModel.js';
 import { hash } from 'bcrypt';
 import twilio from 'twilio'; // Import Twilio
 import Community from '../model/CommunityModel.js';
-
+import Message from '../model/MessageModel.js';
+import AdminActivity from '../model/AdminActivityModel.js';
+import community from '../model/CommunityModel.js';
 const sid = "ACd20c0961e10c674a35238bb1b1e488fa";
 const auth_token = "f28213b4ad4f47ca83499349a49e732d";
 
@@ -404,7 +406,7 @@ export const addStudent = async (req, res) => {
       studentId: enrollment,
       semesters: semesterFees
     });
-
+    const notification = await AdminActivity.create({ user_id: enrollment, name: `${FirstName} ${LastName}`, activity: "Student added", status: "Pending" });
     return res.status(201).json({
       student: {
         enrollment: newStudent.enrollment,
@@ -477,7 +479,10 @@ export const deleteStudent = async (req, res) => {
     if (!user) {
       console.warn(`User entry not found for enrollmentNo: ${enrollmentNo}`);
     }
-
+    const community = await Community.findOneAndUpdate({ communityId: "12345" }, { $pull: { members: user._id } });
+    // Delete the corresponding fees record
+    const fees = await Fees.findOneAndDelete({ studentId: enrollmentNo });
+    const notification = await AdminActivity.create({ user_id: enrollmentNo, name: `${user.Name}`, activity: "Student deleted", status: "Pending" });
     // Return success response
     return res.status(200).json({ message: 'Student and corresponding user deleted successfully!' });
   } catch (error) {
@@ -527,22 +532,27 @@ export const editStudent = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: 'Student not found.' });
     }
-
-
-    // If a new tempPassword is provided, hash it
     if (tempPassword) {
       otherDetails.tempPassword = await hash(tempPassword, 10);
+      const user = await User.findOneAndUpdate({ user_id: enrollmentNo }, {
+        password: otherDetails.tempPassword
+      });
     }
     const updateData = { ...otherDetails }
     if (image_url) {
       updateData.image_url = image_url;
+      const user = await User.findOneAndUpdate({ user_id: enrollmentNo }, {
+        ImgUrl: image_url
+      });
     }
+
     // Update the student details in the database
     const updatedStudent = await Student.findOneAndUpdate(
       { enrollment: enrollmentNo },
       { $set: updateData },
       { new: true, runValidators: true } // Return the updated document
     );
+    const notification = await AdminActivity.create({ user_id: enrollmentNo, name: `${updatedStudent.FirstName} ${updatedStudent.LastName}`, activity: "Student details was changed", status: "Pending" });
 
     // Return success response
     return res.status(200).json({
@@ -607,14 +617,14 @@ export const addFaculty = async (req, res) => {
     // Generate CollegeEmail based on FirstName and LastName
     const CollegeEmail = generateFacultyCollegeEmail(FirstName, LastName);
     const departmentCodeMapping = {
-        "Computer department" : 100,
-        "Mechanical department" : 200,
-        "Electrical department" : 300,
-        "Civil department" : 400,
-        "Physics department" : 500,
-        "Maths department" : 600,
-        "Chemistry department" : 700,
-        "Humanities and Social Sciences department" : 800
+      "Computer department": 100,
+      "Mechanical department": 200,
+      "Electrical department": 300,
+      "Civil department": 400,
+      "Physics department": 500,
+      "Maths department": 600,
+      "Chemistry department": 700,
+      "Humanities and Social Sciences department": 800
     };
     const facultyId = await generateUniqueFacultyId(departmentCodeMapping[department]);
     // Check if faculty with the same facultyId, Email, CollegeEmail, or AadharNumber already exists
@@ -652,7 +662,7 @@ export const addFaculty = async (req, res) => {
       password: hashedPassword,
       role: 'faculty',
       securityCode: hashedsecurityCode,
-      email: CollegeEmail,  
+      email: CollegeEmail,
       Name: `${FirstName} ${LastName}`,
       ImgUrl: otherDetails.image_url
     });
@@ -679,7 +689,7 @@ export const addFaculty = async (req, res) => {
     //   })
     //   .then(() => console.log('Message sent successfully!'))
     //   .catch((err) => console.error('Error sending message:', err));
-
+    const notification = await AdminActivity.create({ user_id: facultyId, name: `${newFaculty.FirstName} ${newFaculty.LastName}`, activity: "Faculty added", status: "Pending" });
     // Return success response
     return res.status(201).json({
       faculty: {
@@ -741,6 +751,8 @@ export const deleteFaculty = async (req, res) => {
     if (!user) {
       console.warn(`User entry not found for facultyId: ${facultyId}`);
     }
+    const community = await Community.findOneAndUpdate({ communityId: "12345" }, { $pull: { members: user._id } });
+    const notification = await AdminActivity.create({ user_id: facultyId, name: `${user.Name}`, activity: "Faculty deleted", status: "Pending" });
     return res.status(200).json({ message: 'Faculty deleted successfully!' });
   } catch (error) {
     console.error('Error deleting faculty and user:', error);
@@ -748,7 +760,6 @@ export const deleteFaculty = async (req, res) => {
   }
 };
 
-// search faculty
 export const searchFaculty = async (req, res) => {
   try {
     const { search } = req.query; // Get the facultyId from query parameters
@@ -796,17 +807,23 @@ export const editFaculty = async (req, res) => {
 
     if (tempPassword) {
       otherDetails.tempPassword = await hash(tempPassword, 10);
+      const user = await User.findOneAndUpdate({ user_id: facultyId }, {
+        password: otherDetails.tempPassword
+      });
     }
     const updateData = { ...otherDetails }
     if (image_url) {
       updateData.image_url = image_url;
+      const user = await User.findOneAndUpdate({ user_id: facultyId }, {
+        ImgUrl: image_url
+      });
     }
     const updatedFaculty = await Faculty.findOneAndUpdate(
       { facultyId },
       { $set: updateData },
       { new: true, runValidators: true }
     );
-
+    const notification = await AdminActivity.create({ user_id: facultyId, name: `${updatedFaculty.FirstName} ${updatedFaculty.LastName}`, activity: "Faculty details was changed", status: "Pending" });
     return res.status(200).json({
       faculty: {
         facultyId: updatedFaculty.facultyId,
@@ -838,13 +855,18 @@ export const addTA = async (req, res) => {
     if (!existingFaculty) {
       return res.status(404).send({ message: 'Faculty not found.' });
     }
-
     // Check if the teaching courses exist
     const existingCourses = await Course.find({ courseID: teachingCourses }); // Updated here
-
     // Check if all requested courses were found
     if (!existingCourses.length) {
       return res.status(404).send({ message: 'courses not found.' });
+    }
+    const user = await User.findOne({ user_id: enrollment });
+    if (user) { 
+      const community = await Community.findOneAndUpdate(
+        { communityId: teachingCourses },
+        { $push: { members: user._id,admin: user._id } }
+      );
     }
 
     // Check if the student is already a TA
@@ -869,7 +891,7 @@ export const addTA = async (req, res) => {
       existingStudent.Academic_info.isTA = true;
       await existingStudent.save();
     }
-
+    const notification = await AdminActivity.create({ user_id: existingStudent.enrollment, name: `${existingStudent.FirstName} ${existingStudent.LastName}`, activity: "Student Marked as TA", status: "Pending" });
     // Return success response
     return res.status(200).json({
       message: 'Student updated to TA successfully!',
@@ -880,7 +902,7 @@ export const addTA = async (req, res) => {
         contactNumber: existingStudent.Contact,
         isTA: existingStudent.Academic_info.isTA, // Ensuring isTA is true
       },
-    });
+    })
   } catch (error) {
     console.error('Error adding TA:', error);
     return res.status(500).send({ message: 'Internal Server Error', error });
@@ -920,7 +942,15 @@ export const deleteTA = async (req, res) => {
 
     // Optionally update the user's role back to 'student'
     // await User.findOneAndUpdate({ user_id: enrollment }, { role: 'student' });
-
+    const notification = await AdminActivity.create({ user_id: existingStudent.enrollment, name: `${existingStudent.FirstName} ${existingStudent.LastName}`, activity: "Student Marked as Non- TA", status: "Pending" });
+    
+    const user = await User.findOne({ user_id: existingStudent.enrollment });
+    if (user) { 
+      const community = await Community.findOneAndUpdate(
+        { communityId: taRecord.teachingCourses },
+        { $pull: { members: user._id,admin: user._id } }
+      );
+    }
     return res.status(200).json({
       message: 'TA role removed successfully!',
       ta: {
@@ -1117,7 +1147,19 @@ export const editTA = async (req, res) => {
     if (!taRecord) {
       return res.status(404).send({ message: 'TA record not found.' });
     }
-
+    if(taRecord.teachingCourses != teachingCourses){
+      const user = await User.findOne({ user_id: enrollment });
+      if (user) { 
+        const community = await Community.findOneAndUpdate(
+          { communityId: taRecord.teachingCourses },
+          { $pull: { members: user._id,admin: user._id } }
+        );
+        await Community.findOneAndUpdate(
+          { communityId: teachingCourses },
+          { $push: { members: user._id,admin: user._id } }
+        );
+      }
+    }
     // Update the TA record
     taRecord.facultyId = facultyId;
     taRecord.teachingSemester = teachingSemester;
@@ -1127,7 +1169,7 @@ export const editTA = async (req, res) => {
     taRecord.stipendAmount = stipendAmount;
 
     await taRecord.save();
-
+    const notification = await AdminActivity.create({ user_id: existingStudent.enrollment, name: `${existingStudent.FirstName} ${existingStudent.LastName}`, activity: "Student TA Details was changed", status: "Pending" });
     return res.status(200).json({
       message: 'TA record updated successfully!',
       ta: {
@@ -1222,7 +1264,7 @@ export const addCourse = async (req, res) => {
       courseInstructorName: `${faculty.FirstName} ${faculty.LastName}`, // Faculty name from Faculty model
     });
     const community = await Community.create(
-      { 
+      {
         communityId: courseID,
         name: newCourse.courseName,
         admin: faculty._id,
@@ -1295,6 +1337,15 @@ export const deleteCourse = async (req, res) => {
     if (!course) {
       return res.status(404).json({ message: 'Course not found.' });
     }
+    // Find the community
+    const community = await Community.findOne({ communityId: courseID });
+    if (community) {
+      // Delete all messages with IDs in the community's messages array
+      await Message.deleteMany({ _id: { $in: community.messages } });
+
+      // Delete the community
+      await Community.findOneAndDelete({ communityId: courseID });
+    }
 
     // Return success response
     return res.status(200).json({ message: 'Course deleted successfully!' });
@@ -1358,6 +1409,11 @@ export const editCourse = async (req, res) => {
       // Update both the instructor ID and name
       otherDetails.courseInstructorID = courseInstructorID;
       otherDetails.courseInstructorName = faculty.name; // Fetch instructor's name from Faculty model
+      const community = await Community.findOneAndUpdate(
+        { communityId: courseID },
+        { $set: { admin: [faculty._id] } }, // Clear the admin array and set it to the new faculty ID
+        { new: true } // Return the updated document
+      );
     }
 
     // Prepare the update object
