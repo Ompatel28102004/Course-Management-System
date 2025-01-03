@@ -2,7 +2,8 @@ import { Server as SocketIOServer } from "socket.io";
 import Message from "./model/MessageModel.js";
 import Channel from "./model/CommunityModel.js";
 import User from "./model/UserModel.js";
-
+import {deleteAsset as deleteAsset_Image}  from "./cloudinary_image.js";
+import {deleteAsset as deleteAsset_files}  from "./cloudinary_files.js";
 const setupSocket = (server) => {
     const io = new SocketIOServer(server, {
         cors: {
@@ -57,7 +58,6 @@ const setupSocket = (server) => {
                 channel.members.forEach((member) => {
                     const memberSocketId = userSocketMap.get(member.user_id.toString());
                     if (memberSocketId) {
-                        console.log(`Sending message to ${memberSocketId}`);
                         io.to(memberSocketId).emit("receive-channel-message", finalData);
                     }
                 });
@@ -75,6 +75,10 @@ const setupSocket = (server) => {
                 console.error(`Message with ID ${messageId} not found.`);
                 return;
             }
+            const publicId = deletedMessage.fileUrl.split('/').pop().split('.')[0];
+            const resourceType = deletedMessage.fileUrl.includes('/raw/') ? 'raw' : 'image';
+            if (resourceType === 'image') {deleteAsset_Image(publicId);}
+            else if (resourceType === 'raw') {deleteAsset_files(publicId);}
 
             // Remove the message reference from the channel
             await Channel.findOneAndUpdate(

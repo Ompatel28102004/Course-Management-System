@@ -9,7 +9,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET 
 });
 
-const uploadFile = async (filePath) => {
+export const uploadFile = async (filePath) => {
   try {
     const result = await cloudinary.uploader.upload(filePath);
     return result;
@@ -18,5 +18,10 @@ const uploadFile = async (filePath) => {
     throw new Error(error.message);
   }
 };
-
-export default uploadFile;
+export const deleteAsset = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.error('Error deleting asset:', error);
+  }
+};

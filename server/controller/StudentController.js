@@ -5,7 +5,7 @@ import Approval from "../model/ApprovalModel.js";
 import Fee from "../model/FeesModel.js";
 import Result from "../model/ResultModel.js";
 import Assignment from "../model/AssignmentModel.js"
-import uploadFile from "../cloudinary_files.js";
+import {uploadFile} from "../cloudinary_files.js";
 import mongoose from "mongoose";
 import fetch from 'node-fetch'; 
 import Feedback from '../model/feedbackModel.js'

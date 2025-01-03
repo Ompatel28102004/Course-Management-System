@@ -1,4 +1,4 @@
-import uploadFile from "../cloudinary_files.js";
+import {uploadFile} from "../cloudinary_files.js";
 
 export const uploadFileController = async (req, res) => {
   try {

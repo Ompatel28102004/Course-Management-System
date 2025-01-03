@@ -13,7 +13,8 @@ import twilio from 'twilio'; // Import Twilio
 import Community from '../model/CommunityModel.js';
 import Message from '../model/MessageModel.js';
 import AdminActivity from '../model/AdminActivityModel.js';
-import community from '../model/CommunityModel.js';
+import { deleteAsset as deleteAsset_Image } from "../cloudinary_image.js";
+import { deleteAsset as deleteAsset_files } from "../cloudinary_files.js";
 const sid = "ACd20c0961e10c674a35238bb1b1e488fa";
 const auth_token = "f28213b4ad4f47ca83499349a49e732d";
 
@@ -473,7 +474,10 @@ export const deleteStudent = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: 'Student not found.' });
     }
-
+    const publicId = student.image_url.split('/').pop().split('.')[0];
+    const resourceType = student.image_url.includes('/raw/') ? 'raw' : 'image';
+    if (resourceType === 'image') { deleteAsset_Image(publicId); }
+    else if (resourceType === 'raw') { deleteAsset_files(publicId); }
     // Delete the corresponding user record
     const user = await User.findOneAndDelete({ user_id: enrollmentNo });
     if (!user) {
@@ -746,6 +750,10 @@ export const deleteFaculty = async (req, res) => {
     if (!faculty) {
       return res.status(404).json({ message: 'Faculty not found.' });
     }
+    const publicId = faculty.image_url.split('/').pop().split('.')[0];
+    const resourceType = faculty.image_url.includes('/raw/') ? 'raw' : 'image';
+    if (resourceType === 'image') { deleteAsset_Image(publicId); }
+    else if (resourceType === 'raw') { deleteAsset_files(publicId); }
 
     const user = await User.findOneAndDelete({ user_id: facultyId });
     if (!user) {
@@ -862,10 +870,10 @@ export const addTA = async (req, res) => {
       return res.status(404).send({ message: 'courses not found.' });
     }
     const user = await User.findOne({ user_id: enrollment });
-    if (user) { 
+    if (user) {
       const community = await Community.findOneAndUpdate(
         { communityId: teachingCourses },
-        { $push: { members: user._id,admin: user._id } }
+        { $push: { members: user._id, admin: user._id } }
       );
     }
 
@@ -943,12 +951,12 @@ export const deleteTA = async (req, res) => {
     // Optionally update the user's role back to 'student'
     // await User.findOneAndUpdate({ user_id: enrollment }, { role: 'student' });
     const notification = await AdminActivity.create({ user_id: existingStudent.enrollment, name: `${existingStudent.FirstName} ${existingStudent.LastName}`, activity: "Student Marked as Non- TA", status: "Pending" });
-    
+
     const user = await User.findOne({ user_id: existingStudent.enrollment });
-    if (user) { 
+    if (user) {
       const community = await Community.findOneAndUpdate(
         { communityId: taRecord.teachingCourses },
-        { $pull: { members: user._id,admin: user._id } }
+        { $pull: { members: user._id, admin: user._id } }
       );
     }
     return res.status(200).json({
@@ -1147,16 +1155,16 @@ export const editTA = async (req, res) => {
     if (!taRecord) {
       return res.status(404).send({ message: 'TA record not found.' });
     }
-    if(taRecord.teachingCourses != teachingCourses){
+    if (taRecord.teachingCourses != teachingCourses) {
       const user = await User.findOne({ user_id: enrollment });
-      if (user) { 
+      if (user) {
         const community = await Community.findOneAndUpdate(
           { communityId: taRecord.teachingCourses },
-          { $pull: { members: user._id,admin: user._id } }
+          { $pull: { members: user._id, admin: user._id } }
         );
         await Community.findOneAndUpdate(
           { communityId: teachingCourses },
-          { $push: { members: user._id,admin: user._id } }
+          { $push: { members: user._id, admin: user._id } }
         );
       }
     }
@@ -1337,6 +1345,10 @@ export const deleteCourse = async (req, res) => {
     if (!course) {
       return res.status(404).json({ message: 'Course not found.' });
     }
+    const publicId = course.pdfUrl.split('/').pop().split('.')[0];
+    const resourceType = course.pdfUrl.includes('/raw/') ? 'raw' : 'image';
+    if (resourceType === 'image') { deleteAsset_Image(publicId); }
+    else if (resourceType === 'raw') { deleteAsset_files(publicId); }
     // Find the community
     const community = await Community.findOne({ communityId: courseID });
     if (community) {
