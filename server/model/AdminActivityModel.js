@@ -1,5 +1,22 @@
 import mongoose from 'mongoose';
 
+// Subdocument schema for replies
+const replySchema = new mongoose.Schema({
+    adminName: {
+        type: String,
+        required: true,
+    },
+    reply: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    date: {
+        type: Date,
+        default: Date.now,
+    },
+});
+
 const adminActivitySchema = new mongoose.Schema({
     user_id: {
         type: Number,
@@ -19,13 +36,14 @@ const adminActivitySchema = new mongoose.Schema({
         default: null,
         trim: true,
     },
+    replies: [replySchema], 
     status: {
         type: String,
         enum: ['Reviewed', 'Pending'],
-        default: false,
+        default: 'Pending',
     },
     isSettled: {
-        type: Boolean,
+        type: Boolean,  
         default: false,
     },
     createdAt: {

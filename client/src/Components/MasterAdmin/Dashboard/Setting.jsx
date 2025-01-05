@@ -7,6 +7,7 @@ import { Input } from "../../../Components/ui/input";
 import { Button } from "../../../Components/ui/button";
 import { Alert, AlertDescription } from "../../../Components/ui/alert";
 import { ArrowLeft, Check, X, KeyRound } from "lucide-react";
+import Toast from '@/Components/Toast/Toast';
 
 const Setting = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -85,8 +86,8 @@ const Setting = () => {
         setShowToast(true);
         setTimeout(() => {
           setShowToast(false);
-          navigate('/academic-admin');
-        }, 3000);
+          navigate('/');
+        }, 2000);
         resetForm();
       }
     } catch (error) {
@@ -180,6 +181,8 @@ const Setting = () => {
           </Button>
         </CardFooter>
       </Card>
+      {/* Toast Notification */}
+      {showToast && <Toast message={toastMessage} />}
     </div>
   );
 };

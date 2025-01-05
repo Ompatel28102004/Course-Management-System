@@ -182,7 +182,7 @@ export default function CreateAdmin() {
                 <SelectItem value="master-admin">Master Admin</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={addAdmin}>Add Admin</Button>
+            <Button className="bg-[#B21FDC] text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 hover:bg-[#8707a8] hover:shadow-md" onClick={addAdmin}>Add Admin</Button>
           </div>
         </CardContent>
       </Card>
@@ -227,7 +227,7 @@ export default function CreateAdmin() {
                           <DialogHeader>
                             <DialogTitle>Get Temporary Access</DialogTitle>
                             <DialogDescription>
-                              Please Rememeber Changed Security Code. Ask the
+                              Please Remember Changed Security Code. Ask the
                               actual admin to change their password once your
                               work is completed.
                             </DialogDescription>
@@ -244,7 +244,7 @@ export default function CreateAdmin() {
                             value={securityCode}
                             onChange={(e) => setSecurityCode(e.target.value)}
                           />
-                          <Button onClick={getTemporaryAccess}>Submit</Button>
+                          <Button className="bg-[#B21FDC] text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:bg-[#8707a8] hover:shadow-md" onClick={getTemporaryAccess}>Submit</Button>
                         </DialogContent>
                       )}
                     </Dialog>
