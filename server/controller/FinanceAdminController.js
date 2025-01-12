@@ -143,7 +143,7 @@ export const pendingFees = async(req, res) => {
       },
       { 
         $match: { 
-          "semesters.status": { $in: ["unpaid", "pending", "overdue"] } 
+          "semesters.status": { $in: ["unpaid", "pending", "overdue","waived"] } 
         }
       },
       { 
@@ -172,7 +172,8 @@ export const pendingFees = async(req, res) => {
               enrollmentNumber: "$studentDetails.enrollment",
               pendingAmount: "$semesters.amount",
               dueDate: "$semesters.dueDate",
-              status: "$semesters.status"
+              status: "$semesters.status",
+              semester:"$semesters.semester"
             } 
           }
         }

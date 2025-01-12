@@ -8,7 +8,7 @@ import { verifyToken } from '../middlewares/AuthMiddleware.js';
 
 const FinanceAdminRoutes = Router();
 FinanceAdminRoutes.get('/overview',verifyToken, Overview);
-FinanceAdminRoutes.get('/pendingFees',verifyToken, pendingFees);
+FinanceAdminRoutes.get('/pendingFees', pendingFees);
 FinanceAdminRoutes.get('/dueDates',verifyToken, dueDates);
 FinanceAdminRoutes.get('/profile', verifyToken, getProfile);
 
