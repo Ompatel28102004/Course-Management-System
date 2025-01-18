@@ -12,6 +12,7 @@ import Assignment from "../model/AssignmentModel.js";
 import Approvals from "../model/ApprovalModel.js";
 import {v4 as uuidv4} from "uuid";
 import mongoose from "mongoose";
+import { uploadFile } from "../cloudinary_files.js";
 
 //It will give all the courses assigned to a faculty based on the facultyId
 export const getCoursesAssigned = asyncHandler(async (req, res) => {
@@ -515,7 +516,7 @@ export const postAssignments = asyncHandler(async (req,res) => {
             createdAt, 
             updatedAt, 
             facultyId, 
-            attachmentUrlFaculty, 
+            attachmentUrlFaculty, //Check if it required or not
             maxScore } = req.body;
 
         if (!courseId || !title || !description || !dueDate || !facultyId || !attachmentUrlFaculty|| !maxScore)
@@ -523,12 +524,18 @@ export const postAssignments = asyncHandler(async (req,res) => {
             return res.status(400).json({error: "All fields are mandatory"});
         }
 
+        if (!req.file){
+            return res.status(400).json({error: "No file is provided !!!"});
+        }
+
+        const upload = await uploadFile(req.file.path);
+
         const newAssignment = {
             title, 
             description, 
             dueDate,  
             facultyId, 
-            attachmentUrlFaculty, 
+            attachmentUrlFaculty: upload.secure_url, 
             maxScore
         }
         
@@ -551,6 +558,59 @@ export const postAssignments = asyncHandler(async (req,res) => {
         res.status(500).json({ message: 'Failed to add assignment', error });
     }
 });
+
+//Posts the marks for assignment of students 
+export const assignmentMarks = asyncHandler(async(req, res) => {
+    try {
+        const { courseId, title, studentId } = req.params;
+        const { marks } = req.body;
+
+        if (!courseId || !studentId){
+            return res.status(400).json({error: 'Course and student ID are required'});
+        }
+
+        if (!marks){
+            return res.status(400).json({error: 'marks are required'});
+        }
+
+        const assignment = await Assignment.findOne({
+            courseId, 
+            'assignments.title': title,
+            'assignments.submissions.studentId': studentId
+        })
+
+        if(!assignment){
+            return res.status(404).json({error: 'No such assignement or submission found'});
+        }
+
+        // Find the specific assignment within the assignments array by title
+        const specificAssignment = assignment.assignments.find(assign => assign.title === title);
+
+        if (!specificAssignment) {
+            return res.status(404).json({ message: 'Assignment not found' });
+        }
+
+        // Find the specific submission within the submissions array
+        const submission = specificAssignment.submissions.find(sub => sub.studentId === parseInt(studentId));
+
+        if (!submission) {
+            return res.status(404).json({ message: 'Submission not found' });
+        }
+
+        // Update the score
+        submission.score = score;
+        submission.updatedAt = new Date();
+
+        // Save the changes to the database
+        await assignment.save();
+
+        res.status(200).json({ message: 'Submission updated successfully', submission });
+
+    } catch (error) {
+        console.log('Error adding marks:', error);
+        res.status(500).json({message: 'Failed to add marks', error});
+    }
+})
 
 //Fetch all the requests for course approvals
 export const getMessages = asyncHandler(async(req,res) => {

@@ -4,7 +4,7 @@ import { getCoursesAssigned, getCourseInfo, getFacultyProfile,
     getRegStudents, getAttenByDate,postAttendance,
     getQuestions, addQuestions, deleteQuestion, editQuestion,
     createExam, getExams, editExam, deleteExam,
-    getExamsResult, getAssignments, postAssignments,
+    getExamsResult, getAssignments, postAssignments, assignmentMarks,
     getMessages, 
     acceptRequest} from "../controller/FacultyController.js";
 
@@ -29,9 +29,9 @@ Routes.delete("/examConduction/createExam/:courseId/:examId", verifyToken,delete
 Routes.get("/result/:courseId",verifyToken,getExamsResult);
 Routes.get("/assignment/:courseId",verifyToken, getAssignments);
 Routes.post("/assignment/:courseId",verifyToken, postAssignments);
+Routes.post("/assignment/:courseId/:title/:studentId",verifyToken, assignmentMarks);
 Routes.get("/inbox/:facultyId",verifyToken,getMessages);
 Routes.put("/inbox",verifyToken,acceptRequest);
 
 
 export default Routes;
-
